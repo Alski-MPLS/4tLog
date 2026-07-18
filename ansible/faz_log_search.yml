@@ -1,0 +1,325 @@
+---
+- name: Query FortiAnalyzer logs through JSON-RPC
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    faz_host: 192.168.64.4
+    faz_port: 443
+    faz_validate_certs: false
+    faz_username: ""
+    faz_api_key: ""
+    faz_adom: root
+    faz_device: All_FortiGate
+    faz_log_type: traffic
+    faz_max_logs: 500
+    faz_request_timeout_seconds: 120
+    faz_search_timeout_seconds: 30
+    faz_poll_delay_seconds: 1
+    faz_rpc_resource: "/logview/adom/{{ faz_adom }}/logsearch"
+    faz_fetch_uri_candidates:
+      - "{{ faz_rpc_resource }}/{{ faz_search_tid }}"
+      - "{{ faz_rpc_resource }}"
+      - "/logview/adom/{{ faz_adom }}/logsearch/task/{{ faz_search_tid }}"
+      - "/logview/adom/{{ faz_adom }}/logsearch/result/{{ faz_search_tid }}"
+      - "/logview/adom/{{ faz_adom }}/logsearch/status/{{ faz_search_tid }}"
+      - "/soc-fabric/logsearch/{{ faz_search_tid }}"
+      - "/soc-fabric/logsearch/"
+    faz_output_dir: "{{ playbook_dir }}/output"
+    faz_output_file: "{{ faz_output_dir }}/faz_log_search.json"
+    faz_output_format: json
+
+    # Filters are stored as inputs first so we can map them to the exact FAZ
+    # request payload once the log-search endpoint is finalized.
+    faz_source_ips: []
+    faz_destination_ips: []
+    faz_ports: []
+    faz_time_window: ""
+    faz_start_time: ""
+    faz_end_time: ""
+
+  tasks:
+    - name: Require an API key
+      ansible.builtin.assert:
+        that:
+          - faz_api_key | length > 0
+        fail_msg: "Pass faz_api_key with --extra-vars or a vaulted vars file."
+
+    - name: Normalize the time range
+      ansible.builtin.set_fact:
+        faz_time_range: >-
+          {{
+            {'start': faz_start_time, 'end': faz_end_time}
+            if (faz_start_time | length > 0 and faz_end_time | length > 0)
+            else (
+              {'last-n-minutes': (faz_time_window | regex_replace('m$', '')) | int}
+              if (faz_time_window | length > 0 and faz_time_window is match('^\\d+m$'))
+              else (
+                {'last-n-hours': (faz_time_window | regex_replace('h$', '')) | int}
+                if (faz_time_window | length > 0 and faz_time_window is match('^\\d+h$'))
+                else (
+                  {'last-n-hours': ((faz_time_window | regex_replace('d$', '')) | int) * 24}
+                  if (faz_time_window | length > 0 and faz_time_window is match('^\\d+d$'))
+                  else {'last-n-hours': 24}
+                )
+              )
+            )
+          }}
+
+    - name: Build the log filter expression
+      ansible.builtin.set_fact:
+        faz_filter_clauses: >-
+          {% set clauses = [] %}
+          {% for ip in faz_source_ips %}
+          {% if ip | upper not in ['ANY', 'ALL'] %}
+          {% set _ = clauses.append('srcip==' ~ ip) %}
+          {% endif %}
+          {% endfor %}
+          {% for ip in faz_destination_ips %}
+          {% if ip | upper not in ['ANY', 'ALL'] %}
+          {% set _ = clauses.append('dstip==' ~ ip) %}
+          {% endif %}
+          {% endfor %}
+          {% for port in faz_ports %}
+          {% if port | upper not in ['ANY', 'ALL'] %}
+          {% if port is match('^\\d+$') %}
+          {% set _ = clauses.append('dstport==' ~ port) %}
+          {% elif port is match('^(tcp|udp):\\d+$') %}
+          {% set _ = clauses.append('dstport==' ~ (port.split(':')[-1])) %}
+          {% else %}
+          {% set _ = clauses.append('service=="' ~ port ~ '"') %}
+          {% endif %}
+          {% endif %}
+          {% endfor %}
+          {{ clauses | join(' and ') }}
+
+    - name: Build the step 1 JSON-RPC request body
+      ansible.builtin.debug:
+        msg: |
+          FAZ target: https://{{ faz_host }}:{{ faz_port }}/jsonrpc
+          Resource: {{ faz_rpc_resource }}
+          Time range: {{ faz_time_range | to_nice_yaml(indent=2) | trim }}
+          Filter expression: {{ faz_filter_clauses if faz_filter_clauses | length > 0 else '(none)' }}
+          Query inputs:
+          {{ {
+            'device': faz_device,
+            'logtype': faz_log_type,
+            'source_ips': faz_source_ips,
+            'destination_ips': faz_destination_ips,
+            'ports': faz_ports,
+            'time_window': faz_time_window,
+            'start_time': faz_start_time,
+            'end_time': faz_end_time,
+            'max_logs': faz_max_logs,
+            'output_format': faz_output_format
+          } | to_nice_yaml(indent=2) }}
+
+    - name: Submit the log search
+      block:
+        - name: Build submit request parameter candidates
+          ansible.builtin.set_fact:
+            faz_submit_params_candidates:
+              - uri: "{{ faz_rpc_resource }}"
+                data:
+                  device: "{{ faz_device }}"
+                  logtype: "{{ faz_log_type }}"
+                  filter: "{{ faz_filter_clauses }}"
+                  time-range: "{{ faz_time_range }}"
+                  case-sensitive: false
+                  max-logs: "{{ faz_max_logs }}"
+              - url: "{{ faz_rpc_resource }}"
+                apiver: 3
+                case-sensitive: false
+                filter: "{{ faz_filter_clauses }}"
+                logtype: "{{ faz_log_type }}"
+                time-order: desc
+                time-range: "{{ faz_time_range }}"
+                limit: "{{ faz_max_logs }}"
+                devtype: FortiGate
+                members: []
+
+        - name: Probe submit request parameter candidates
+          ansible.builtin.uri:
+            url: "https://{{ faz_host }}:{{ faz_port }}/jsonrpc"
+            method: POST
+            headers:
+              Authorization: "Bearer {{ faz_api_key }}"
+              Content-Type: application/json
+            body_format: json
+            body:
+              jsonrpc: "2.0"
+              method: add
+              params:
+                - "{{ item }}"
+              session: null
+              id: 1
+            return_content: true
+            validate_certs: "{{ faz_validate_certs }}"
+            timeout: "{{ faz_request_timeout_seconds }}"
+          loop: "{{ faz_submit_params_candidates }}"
+          register: faz_submit_probe
+          failed_when: false
+
+        - name: Show submit probe responses
+          ansible.builtin.debug:
+            var: faz_submit_probe.results | map(attribute='json') | list
+
+        - name: Select a successful submit response
+          ansible.builtin.set_fact:
+            faz_search_submit: >-
+              {{
+                (
+                  faz_submit_probe.results
+                  | rejectattr('json.error', 'defined')
+                  | selectattr('json.result', 'defined')
+                  | list
+                  | first
+                )
+                | default({})
+              }}
+
+        - name: Fail if all submit request candidates were rejected
+          ansible.builtin.fail:
+            msg: >-
+              FortiAnalyzer rejected all submit request formats.
+              Candidates={{ faz_submit_params_candidates | to_json }}
+              Responses={{ faz_submit_probe.results | map(attribute='json') | list | to_json }}
+          when: faz_search_submit | length == 0
+
+        - name: Record the task ID
+          ansible.builtin.set_fact:
+            faz_search_tid: >-
+              {{
+                faz_search_submit.json.result.tid
+                if (faz_search_submit.json.result is mapping and faz_search_submit.json.result.tid is defined)
+                else (
+                  faz_search_submit.json.result[0].data.tid
+                  if (faz_search_submit.json.result is sequence and faz_search_submit.json.result | length > 0 and faz_search_submit.json.result[0].data is defined and faz_search_submit.json.result[0].data.tid is defined)
+                  else ''
+                )
+              }}
+          when:
+            - faz_search_submit is defined
+
+        - name: Fail if no task ID was returned
+          ansible.builtin.fail:
+            msg: >-
+              Submit call returned no task ID.
+              Submit response={{ faz_search_submit.json | to_json }}
+          when: (faz_search_tid | string | length) == 0
+
+        - name: Probe fetch URI candidates
+          ansible.builtin.uri:
+            url: "https://{{ faz_host }}:{{ faz_port }}/jsonrpc"
+            method: POST
+            headers:
+              Authorization: "Bearer {{ faz_api_key }}"
+              Content-Type: application/json
+            body_format: json
+            body:
+              jsonrpc: "2.0"
+              method: get
+              params:
+                - uri: "{{ item }}"
+                  data:
+                    limit: "{{ faz_max_logs }}"
+                    offset: 0
+              session: null
+              id: 2
+            return_content: true
+            validate_certs: "{{ faz_validate_certs }}"
+            timeout: "{{ faz_request_timeout_seconds }}"
+          loop: "{{ faz_fetch_uri_candidates }}"
+          register: faz_fetch_probe
+          failed_when: false
+
+        - name: Select the first fetch URI accepted by FAZ
+          ansible.builtin.set_fact:
+            faz_selected_fetch_uri: >-
+              {{
+                (
+                  faz_fetch_probe.results
+                  | rejectattr('json.error', 'defined')
+                  | map(attribute='item')
+                  | list
+                  | first
+                )
+                | default('')
+              }}
+
+        - name: Fail if no fetch URI candidate worked
+          ansible.builtin.fail:
+            msg: >-
+              None of the fetch URI candidates were accepted by FortiAnalyzer.
+              Tried={{ faz_fetch_uri_candidates | to_json }}
+              Responses={{ faz_fetch_probe.results | map(attribute='json') | list | to_json }}
+          when: faz_selected_fetch_uri | length == 0
+
+        - name: Poll for log search completion and fetch results
+          ansible.builtin.uri:
+            url: "https://{{ faz_host }}:{{ faz_port }}/jsonrpc"
+            method: POST
+            headers:
+              Authorization: "Bearer {{ faz_api_key }}"
+              Content-Type: application/json
+            body_format: json
+            body:
+              jsonrpc: "2.0"
+              method: get
+              params:
+                - uri: "{{ faz_selected_fetch_uri }}"
+                  data:
+                    limit: "{{ faz_max_logs }}"
+                    offset: 0
+              session: null
+              id: 2
+            return_content: true
+            validate_certs: "{{ faz_validate_certs }}"
+            timeout: "{{ faz_request_timeout_seconds }}"
+          register: faz_search_result
+          until: >-
+            {{
+              (faz_search_result.json.result[0].data.status | default('')) == 'done'
+              and ((faz_search_result.json.result[0].data.percentage | default(0)) | int) == 100
+            }}
+          retries: "{{ (faz_search_timeout_seconds | int) // (faz_poll_delay_seconds | int) + 1 }}"
+          delay: "{{ faz_poll_delay_seconds }}"
+          failed_when: >-
+            {{
+              (faz_search_result.json.result[0].data.status | default('')) in ['error', 'cancelled']
+            }}
+
+        - name: Show the final FAZ result payload
+          ansible.builtin.debug:
+            var: faz_search_result.json
+
+      rescue:
+        - name: Dump the FAZ response that caused the failure
+          ansible.builtin.debug:
+            var: faz_search_submit if faz_search_submit is defined else faz_search_result
+
+        - name: Fail with a short API hint
+          ansible.builtin.fail:
+            msg: >-
+              FortiAnalyzer did not complete the log search successfully.
+              The API transport is working, but the resource path, log type,
+              or search payload still needs adjustment for this account or
+              firmware.
+
+    - name: Ensure the output directory exists
+      ansible.builtin.file:
+        path: "{{ faz_output_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Write the response as JSON
+      ansible.builtin.copy:
+        dest: "{{ faz_output_file }}"
+        content: "{{ faz_search_result.json | to_nice_json }}\n"
+        mode: "0644"
+      when: faz_output_format == 'json'
+
+    - name: Tell the operator where the export landed
+      ansible.builtin.debug:
+        msg: "Saved FAZ output to {{ faz_output_file }}"

@@ -1,0 +1,11 @@
+{
+    "id": 1,
+    "result": [
+        {
+            "status": {
+                "code": -11,
+                "message": "No permission for the resource"
+            }
+        }
+    ]
+}
