@@ -131,6 +131,31 @@ ansible-playbook faz_log_search.yml \
 - The playbook probes multiple submit/fetch request formats and URI candidates automatically. If your FAZ build uses different paths, override `faz_fetch_uri_candidates` in `--extra-vars`.
 - The playbook currently writes JSON output. CSV export can be added once the final response shape is confirmed.
 
+## FAZ Admin Checklist
+
+Use this checklist when the `adminapi` account appears to be configured but API calls still fail:
+
+1. Confirm the account is a REST API admin and JSON API access is enabled.
+2. Confirm the admin profile has the permissions you expect, especially for `logview`.
+3. Confirm the trusted host list includes the machine running Ansible or your shell session.
+4. Regenerate the API key after any permission or trust-host change.
+5. Verify the key still reaches `https://192.168.64.4/jsonrpc` with a lightweight probe.
+6. Verify a small module-specific preflight works before the full log search.
+7. If `logview` fails but other modules work, treat it as a module permission issue rather than a bad key.
+
+### What To Run From Shell
+
+If you have shell access, the fastest checks are:
+
+```bash
+ansible-playbook faz_log_search.yml \
+	--extra-vars '{"faz_api_key":"YOUR_NEW_KEY","faz_time_window":"5m","faz_source_ips":["10.1.1.0/24"],"faz_destination_ips":[],"faz_ports":[]}'
+```
+
+That run now includes a `logview` preflight. If it fails with `No permission for the resource`, the API key is accepted but the account still does not have access to the logview module.
+
+If you want a direct transport check from shell without the playbook, send a JSON-RPC request to `/jsonrpc` with the same `X-API-Key` header and confirm that the response is not an auth or permission error before moving on to log search.
+
 ## Capture Exact GUI API Calls
 
 If endpoint discovery still fails, capture the exact JSON-RPC calls used by the FAZ web UI and mirror that shape in the playbook.

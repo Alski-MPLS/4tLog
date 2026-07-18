@@ -18,14 +18,8 @@
     faz_search_timeout_seconds: 30
     faz_poll_delay_seconds: 1
     faz_rpc_resource: "/logview/adom/{{ faz_adom }}/logsearch"
-    faz_fetch_uri_candidates:
-      - "{{ faz_rpc_resource }}/{{ faz_search_tid }}"
-      - "{{ faz_rpc_resource }}"
-      - "/logview/adom/{{ faz_adom }}/logsearch/task/{{ faz_search_tid }}"
-      - "/logview/adom/{{ faz_adom }}/logsearch/result/{{ faz_search_tid }}"
-      - "/logview/adom/{{ faz_adom }}/logsearch/status/{{ faz_search_tid }}"
-      - "/soc-fabric/logsearch/{{ faz_search_tid }}"
-      - "/soc-fabric/logsearch/"
+    faz_preflight_resource: "/logview/adom/{{ faz_adom }}/logfields"
+    faz_preflight_devtype: FortiGate
     faz_output_dir: "{{ playbook_dir }}/output"
     faz_output_file: "{{ faz_output_dir }}/faz_log_search.json"
     faz_output_format: json
@@ -48,23 +42,43 @@
 
     - name: Normalize the time range
       ansible.builtin.set_fact:
-        faz_time_range: >-
+        faz_time_range:
+          last-n-hours: 24
+
+    - name: Use an explicit start/end time range when provided
+      ansible.builtin.set_fact:
+        faz_time_range:
+          start: "{{ faz_start_time }}"
+          end: "{{ faz_end_time }}"
+      when:
+        - faz_start_time | length > 0
+        - faz_end_time | length > 0
+
+    - name: Use a last-n-minutes time range when requested
+      ansible.builtin.set_fact:
+        faz_time_range:
+          last-n-minutes: "{{ faz_time_window | regex_replace('m$', '') | int }}"
+      when: faz_time_window is match('^\d+m$')
+
+    - name: Use a last-n-hours time range when requested
+      ansible.builtin.set_fact:
+        faz_time_range:
+          last-n-hours: "{{ faz_time_window | regex_replace('h$', '') | int }}"
+      when: faz_time_window is match('^\d+h$')
+
+    - name: Use a day-based time range when requested
+      ansible.builtin.set_fact:
+        faz_time_range:
+          last-n-hours: "{{ (faz_time_window | regex_replace('d$', '') | int) * 24 }}"
+      when: faz_time_window is match('^\d+d$')
+
+    - name: Normalize the device payload
+      ansible.builtin.set_fact:
+        faz_device_payload: >-
           {{
-            {'start': faz_start_time, 'end': faz_end_time}
-            if (faz_start_time | length > 0 and faz_end_time | length > 0)
-            else (
-              {'last-n-minutes': (faz_time_window | regex_replace('m$', '')) | int}
-              if (faz_time_window | length > 0 and faz_time_window is match('^\\d+m$'))
-              else (
-                {'last-n-hours': (faz_time_window | regex_replace('h$', '')) | int}
-                if (faz_time_window | length > 0 and faz_time_window is match('^\\d+h$'))
-                else (
-                  {'last-n-hours': ((faz_time_window | regex_replace('d$', '')) | int) * 24}
-                  if (faz_time_window | length > 0 and faz_time_window is match('^\\d+d$'))
-                  else {'last-n-hours': 24}
-                )
-              )
-            )
+            faz_device
+            if (faz_device is sequence and faz_device is not string)
+            else [{'devid': faz_device}]
           }}
 
     - name: Build the log filter expression
@@ -99,7 +113,9 @@
         msg: |
           FAZ target: https://{{ faz_host }}:{{ faz_port }}/jsonrpc
           Resource: {{ faz_rpc_resource }}
+          Preflight resource: {{ faz_preflight_resource }}
           Time range: {{ faz_time_range | to_nice_yaml(indent=2) | trim }}
+          Device payload: {{ faz_device_payload | to_nice_yaml(indent=2) | trim }}
           Filter expression: {{ faz_filter_clauses if faz_filter_clauses | length > 0 else '(none)' }}
           Query inputs:
           {{ {
@@ -115,77 +131,83 @@
             'output_format': faz_output_format
           } | to_nice_yaml(indent=2) }}
 
+    - name: Run a quick logview preflight
+      ansible.builtin.uri:
+        url: "https://{{ faz_host }}:{{ faz_port }}/jsonrpc"
+        method: POST
+        headers:
+          X-API-Key: "{{ faz_api_key }}"
+          Content-Type: application/json
+        body_format: json
+        body:
+          jsonrpc: "2.0"
+          method: get
+          params:
+            - url: "{{ faz_preflight_resource }}"
+              apiver: 3
+              devtype: "{{ faz_preflight_devtype }}"
+              logtype: "{{ faz_log_type }}"
+          session: null
+          id: 0
+        return_content: true
+        validate_certs: "{{ faz_validate_certs }}"
+        timeout: "{{ faz_request_timeout_seconds }}"
+      register: faz_preflight_check
+      changed_when: false
+      failed_when: false
+
+    - name: Stop early if the preflight cannot read logview
+      ansible.builtin.fail:
+        msg: >-
+          Logview preflight failed before the full search ran.
+          This usually means the API key is accepted but the account still
+          lacks logview access for this ADOM or host.
+          Response={{ faz_preflight_check.json | to_json }}
+      when: >-
+        (faz_preflight_check.json.result is defined)
+        and (faz_preflight_check.json.result is sequence)
+        and (faz_preflight_check.json.result | length > 0)
+        and (faz_preflight_check.json.result[0].status is defined)
+        and ((faz_preflight_check.json.result[0].status.code | default(0)) != 0)
+
+    - name: Show the preflight result
+      ansible.builtin.debug:
+        var: faz_preflight_check.json
+
     - name: Submit the log search
       block:
-        - name: Build submit request parameter candidates
-          ansible.builtin.set_fact:
-            faz_submit_params_candidates:
-              - uri: "{{ faz_rpc_resource }}"
-                data:
-                  device: "{{ faz_device }}"
-                  logtype: "{{ faz_log_type }}"
-                  filter: "{{ faz_filter_clauses }}"
-                  time-range: "{{ faz_time_range }}"
-                  case-sensitive: false
-                  max-logs: "{{ faz_max_logs }}"
-              - url: "{{ faz_rpc_resource }}"
-                apiver: 3
-                case-sensitive: false
-                filter: "{{ faz_filter_clauses }}"
-                logtype: "{{ faz_log_type }}"
-                time-order: desc
-                time-range: "{{ faz_time_range }}"
-                limit: "{{ faz_max_logs }}"
-                devtype: FortiGate
-                members: []
-
-        - name: Probe submit request parameter candidates
+        - name: Submit the documented log-search request
           ansible.builtin.uri:
             url: "https://{{ faz_host }}:{{ faz_port }}/jsonrpc"
             method: POST
             headers:
-              Authorization: "Bearer {{ faz_api_key }}"
+              X-API-Key: "{{ faz_api_key }}"
               Content-Type: application/json
             body_format: json
             body:
               jsonrpc: "2.0"
               method: add
               params:
-                - "{{ item }}"
+                - url: "{{ faz_rpc_resource }}"
+                  apiver: 3
+                  device: "{{ faz_device_payload }}"
+                  filter: "{{ faz_filter_clauses }}"
+                  limit: "{{ faz_max_logs }}"
+                  logtype: "{{ faz_log_type }}"
+                  offset: 0
+                  case-sensitive: false
+                  time-order: desc
+                  time-range: "{{ faz_time_range }}"
               session: null
               id: 1
             return_content: true
             validate_certs: "{{ faz_validate_certs }}"
             timeout: "{{ faz_request_timeout_seconds }}"
-          loop: "{{ faz_submit_params_candidates }}"
-          register: faz_submit_probe
-          failed_when: false
-
-        - name: Show submit probe responses
-          ansible.builtin.debug:
-            var: faz_submit_probe.results | map(attribute='json') | list
-
-        - name: Select a successful submit response
-          ansible.builtin.set_fact:
-            faz_search_submit: >-
-              {{
-                (
-                  faz_submit_probe.results
-                  | rejectattr('json.error', 'defined')
-                  | selectattr('json.result', 'defined')
-                  | list
-                  | first
-                )
-                | default({})
-              }}
-
-        - name: Fail if all submit request candidates were rejected
-          ansible.builtin.fail:
-            msg: >-
-              FortiAnalyzer rejected all submit request formats.
-              Candidates={{ faz_submit_params_candidates | to_json }}
-              Responses={{ faz_submit_probe.results | map(attribute='json') | list | to_json }}
-          when: faz_search_submit | length == 0
+          register: faz_search_submit
+          failed_when: >-
+            faz_search_submit.json.error is defined
+            or (faz_search_submit.json.result is not defined)
+            or (faz_search_submit.json.result.tid is not defined)
 
         - name: Record the task ID
           ansible.builtin.set_fact:
@@ -193,11 +215,7 @@
               {{
                 faz_search_submit.json.result.tid
                 if (faz_search_submit.json.result is mapping and faz_search_submit.json.result.tid is defined)
-                else (
-                  faz_search_submit.json.result[0].data.tid
-                  if (faz_search_submit.json.result is sequence and faz_search_submit.json.result | length > 0 and faz_search_submit.json.result[0].data is defined and faz_search_submit.json.result[0].data.tid is defined)
-                  else ''
-                )
+                else ''
               }}
           when:
             - faz_search_submit is defined
@@ -209,69 +227,22 @@
               Submit response={{ faz_search_submit.json | to_json }}
           when: (faz_search_tid | string | length) == 0
 
-        - name: Probe fetch URI candidates
+        - name: Fetch the task result
           ansible.builtin.uri:
             url: "https://{{ faz_host }}:{{ faz_port }}/jsonrpc"
             method: POST
             headers:
-              Authorization: "Bearer {{ faz_api_key }}"
+              X-API-Key: "{{ faz_api_key }}"
               Content-Type: application/json
             body_format: json
             body:
               jsonrpc: "2.0"
               method: get
               params:
-                - uri: "{{ item }}"
-                  data:
-                    limit: "{{ faz_max_logs }}"
-                    offset: 0
-              session: null
-              id: 2
-            return_content: true
-            validate_certs: "{{ faz_validate_certs }}"
-            timeout: "{{ faz_request_timeout_seconds }}"
-          loop: "{{ faz_fetch_uri_candidates }}"
-          register: faz_fetch_probe
-          failed_when: false
-
-        - name: Select the first fetch URI accepted by FAZ
-          ansible.builtin.set_fact:
-            faz_selected_fetch_uri: >-
-              {{
-                (
-                  faz_fetch_probe.results
-                  | rejectattr('json.error', 'defined')
-                  | map(attribute='item')
-                  | list
-                  | first
-                )
-                | default('')
-              }}
-
-        - name: Fail if no fetch URI candidate worked
-          ansible.builtin.fail:
-            msg: >-
-              None of the fetch URI candidates were accepted by FortiAnalyzer.
-              Tried={{ faz_fetch_uri_candidates | to_json }}
-              Responses={{ faz_fetch_probe.results | map(attribute='json') | list | to_json }}
-          when: faz_selected_fetch_uri | length == 0
-
-        - name: Poll for log search completion and fetch results
-          ansible.builtin.uri:
-            url: "https://{{ faz_host }}:{{ faz_port }}/jsonrpc"
-            method: POST
-            headers:
-              Authorization: "Bearer {{ faz_api_key }}"
-              Content-Type: application/json
-            body_format: json
-            body:
-              jsonrpc: "2.0"
-              method: get
-              params:
-                - uri: "{{ faz_selected_fetch_uri }}"
-                  data:
-                    limit: "{{ faz_max_logs }}"
-                    offset: 0
+                - url: "{{ faz_rpc_resource }}/{{ faz_search_tid }}"
+                  apiver: 3
+                  limit: "{{ faz_max_logs }}"
+                  offset: 0
               session: null
               id: 2
             return_content: true
@@ -279,16 +250,13 @@
             timeout: "{{ faz_request_timeout_seconds }}"
           register: faz_search_result
           until: >-
-            {{
-              (faz_search_result.json.result[0].data.status | default('')) == 'done'
-              and ((faz_search_result.json.result[0].data.percentage | default(0)) | int) == 100
-            }}
+            (faz_search_result.json.result.percentage | default(0)) | int == 100
           retries: "{{ (faz_search_timeout_seconds | int) // (faz_poll_delay_seconds | int) + 1 }}"
           delay: "{{ faz_poll_delay_seconds }}"
           failed_when: >-
-            {{
-              (faz_search_result.json.result[0].data.status | default('')) in ['error', 'cancelled']
-            }}
+            faz_search_result.json.error is defined
+            or (faz_search_result.json.result is not defined)
+            or ((faz_search_result.json.result.status.code | default(0)) not in [0])
 
         - name: Show the final FAZ result payload
           ansible.builtin.debug:
