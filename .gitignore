@@ -1,1 +1,9 @@
+# macOS
+.DS_Store
+
+# Notes / planning docs not meant for the repo
 plan.md
+
+# Ansible
+*.retry
+ansible/output/
