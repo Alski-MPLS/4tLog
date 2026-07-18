@@ -108,6 +108,10 @@
           {% endfor %}
           {{ clauses | join(' and ') }}
 
+    - name: Trim stray whitespace left by the filter template
+      ansible.builtin.set_fact:
+        faz_filter_clauses: "{{ faz_filter_clauses | trim }}"
+
     - name: Build the step 1 JSON-RPC request body
       ansible.builtin.debug:
         msg: |
@@ -136,7 +140,7 @@
         url: "https://{{ faz_host }}:{{ faz_port }}/jsonrpc"
         method: POST
         headers:
-          X-API-Key: "{{ faz_api_key }}"
+          Authorization: "Bearer {{ faz_api_key }}"
           Content-Type: application/json
         body_format: json
         body:
@@ -181,7 +185,7 @@
             url: "https://{{ faz_host }}:{{ faz_port }}/jsonrpc"
             method: POST
             headers:
-              X-API-Key: "{{ faz_api_key }}"
+              Authorization: "Bearer {{ faz_api_key }}"
               Content-Type: application/json
             body_format: json
             body:
@@ -232,7 +236,7 @@
             url: "https://{{ faz_host }}:{{ faz_port }}/jsonrpc"
             method: POST
             headers:
-              X-API-Key: "{{ faz_api_key }}"
+              Authorization: "Bearer {{ faz_api_key }}"
               Content-Type: application/json
             body_format: json
             body:
