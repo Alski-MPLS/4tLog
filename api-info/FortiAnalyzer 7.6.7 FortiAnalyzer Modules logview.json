@@ -1,0 +1,2120 @@
+{
+    "basePath": "\/jsonrpc",
+    "consumes": [
+        "application\/json"
+    ],
+    "host": "172.16.79.72",
+    "info": {
+        "description": "Documentation for FortiAnalyzer JSON API<br\/><br\/>This daemon controls main system functions, including log in and log out. All APIs for this module are under the prefix <b>\/sys\/<\/b>.",
+        "title": "FortiAnalyzer JSON API Documentation",
+        "version": "7.6 (Build 3737)"
+    },
+    "produces": [
+        "application\/json"
+    ],
+    "schemes": [
+        "http",
+        "https"
+    ],
+    "swagger": "2.0",
+    "x-service-type": "json-rpc",
+    "tags": [
+        {
+            "description": "Start log search requests.",
+            "name": "\/logview\/logsearch"
+        },
+        {
+            "description": "Handle log search requests by task ID.",
+            "name": "\/logview\/logsearch\/<tid>"
+        },
+        {
+            "description": "Count logs.",
+            "name": "\/logview\/logsearch\/count\/<tid>"
+        },
+        {
+            "description": "Get log file state.",
+            "name": "\/logview\/logfiles\/state"
+        },
+        {
+            "description": "Handle log file data.",
+            "name": "\/logview\/logfiles\/data"
+        },
+        {
+            "description": "Log search over log-file.",
+            "name": "\/logview\/logfiles\/search"
+        },
+        {
+            "description": "List log fields.",
+            "name": "\/logview\/logfields"
+        },
+        {
+            "description": "Get log statistics.",
+            "name": "\/logview\/logstats"
+        },
+        {
+            "description": "Get log pcapfile.",
+            "name": "\/logview\/pcapfile"
+        }
+    ],
+    "definitions": {
+        "logview.logfields.get.req": {
+            "properties": {
+                "id": {
+                    "description": "An identifier established by the client.",
+                    "type": "string"
+                },
+                "jsonrpc": {
+                    "description": "A string specifying the JSON-RPC protocol version.",
+                    "enum": [
+                        "2.0"
+                    ],
+                    "type": "string"
+                },
+                "method": {
+                    "description": "A string containing the method name to be invoked.",
+                    "enum": [
+                        "get"
+                    ],
+                    "type": "string"
+                },
+                "params": {
+                    "description": "A structure that holds the parameter values.",
+                    "items": {
+                        "properties": {
+                            "apiver": {
+                                "description": "Current API version.",
+                                "enum": [
+                                    3
+                                ],
+                                "type": "number"
+                            },
+                            "devtype": {
+                                "description": "Device type name, such as FortiGate, FortiClient, FortiMail, FortiWeb, FortiSandbox, FortiDDos, FortiDeceptor, FortiADC, FortiFirewall",
+                                "type": "string"
+                            },
+                            "logtype": {
+                                "description": "Logtype names",
+                                "enum": [
+                                    "traffic",
+                                    "app-ctrl",
+                                    "attack",
+                                    "content",
+                                    "dlp",
+                                    "emailfilter",
+                                    "event",
+                                    "history",
+                                    "virus",
+                                    "voip",
+                                    "webfilter",
+                                    "netscan",
+                                    "fct-event",
+                                    "fct-traffic",
+                                    "waf",
+                                    "gtp",
+                                    "ztna",
+                                    "security"
+                                ],
+                                "type": "string"
+                            },
+                            "subtype": {
+                                "description": "Subtype names.",
+                                "example": "",
+                                "type": "string"
+                            },
+                            "url": {
+                                "description": "The resource path to <b>LogView Logfile State task<\/b>.",
+                                "enum": [
+                                    "\/logview\/adom\/<adom-name>\/logfields"
+                                ],
+                                "example": "\/logview\/adom\/root\/logfields",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "url",
+                            "apiver"
+                        ],
+                        "type": "object"
+                    },
+                    "type": "array"
+                },
+                "session": {
+                    "description": "The cookie of an active session in FortiAnalyzer.",
+                    "type": "string"
+                }
+            }
+        },
+        "logview.logfields.get.resp": {
+            "properties": {
+                "id": {
+                    "description": "An identifier established by the client.",
+                    "type": "string"
+                },
+                "jsonrpc": {
+                    "description": "A string specifying the JSON-RPC protocol version.",
+                    "enum": [
+                        "2.0"
+                    ],
+                    "type": "string"
+                },
+                "result": {
+                    "description": "A structured value responding to Log Fields <b>fetch<\/b> method.",
+                    "properties": {
+                        "data": {
+                            "description": "The data stream for the log fields.",
+                            "items": {
+                                "properties": {
+                                    "field": {
+                                        "description": "The fields to be listed.",
+                                        "items": {
+                                            "properties": {
+                                                "defaultshow": {
+                                                    "description": "If the fields is displayed by default.",
+                                                    "type": "boolean"
+                                                },
+                                                "desc": {
+                                                    "description": "The description of the field.",
+                                                    "type": "string"
+                                                },
+                                                "extended": {
+                                                    "description": "If it is an extended field. An extended field is neither in the logfile nor in the database.",
+                                                    "type": "boolean"
+                                                },
+                                                "name": {
+                                                    "description": "The name of the field.",
+                                                    "type": "string"
+                                                },
+                                                "type": {
+                                                    "description": "The type of the field.",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "type": "array"
+                                    },
+                                    "logtype": {
+                                        "description": "The logtype name. See Appendix",
+                                        "enum": [
+                                            "Logtype name"
+                                        ],
+                                        "type": "string"
+                                    },
+                                    "masked-fields": {
+                                        "description": "datamasked field list.",
+                                        "items": {
+                                            "description": "field name.",
+                                            "type": "string"
+                                        },
+                                        "type": "array"
+                                    },
+                                    "private-field": {
+                                        "description": "The private fields to be listed. Private fields are those in the database but not in the logfiles.",
+                                        "items": {
+                                            "properties": {
+                                                "defaultshow": {
+                                                    "description": "If the fields is displayed by default.",
+                                                    "type": "boolean"
+                                                },
+                                                "desc": {
+                                                    "description": "The description of the field.",
+                                                    "type": "string"
+                                                },
+                                                "extended": {
+                                                    "description": "If it is an extended field. An extended field is neither in the logfile nor in the database.",
+                                                    "type": "boolean"
+                                                },
+                                                "logfldgrp": {
+                                                    "description": "Log field group information.",
+                                                    "type": "number"
+                                                },
+                                                "name": {
+                                                    "description": "The name of the field.",
+                                                    "type": "string"
+                                                },
+                                                "type": {
+                                                    "description": "The type of the field.",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "type": "array"
+                                    }
+                                },
+                                "type": "object"
+                            },
+                            "type": "array"
+                        }
+                    },
+                    "required": [
+                        "logtype",
+                        "fields",
+                        "private-field"
+                    ],
+                    "type": "object"
+                }
+            }
+        },
+        "logview.logfiles.data.get.req": {
+            "properties": {
+                "id": {
+                    "description": "An identifier established by the client.",
+                    "type": "string"
+                },
+                "jsonrpc": {
+                    "description": "A string specifying the JSON-RPC protocol version.",
+                    "enum": [
+                        "2.0"
+                    ],
+                    "type": "string"
+                },
+                "method": {
+                    "description": "A string containing the method name to be invoked.",
+                    "enum": [
+                        "get"
+                    ],
+                    "type": "string"
+                },
+                "params": {
+                    "description": "A structure that holds the parameter values.",
+                    "items": {
+                        "properties": {
+                            "apiver": {
+                                "description": "Current API version.",
+                                "enum": [
+                                    3
+                                ],
+                                "type": "number"
+                            },
+                            "data-type": {
+                                "default": "base64",
+                                "description": "The type of return data, e.g. 'text\/gzip\/base64'.",
+                                "enum": [
+                                    "base64",
+                                    "csv\/gzip\/base64",
+                                    "text\/gzip\/base64"
+                                ],
+                                "example": "base64",
+                                "type": "string"
+                            },
+                            "devid": {
+                                "description": "ID of the device hosting the logfile.",
+                                "example": "FGVM01TM19005989",
+                                "type": "string"
+                            },
+                            "filename": {
+                                "description": "Name of the file.",
+                                "example": "filename",
+                                "type": "string"
+                            },
+                            "length": {
+                                "default": 1048576,
+                                "description": "Length in byte of the file content to return. Default is 1MB, the maximum is 50MB.",
+                                "example": 1048576,
+                                "maximum": 52428800,
+                                "minimum": 1,
+                                "type": "number"
+                            },
+                            "offset": {
+                                "default": 0,
+                                "description": "Offset bytes from the beginning of the file.",
+                                "example": 0,
+                                "minimum": 0,
+                                "type": "number"
+                            },
+                            "url": {
+                                "description": "The resource path to <b>Log-File Content task<\/b>",
+                                "enum": [
+                                    "\/logview\/adom\/<adom-name>\/logfiles\/data"
+                                ],
+                                "example": "\/logview\/adom\/root\/logfiles\/data",
+                                "type": "string"
+                            },
+                            "vdom": {
+                                "description": "Name of the VDOM. If left empty, all VDOM under the <devid> will be considered.",
+                                "example": "root",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "url",
+                            "apiver",
+                            "devid",
+                            "vdom",
+                            "filename"
+                        ],
+                        "type": "object"
+                    },
+                    "type": "array"
+                },
+                "session": {
+                    "description": "The cookie of an active session in FortiAnalyzer.",
+                    "type": "string"
+                }
+            }
+        },
+        "logview.logfiles.data.get.resp": {
+            "properties": {
+                "id": {
+                    "description": "An identifier established by the client.",
+                    "type": "string"
+                },
+                "jsonrpc": {
+                    "description": "A string specifying the JSON-RPC protocol version.",
+                    "enum": [
+                        "2.0"
+                    ],
+                    "type": "string"
+                },
+                "result": {
+                    "description": "A structured value responding to LogView Search <b>fetch<\/b> method.",
+                    "properties": {
+                        "checksum": {
+                            "description": "Checksum information.",
+                            "properties": {
+                                "hash": {
+                                    "description": "Checksum string.",
+                                    "type": "string"
+                                },
+                                "method": {
+                                    "description": "Checksum algorithm, e.g. 'MD5'.",
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "data": {
+                            "description": "Data stream in base64 format.",
+                            "type": "string"
+                        },
+                        "data-type": {
+                            "description": "The return type of data, e.g. 'text\/gzip\/base64'.",
+                            "type": "string"
+                        },
+                        "length": {
+                            "description": "Actual length in byte of file content returned.",
+                            "type": "number"
+                        },
+                        "log-count": {
+                            "description": "Actual number of logs returned when download csv or text logs.",
+                            "type": "number"
+                        },
+                        "logfile-orig-size": {
+                            "description": "Uncompressed file size for gzip-format log files.",
+                            "type": "number"
+                        },
+                        "offset": {
+                            "description": "Actual offset bytes from the beginning of the log file.",
+                            "type": "number"
+                        }
+                    },
+                    "required": [
+                        "data",
+                        "offset",
+                        "length",
+                        "data-type"
+                    ],
+                    "type": "object"
+                }
+            }
+        },
+        "logview.logfiles.search.get.req": {
+            "properties": {
+                "id": {
+                    "description": "An identifier established by the client.",
+                    "type": "string"
+                },
+                "jsonrpc": {
+                    "description": "A string specifying the JSON-RPC protocol version.",
+                    "enum": [
+                        "2.0"
+                    ],
+                    "type": "string"
+                },
+                "method": {
+                    "description": "A string containing the method name to be invoked.",
+                    "enum": [
+                        "get"
+                    ],
+                    "type": "string"
+                },
+                "params": {
+                    "description": "A structure that holds the parameter values.",
+                    "items": {
+                        "properties": {
+                            "apiver": {
+                                "description": "Current API version.",
+                                "enum": [
+                                    3
+                                ],
+                                "type": "number"
+                            },
+                            "case-sensitive": {
+                                "default": true,
+                                "description": "Case sensitivty.",
+                                "example": true,
+                                "type": "boolean"
+                            },
+                            "devid": {
+                                "description": "ID of the device hosting the logfile.",
+                                "example": "FGVM01TM19005989",
+                                "type": "string"
+                            },
+                            "filename": {
+                                "description": "File name to search.",
+                                "example": "",
+                                "type": "string"
+                            },
+                            "filter": {
+                                "default": "",
+                                "description": "Filter to apply.",
+                                "example": "",
+                                "type": "string"
+                            },
+                            "limit": {
+                                "default": 50,
+                                "description": "Maximum number of log records to fetch.",
+                                "example": 50,
+                                "maximum": 500,
+                                "minimum": 1,
+                                "type": "number"
+                            },
+                            "logtype": {
+                                "description": "Name of the logtype.",
+                                "enum": [
+                                    "traffic",
+                                    "app-ctrl",
+                                    "attack",
+                                    "content",
+                                    "dlp",
+                                    "emailfilter",
+                                    "event",
+                                    "history",
+                                    "virus",
+                                    "voip",
+                                    "webfilter",
+                                    "netscan",
+                                    "fct-event",
+                                    "fct-traffic",
+                                    "waf",
+                                    "gtp"
+                                ],
+                                "type": "string"
+                            },
+                            "offset": {
+                                "default": 0,
+                                "description": "Offset number of log records from the beginning of the log file.",
+                                "example": 0,
+                                "minimum": 0,
+                                "type": "number"
+                            },
+                            "url": {
+                                "description": "The resource path to <b>Log-File Search task<\/b>",
+                                "enum": [
+                                    "\/logview\/adom\/<adom-name>\/logfiles\/search"
+                                ],
+                                "example": "\/logview\/adom\/root\/logfiles\/search",
+                                "type": "string"
+                            },
+                            "vdom": {
+                                "description": "Name of the VDOM hosting the logfile.",
+                                "example": "",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "url",
+                            "apiver",
+                            "devid",
+                            "vdom",
+                            "filename",
+                            "logtype"
+                        ],
+                        "type": "object"
+                    },
+                    "type": "array"
+                },
+                "session": {
+                    "description": "The cookie of an active session in FortiAnalyzer.",
+                    "type": "string"
+                }
+            }
+        },
+        "logview.logfiles.search.get.resp": {
+            "properties": {
+                "id": {
+                    "description": "An identifier established by the client.",
+                    "type": "string"
+                },
+                "jsonrpc": {
+                    "description": "A string specifying the JSON-RPC protocol version.",
+                    "enum": [
+                        "2.0"
+                    ],
+                    "type": "string"
+                },
+                "result": {
+                    "description": "A structured value responding to LogView Search <b>fetch<\/b> method.",
+                    "properties": {
+                        "data": {
+                            "description": "An array of json objects hosting the returned logfile records.",
+                            "items": {
+                                "properties": {
+                                    "fields": {
+                                        "description": "The value for the fields in original logfile.",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            },
+                            "type": "array"
+                        },
+                        "masked-fields": {
+                            "description": "datamasked field list.",
+                            "items": {
+                                "description": "field name.",
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        "return-lines": {
+                            "description": "Number of total log records found in the logfile with regards to the conditions.",
+                            "type": "number"
+                        },
+                        "total-count": {
+                            "description": "Number of total log records found in the logfile.",
+                            "type": "number"
+                        }
+                    },
+                    "required": [
+                        "return-lines",
+                        "data"
+                    ],
+                    "type": "object"
+                }
+            }
+        },
+        "logview.logfiles.state.get.req": {
+            "properties": {
+                "id": {
+                    "description": "An identifier established by the client.",
+                    "type": "string"
+                },
+                "jsonrpc": {
+                    "description": "A string specifying the JSON-RPC protocol version.",
+                    "enum": [
+                        "2.0"
+                    ],
+                    "type": "string"
+                },
+                "method": {
+                    "description": "A string containing the method name to be invoked.",
+                    "enum": [
+                        "get"
+                    ],
+                    "type": "string"
+                },
+                "params": {
+                    "description": "A structure that holds the parameter values.",
+                    "items": {
+                        "properties": {
+                            "apiver": {
+                                "description": "Current API version.",
+                                "enum": [
+                                    3
+                                ],
+                                "type": "number"
+                            },
+                            "devid": {
+                                "description": "ID of the device. If left empty, all devices under the <adom-name> will be considered. See Appendix for available options",
+                                "enum": [
+                                    "device-id",
+                                    "All_FortiGate",
+                                    "All_FortiMail",
+                                    "All_FortiWeb",
+                                    "All_FortiManager",
+                                    "All_Syslog",
+                                    "All_FortiClient",
+                                    "All_FortiCache",
+                                    "All_FortiProxy",
+                                    "All_FortiAnalyzer",
+                                    "All_FortiSandbox",
+                                    "All_FortiAuthenticator",
+                                    "All_FortiDDoS"
+                                ],
+                                "type": "string"
+                            },
+                            "filename": {
+                                "description": "name of the file. If left empty, all files under the <vdom> will be considered",
+                                "example": "",
+                                "type": "string"
+                            },
+                            "time-range": {
+                                "description": "Time range for data selection.",
+                                "properties": {
+                                    "end": {
+                                        "description": "Ending date time. Consider it following the timezone parameter's, ADOM's or FortiAnalyzer's timezone if timezone info is not specified within time range. Format: 'yyyy-MM-dd'T'HH:mm:ssZ' (RFC 3339) e.g. '2016-10-17T20:45:37-07:00 or 'yyyy-MM-dd HH:mm:ss' e.g. '2016-10-17 20:45:37'",
+                                        "example": "2019-07-03T17:16:35",
+                                        "format": "date-time",
+                                        "type": "string"
+                                    },
+                                    "start": {
+                                        "description": "Starting date time. Consider it following the timezone parameter's, ADOM's or FortiAnalyzer's timezone if timezone info is not specified within time range. Format: 'yyyy-MM-dd'T'HH:mm:ssZ' (RFC 3339) e.g. '2016-10-17T20:45:37-07:00 or 'yyyy-MM-dd HH:mm:ss' e.g. '2016-10-17 20:45:37'",
+                                        "example": "2019-07-02T17:16:35",
+                                        "format": "date-time",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "start",
+                                    "end"
+                                ],
+                                "type": "object"
+                            },
+                            "timezone": {
+                                "description": "The timezone index or name. Time range in request and date\/time if any in response will follow this timezone. See Appendix",
+                                "type": "string"
+                            },
+                            "url": {
+                                "description": "The resource path to <b>Log-File State get task<\/b>",
+                                "enum": [
+                                    "\/logview\/adom\/<adom-name>\/logfiles\/state"
+                                ],
+                                "example": "\/logview\/adom\/root\/logfiles\/state",
+                                "type": "string"
+                            },
+                            "vdom": {
+                                "description": "Name of the VDOM. If left empty, all VDOM under the <devid> will be considered.",
+                                "example": "root",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "url",
+                            "apiver"
+                        ],
+                        "type": "object"
+                    },
+                    "type": "array"
+                },
+                "session": {
+                    "description": "The cookie of an active session on FortiAnalyzer.",
+                    "type": "string"
+                }
+            }
+        },
+        "logview.logfiles.state.get.resp": {
+            "properties": {
+                "id": {
+                    "description": "An identifier established by the client.",
+                    "type": "string"
+                },
+                "jsonrpc": {
+                    "description": "A string specifying the JSON-RPC protocol version.",
+                    "enum": [
+                        "2.0"
+                    ],
+                    "type": "string"
+                },
+                "result": {
+                    "description": "A structured value responding to Log-File Search <b>fetch<\/b> method.",
+                    "properties": {
+                        "device-file-list": {
+                            "description": "An array of json objects holding the results from devices.",
+                            "items": {
+                                "properties": {
+                                    "device-id": {
+                                        "description": "Device ID",
+                                        "type": "string"
+                                    },
+                                    "device-name": {
+                                        "description": "Device Name",
+                                        "type": "string"
+                                    },
+                                    "endtime": {
+                                        "description": "The ending time of all found results of this device.",
+                                        "type": "string"
+                                    },
+                                    "starttime": {
+                                        "description": "The starting time of all found results of this device.",
+                                        "type": "string"
+                                    },
+                                    "vdom-file-list": {
+                                        "description": "An array of json objects holding the results from VDOMs",
+                                        "items": {
+                                            "properties": {
+                                                "endtime": {
+                                                    "description": "The ending time of all found results in this vdom.",
+                                                    "type": "string"
+                                                },
+                                                "logfile-list": {
+                                                    "description": "An json object holding the list of logfiles",
+                                                    "properties": {
+                                                        "logtype-name": {
+                                                            "properties": {
+                                                                "files": {
+                                                                    "description": "An array holds the basic information of the files",
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "endtime": {
+                                                                                "description": "The ending time of the logfile content.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "filename": {
+                                                                                "description": "The name of file",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "fsize": {
+                                                                                "description": "The size of the logfile.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "starttime": {
+                                                                                "description": "The starting time of the logfile content.",
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array"
+                                                                },
+                                                                "logtype": {
+                                                                    "properties": {
+                                                                        "id": {
+                                                                            "description": "The numeric id of the logtype. See Appendix for 'Type ID'.",
+                                                                            "type": "number"
+                                                                        },
+                                                                        "key": {
+                                                                            "description": "The logtype keyname. See Appendix",
+                                                                            "enum": [
+                                                                                "Logfile Name"
+                                                                            ],
+                                                                            "type": "string"
+                                                                        },
+                                                                        "name": {
+                                                                            "description": "The name of the logtype. See Appendix",
+                                                                            "enum": [
+                                                                                "Type Name"
+                                                                            ],
+                                                                            "type": "string"
+                                                                        }
+                                                                    },
+                                                                    "type": "object"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "starttime": {
+                                                    "description": "The starting time of all found results in this vdom.",
+                                                    "type": "string"
+                                                },
+                                                "vdom-name": {
+                                                    "description": "VDOM Name",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "type": "array"
+                                    }
+                                },
+                                "type": "object"
+                            },
+                            "type": "array"
+                        }
+                    },
+                    "required": [
+                        "process-percentage",
+                        "fields",
+                        "data"
+                    ],
+                    "type": "object"
+                }
+            }
+        },
+        "logview.logsearch.add.req": {
+            "properties": {
+                "id": {
+                    "description": "An identifier established by the client.",
+                    "type": "string"
+                },
+                "jsonrpc": {
+                    "description": "A string specifying the JSON-RPC protocol version.",
+                    "enum": [
+                        "2.0"
+                    ],
+                    "type": "string"
+                },
+                "method": {
+                    "description": "A string containing the method name to be invoked.",
+                    "enum": [
+                        "add"
+                    ],
+                    "type": "string"
+                },
+                "params": {
+                    "description": "A structure that holds the parameter values.",
+                    "items": {
+                        "properties": {
+                            "apiver": {
+                                "description": "Current API version.",
+                                "enum": [
+                                    3
+                                ],
+                                "type": "number"
+                            },
+                            "case-sensitive": {
+                                "default": false,
+                                "description": "Case sensitivity in filter.",
+                                "example": false,
+                                "type": "boolean"
+                            },
+                            "device": {
+                                "description": "Device filter. For all devices in some type please use the All-Device ID. <b><i>See Appendix<\/i><\/b>",
+                                "items": {
+                                    "properties": {
+                                        "csfname": {
+                                            "description": "Name of security fabric. Format: csfname. e.g. 'Corp_SF'",
+                                            "example": "Corp_SF",
+                                            "type": "string"
+                                        },
+                                        "devid": {
+                                            "description": "Format: devid[vdom]. e.g. 'FGT60C0000000001[root]'. See Appendix",
+                                            "enum": [
+                                                "device-id[vdom]",
+                                                "device-id",
+                                                "All_FortiGate",
+                                                "All_FortiMail",
+                                                "All_FortiWeb",
+                                                "All_FortiManager",
+                                                "All_Syslog",
+                                                "All_FortiClient",
+                                                "All_FortiCache",
+                                                "All_FortiProxy",
+                                                "All_FortiAnalyzer",
+                                                "All_FortiSandbox",
+                                                "All_FortiAuthenticator",
+                                                "All_FortiDDoS"
+                                            ],
+                                            "example": "FGT60C0000000001[root]",
+                                            "type": "string"
+                                        },
+                                        "devname": {
+                                            "description": "Format: devname[vdom]. e.g. 'FGT-vancouver[traffic]'",
+                                            "example": "FGT-vancouver[traffic]",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "type": "array"
+                            },
+                            "filter": {
+                                "default": "",
+                                "description": "Filter expression.",
+                                "example": "",
+                                "type": "string"
+                            },
+                            "limit": {
+                                "default": 100,
+                                "description": "Number of records to return.",
+                                "example": 100,
+                                "maximum": 1000,
+                                "minimum": 1,
+                                "type": "number"
+                            },
+                            "logtype": {
+                                "description": "The name of the logtype.",
+                                "enum": [
+                                    "traffic",
+                                    "app-ctrl",
+                                    "attack",
+                                    "content",
+                                    "dlp",
+                                    "emailfilter",
+                                    "event",
+                                    "history",
+                                    "virus",
+                                    "voip",
+                                    "webfilter",
+                                    "netscan",
+                                    "fct-event",
+                                    "fct-traffic",
+                                    "waf",
+                                    "gtp"
+                                ],
+                                "type": "string"
+                            },
+                            "offset": {
+                                "default": 0,
+                                "description": "Number of records to offset.",
+                                "example": 0,
+                                "minimum": 0,
+                                "type": "number"
+                            },
+                            "time-order": {
+                                "default": "desc",
+                                "description": "Sort result in descending or ascending order by time",
+                                "enum": [
+                                    "desc",
+                                    "asc"
+                                ],
+                                "example": "desc",
+                                "type": "string"
+                            },
+                            "time-range": {
+                                "description": "Time range for log selection.",
+                                "properties": {
+                                    "end": {
+                                        "description": "Ending date time. Consider it following the timezone parameter's, ADOM's or FortiAnalyzer's timezone if timezone info is not specified within time range. Format: 'yyyy-MM-dd'T'HH:mm:ssZ' (RFC 3339) e.g. '2016-10-17T20:45:37-07:00 or 'yyyy-MM-dd HH:mm:ss' e.g. '2016-10-17 20:45:37'",
+                                        "example": "2019-07-03T17:16:35",
+                                        "format": "date-time",
+                                        "type": "string"
+                                    },
+                                    "start": {
+                                        "description": "Starting date time. Consider it following the timezone parameter's, ADOM's or FortiAnalyzer's timezone if timezone info is not specified within time range. Format: 'yyyy-MM-dd'T'HH:mm:ssZ' (RFC 3339) e.g. '2016-10-17T20:45:37-07:00 or 'yyyy-MM-dd HH:mm:ss' e.g. '2016-10-17 20:45:37'",
+                                        "example": "2019-07-02T17:16:35",
+                                        "format": "date-time",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "start",
+                                    "end"
+                                ],
+                                "type": "object"
+                            },
+                            "timezone": {
+                                "description": "The timezone index or name. Time range in request and date\/time if any in response will follow this timezone. See Appendix",
+                                "type": "string"
+                            },
+                            "url": {
+                                "description": "The resource path to <b>log Search<\/b>.",
+                                "enum": [
+                                    "\/logview\/adom\/<adom-name>\/logsearch"
+                                ],
+                                "example": "\/logview\/adom\/root\/logsearch",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "url",
+                            "apiver",
+                            "device",
+                            "time-range",
+                            "logtype"
+                        ],
+                        "type": "object"
+                    },
+                    "type": "array"
+                },
+                "session": {
+                    "description": "The cookie of an active session in FortiAnalyzer.",
+                    "type": "string"
+                }
+            }
+        },
+        "logview.logsearch.add.resp": {
+            "properties": {
+                "id": {
+                    "description": "An identifier established by the client.",
+                    "type": "string"
+                },
+                "jsonrpc": {
+                    "description": "A String specifying the JSON-RPC protocol version.",
+                    "enum": [
+                        "2.0"
+                    ],
+                    "type": "string"
+                },
+                "result": {
+                    "description": "A structured value that responds to LogView Search method.",
+                    "properties": {
+                        "tid": {
+                            "description": "The task ID for Log Search <b>fetch<\/b> task.",
+                            "type": "number"
+                        }
+                    },
+                    "required": [
+                        "tid"
+                    ],
+                    "type": "object"
+                }
+            }
+        },
+        "logview.logsearch.count.tid.get.req": {
+            "properties": {
+                "id": {
+                    "description": "An identifier established by the client.",
+                    "type": "string"
+                },
+                "jsonrpc": {
+                    "description": "A string specifying the JSON-RPC protocol version.",
+                    "enum": [
+                        "2.0"
+                    ],
+                    "type": "string"
+                },
+                "method": {
+                    "description": "A string containing the method name to be invoked.",
+                    "enum": [
+                        "get"
+                    ],
+                    "type": "string"
+                },
+                "params": {
+                    "description": "A structured that holds the parameter values.",
+                    "items": {
+                        "properties": {
+                            "apiver": {
+                                "description": "Current API version.",
+                                "enum": [
+                                    3
+                                ],
+                                "type": "number"
+                            },
+                            "url": {
+                                "description": "The resource path to log count tastk. <b>tid<\/b> is the task id of a log search request.",
+                                "enum": [
+                                    "\/logview\/adom\/<adom-name>\/logsearch\/count\/<tid>"
+                                ],
+                                "example": "\/logview\/adom\/root\/logsearch\/count\/<tid>",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "url",
+                            "apiver"
+                        ],
+                        "type": "object"
+                    },
+                    "type": "array"
+                },
+                "session": {
+                    "description": "The cookie of an active session in FortiAnalyzer.",
+                    "type": "string"
+                }
+            }
+        },
+        "logview.logsearch.count.tid.get.resp": {
+            "properties": {
+                "id": {
+                    "description": "An identifier established by the client.",
+                    "type": "string"
+                },
+                "jsonrpc": {
+                    "description": "A string specifying the JSON-RPC protocol version.",
+                    "enum": [
+                        "2.0"
+                    ],
+                    "type": "string"
+                },
+                "result": {
+                    "description": "A structured value responding to log count <b>fetch<\/b> method.",
+                    "properties": {
+                        "elapsed-time-ms": {
+                            "description": "Time spent for the current task, in millisecond.",
+                            "type": "number"
+                        },
+                        "estimated-remain-sec": {
+                            "description": "Estimated remaining time, in second.",
+                            "type": "number"
+                        },
+                        "matched-logs": {
+                            "description": "Number of all matched logs when \"progress-percentage\" is 100. If the percentage is below 100, repeated requests need to be sent to fetch the total count.",
+                            "type": "number"
+                        },
+                        "progress-percent": {
+                            "description": "The searching process percentage for the corresponding task ID.",
+                            "type": "number"
+                        },
+                        "scanned-logs": {
+                            "description": "Number of scanned logs, including matched and not matched logs.",
+                            "type": "number"
+                        },
+                        "status": {
+                            "description": "Status of the current task.",
+                            "properties": {
+                                "code": {
+                                    "description": "Status code.",
+                                    "type": "number"
+                                },
+                                "message": {
+                                    "description": "Status description.",
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "code",
+                                "message"
+                            ],
+                            "type": "object"
+                        },
+                        "total-logs": {
+                            "description": "Number of all logs in the time range.",
+                            "type": "number"
+                        }
+                    },
+                    "required": [
+                        "total-logs",
+                        "scanned-logs",
+                        "matched-logs",
+                        "elapsed-time-ms",
+                        "estimated-remain-sec",
+                        "progress-percent",
+                        "status"
+                    ],
+                    "type": "object"
+                }
+            }
+        },
+        "logview.logsearch.tid.delete.req": {
+            "properties": {
+                "id": {
+                    "description": "An identifier established by the client.",
+                    "type": "string"
+                },
+                "jsonrpc": {
+                    "description": "A string specifying the JSON-RPC protocol version.",
+                    "enum": [
+                        "2.0"
+                    ],
+                    "type": "string"
+                },
+                "method": {
+                    "description": "A string containing the method name to be invoked.",
+                    "enum": [
+                        "delete"
+                    ],
+                    "type": "string"
+                },
+                "params": {
+                    "description": "A structure that holds the parameter values.",
+                    "items": {
+                        "properties": {
+                            "apiver": {
+                                "description": "Current API version.",
+                                "enum": [
+                                    3
+                                ],
+                                "type": "number"
+                            },
+                            "url": {
+                                "description": "The resource path to <b>Log Search task<\/b>",
+                                "enum": [
+                                    "\/logview\/adom\/<adom-name>\/logsearch\/<tid>"
+                                ],
+                                "example": "\/logview\/adom\/root\/logsearch\/<tid>",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "url",
+                            "apiver"
+                        ],
+                        "type": "object"
+                    },
+                    "type": "array"
+                },
+                "session": {
+                    "description": "The cookie of an active session in FortiAnalyzer.",
+                    "type": "string"
+                }
+            }
+        },
+        "logview.logsearch.tid.delete.resp": {
+            "properties": {
+                "id": {
+                    "description": "An identifier established by the client.",
+                    "type": "string"
+                },
+                "jsonrpc": {
+                    "description": "A string specifying the JSON-RPC protocol version.",
+                    "enum": [
+                        "2.0"
+                    ],
+                    "type": "string"
+                },
+                "result": {
+                    "description": "A structured value that respond to Log Search <b>cancel<\/b> method.",
+                    "properties": {
+                        "status": {
+                            "description": "Cancellation status.",
+                            "type": "string"
+                        },
+                        "task-id": {
+                            "description": "The ID of the cancelled task.",
+                            "type": "number"
+                        }
+                    },
+                    "type": "object"
+                }
+            }
+        },
+        "logview.logsearch.tid.get.req": {
+            "properties": {
+                "id": {
+                    "description": "An identifier established by the client.",
+                    "type": "string"
+                },
+                "jsonrpc": {
+                    "description": "A string specifying the JSON-RPC protocol version.",
+                    "enum": [
+                        "2.0"
+                    ],
+                    "type": "string"
+                },
+                "method": {
+                    "description": "A string containing the method name to be invoked.",
+                    "enum": [
+                        "get"
+                    ],
+                    "type": "string"
+                },
+                "params": {
+                    "description": "A structured that holds the parameter values.",
+                    "items": {
+                        "properties": {
+                            "apiver": {
+                                "description": "Current API version.",
+                                "enum": [
+                                    3
+                                ],
+                                "type": "number"
+                            },
+                            "limit": {
+                                "default": 50,
+                                "description": "Number of records to return.",
+                                "example": 50,
+                                "maximum": 500,
+                                "minimum": 1,
+                                "type": "number"
+                            },
+                            "offset": {
+                                "default": 0,
+                                "description": "Number of records to offset.",
+                                "example": 0,
+                                "minimum": 0,
+                                "type": "number"
+                            },
+                            "url": {
+                                "description": "The resource path to <b>Log Search task<\/b>",
+                                "enum": [
+                                    "\/logview\/adom\/<adom-name>\/logsearch\/<tid>"
+                                ],
+                                "example": "\/logview\/adom\/root\/logsearch\/<tid>",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "url",
+                            "apiver"
+                        ],
+                        "type": "object"
+                    },
+                    "type": "array"
+                },
+                "session": {
+                    "description": "The cookie of an active session in FortiAnalyzer.",
+                    "type": "string"
+                }
+            }
+        },
+        "logview.logsearch.tid.get.resp": {
+            "properties": {
+                "id": {
+                    "description": "An identifier established by the client.",
+                    "type": "string"
+                },
+                "jsonrpc": {
+                    "description": "A string specifying the JSON-RPC protocol version.",
+                    "enum": [
+                        "2.0"
+                    ],
+                    "type": "string"
+                },
+                "result": {
+                    "description": "A structured value responding to Log Search <b>fetch<\/b> method.",
+                    "properties": {
+                        "data": {
+                            "description": "Dataset",
+                            "items": {
+                                "oneOf": [
+                                    {
+                                        "type": "array"
+                                    },
+                                    {
+                                        "type": "object"
+                                    }
+                                ]
+                            },
+                            "type": "array"
+                        },
+                        "masked-fields": {
+                            "description": "datamasked field list.",
+                            "items": {
+                                "description": "field name.",
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        "percentage": {
+                            "description": "The searching process percentage for the corresponding task ID. Equals to 100 if found (1) requested number of matching logs (2) all matching logs.",
+                            "type": "number"
+                        },
+                        "return-lines": {
+                            "description": "Number of returned lines. The task reaches the end of all results when percentage = 100 and 'return-lines' is smaller than 'limit' in the <b>fetch<\/b> request.",
+                            "type": "number"
+                        },
+                        "status": {
+                            "description": "Status of the current task",
+                            "properties": {
+                                "code": {
+                                    "description": "Status code",
+                                    "type": "number"
+                                },
+                                "message": {
+                                    "description": "Status description",
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "tid": {
+                            "description": "Corresponding task ID.",
+                            "type": "number"
+                        }
+                    },
+                    "required": [
+                        "percentage",
+                        "data"
+                    ],
+                    "type": "object"
+                }
+            }
+        },
+        "logview.logstats.get.req": {
+            "properties": {
+                "id": {
+                    "description": "An identifier established by the client.",
+                    "type": "string"
+                },
+                "jsonrpc": {
+                    "description": "A string specifying the JSON-RPC protocol version.",
+                    "enum": [
+                        "2.0"
+                    ],
+                    "type": "string"
+                },
+                "method": {
+                    "description": "A string containing the method name to be invoked.",
+                    "enum": [
+                        "get"
+                    ],
+                    "type": "string"
+                },
+                "params": {
+                    "description": "A structure that holds the parameter values.",
+                    "items": {
+                        "properties": {
+                            "apiver": {
+                                "description": "Current API version.",
+                                "enum": [
+                                    3
+                                ],
+                                "type": "number"
+                            },
+                            "device": {
+                                "description": "Device filter. For all devices in some type please use the All-Device ID. <b><i>See Appendix<\/i><\/b>",
+                                "items": {
+                                    "properties": {
+                                        "csfname": {
+                                            "description": "Name of security fabric. Format: csfname. e.g. 'Corp_SF'",
+                                            "example": "Corp_SF",
+                                            "type": "string"
+                                        },
+                                        "devid": {
+                                            "description": "Format: devid[vdom]. e.g. 'FGT60C0000000001[root]'. See Appendix",
+                                            "enum": [
+                                                "device-id[vdom]",
+                                                "device-id",
+                                                "All_FortiGate",
+                                                "All_FortiMail",
+                                                "All_FortiWeb",
+                                                "All_FortiManager",
+                                                "All_Syslog",
+                                                "All_FortiClient",
+                                                "All_FortiCache",
+                                                "All_FortiProxy",
+                                                "All_FortiAnalyzer",
+                                                "All_FortiSandbox",
+                                                "All_FortiAuthenticator",
+                                                "All_FortiDDoS"
+                                            ],
+                                            "example": "FGT60C0000000001[root]",
+                                            "type": "string"
+                                        },
+                                        "devname": {
+                                            "description": "Format: devname[vdom]. e.g. 'FGT-vancouver[traffic]'",
+                                            "example": "FGT-vancouver[traffic]",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "type": "array"
+                            },
+                            "url": {
+                                "description": "The resource path to <b>log stats<\/b>.",
+                                "enum": [
+                                    "\/logview\/adom\/<adom-name>\/logstats"
+                                ],
+                                "example": "\/logview\/adom\/root\/logstats",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "url",
+                            "apiver"
+                        ],
+                        "type": "object"
+                    },
+                    "type": "array"
+                },
+                "session": {
+                    "description": "The cookie of an active session in FortiAnalyzer.",
+                    "type": "string"
+                }
+            }
+        },
+        "logview.logstats.get.resp": {
+            "properties": {
+                "id": {
+                    "description": "An identifier established by the client.",
+                    "type": "string"
+                },
+                "jsonrpc": {
+                    "description": "A string specifying the JSON-RPC protocol version.",
+                    "enum": [
+                        "2.0"
+                    ],
+                    "type": "string"
+                },
+                "result": {
+                    "description": "A structured value responding to LogView Search <b>fetch<\/b> method.",
+                    "properties": {
+                        "data": {
+                            "description": "The json object hosting the returned log stats records.",
+                            "properties": {
+                                "devs": {
+                                    "description": "An array of json objects hosting the returned log stats records.",
+                                    "items": {
+                                        "properties": {
+                                            "devid": {
+                                                "description": "Format: devid. e.g. 'FGT60C0000000001'.",
+                                                "type": "string"
+                                            },
+                                            "devname": {
+                                                "description": "Format: devname. e.g. 'FGT-vancouver'",
+                                                "example": "FGT-vancouver",
+                                                "type": "string"
+                                            },
+                                            "encrypted-logging": {
+                                                "description": "Whether logging through encrypted transmission (1) or not (0).",
+                                                "type": "boolean"
+                                            },
+                                            "encrypted_forwarding": {
+                                                "description": "Whether logging through reliable (encrypted) forwarding (1) or not (0).",
+                                                "type": "boolean"
+                                            },
+                                            "is-ha": {
+                                                "description": "Whether the device is a HA member (1) or not (0).",
+                                                "type": "boolean"
+                                            },
+                                            "logging-mode": {
+                                                "description": "The logging mode is 'store and upload' (1) or 'realtime' (0).",
+                                                "type": "boolean"
+                                            },
+                                            "logstat-info": {
+                                                "description": "The log stats information.",
+                                                "type": "string"
+                                            },
+                                            "status": {
+                                                "description": "The device status.",
+                                                "type": "number"
+                                            },
+                                            "vdoms": {
+                                                "description": "An array of json objects hosting the vdoms' log stats records.",
+                                                "items": {
+                                                    "properties": {
+                                                        "adom-quota-MB": {
+                                                            "description": "ADOM quota in MB.",
+                                                            "type": "number"
+                                                        },
+                                                        "last-log-time": {
+                                                            "description": "last received log's time.",
+                                                            "type": "string"
+                                                        },
+                                                        "last-log-timestamp": {
+                                                            "description": "last received log's timestamp.",
+                                                            "type": "number"
+                                                        },
+                                                        "log-db-size": {
+                                                            "description": "The size of logs in DB.",
+                                                            "type": "number"
+                                                        },
+                                                        "log-disk-size": {
+                                                            "description": "The size of logs on disk.",
+                                                            "type": "number"
+                                                        },
+                                                        "lograte": {
+                                                            "description": "log rate, #\/second.",
+                                                            "type": "number"
+                                                        },
+                                                        "vdom": {
+                                                            "description": "Format: vdom. e.g. 'root'.",
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "type": "array"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    "type": "array"
+                                },
+                                "log-interval-dev-no-logging-realtime": {
+                                    "description": "The interval of no real-time device log.",
+                                    "type": "number"
+                                },
+                                "log-interval-dev-no-logging-upload": {
+                                    "description": "The interval of no upload device log.",
+                                    "type": "number"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "required": [
+                        "data"
+                    ],
+                    "type": "object"
+                }
+            }
+        },
+        "logview.pcapfile.get.req": {
+            "properties": {
+                "id": {
+                    "description": "An identifier established by the client.",
+                    "type": "string"
+                },
+                "jsonrpc": {
+                    "description": "A string specifying the JSON-RPC protocol version.",
+                    "enum": [
+                        "2.0"
+                    ],
+                    "type": "string"
+                },
+                "method": {
+                    "description": "A string containing the method name to be invoked.",
+                    "enum": [
+                        "get"
+                    ],
+                    "type": "string"
+                },
+                "params": {
+                    "description": "A structure that holds the parameter values.",
+                    "items": {
+                        "properties": {
+                            "apiver": {
+                                "description": "Current API version.",
+                                "enum": [
+                                    3
+                                ],
+                                "type": "number"
+                            },
+                            "key-data": {
+                                "description": "The key for searching pcapfile. It supports three type of data: 1) JSON format log , 2) txt format log and 3) pcapurl. A pcapurl can be found in the logsearch result if the log does have an associated pcapfile. e.g. 'pcapfile?ZGV2aWQ9IkZHMjAwRTRRMTc5MTYwNTkiIHZkPSJyb290IiBzdWJ0eXBlPSJhcHAtY3RybCIgY2hlY2tzdW09IiIgZXBvY2g9MCBpbmNpZGVudHNlcmlhbG5vPTM4NjE4Mzg5OSBzZXJ2aWNlPSJTU0wiIHR5cGU9InV0bSIgZXZlbnRpZD0wIGluZGVudGlkeD0wIGZpbGVwYXRoPSIvaXBzX2ZpbGVzL0ZHMjAwRTRRMTc5MTYwNTkvcm9vdC8xNjM0ODUxNTU0LzM4NjE4Mzg5OTowIg==\\'. For more details, please click 'Show examples...' .",
+                                "type": "string"
+                            },
+                            "key-type": {
+                                "description": "The type of the given key-data.",
+                                "enum": [
+                                    "log-data",
+                                    "pcapurl"
+                                ],
+                                "type": "string"
+                            },
+                            "url": {
+                                "description": "The resource path to <b>pcapfile<\/b>.",
+                                "enum": [
+                                    "\/logview\/pcapfile"
+                                ],
+                                "example": "\/logview\/logstats",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "url",
+                            "apiver",
+                            "key-data",
+                            "key-type"
+                        ],
+                        "type": "object"
+                    },
+                    "type": "array"
+                },
+                "session": {
+                    "description": "The cookie of an active session in FortiAnalyzer.",
+                    "type": "string"
+                }
+            }
+        },
+        "logview.pcapfile.get.resp": {
+            "properties": {
+                "id": {
+                    "description": "An identifier established by the client.",
+                    "type": "string"
+                },
+                "jsonrpc": {
+                    "description": "A string specifying the JSON-RPC protocol version.",
+                    "enum": [
+                        "2.0"
+                    ],
+                    "type": "string"
+                },
+                "result": {
+                    "description": "A structured value responding to the pcapfile request.",
+                    "properties": {
+                        "data": {
+                            "description": "A returned pcapfile compressed and encoded according to 'data-type'.",
+                            "type": "string"
+                        },
+                        "data-type": {
+                            "description": "Indicating if the pcapfile is zipped with or without password and encoded in base64. e.g. 'base64', 'zip\/base64' and 'zip-password\/base64'.",
+                            "type": "string"
+                        },
+                        "file-category": {
+                            "description": "The category of the returned pcapfile.",
+                            "enum": [
+                                "ips_file",
+                                "email_file",
+                                "ftp_file",
+                                "http_file",
+                                "im_file",
+                                "mms_file",
+                                "quarantined_file"
+                            ],
+                            "type": "string"
+                        },
+                        "file-name": {
+                            "description": "The filename of the returned pcapfile.",
+                            "type": "string"
+                        },
+                        "length": {
+                            "description": "The length of encoded base64 data (excluding the ending '\\0'.)",
+                            "type": "number"
+                        },
+                        "zip-password": {
+                            "description": "Password for unzipping pcapfile if it is zipped with password.",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "data",
+                        "data-type",
+                        "file-category",
+                        "file-name",
+                        "length"
+                    ],
+                    "type": "object"
+                }
+            }
+        }
+    },
+    "paths": {
+        "\/logview\/logfields(get)": {
+            "post": {
+                "consumes": [
+                    "application\/json"
+                ],
+                "description": "Get all log fields.",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#\/definitions\/logview.logfields.get.req"
+                        }
+                    }
+                ],
+                "produces": [
+                    "application\/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#\/definitions\/logview.logfields.get.resp"
+                        }
+                    },
+                    "405": {
+                        "description": "Invalid input"
+                    }
+                },
+                "summary": "",
+                "tags": [
+                    "\/logview\/logfields"
+                ]
+            }
+        },
+        "\/logview\/logfiles\/data(get)": {
+            "post": {
+                "consumes": [
+                    "application\/json"
+                ],
+                "description": "Get the content of the specified log file.",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#\/definitions\/logview.logfiles.data.get.req"
+                        }
+                    }
+                ],
+                "produces": [
+                    "application\/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#\/definitions\/logview.logfiles.data.get.resp"
+                        }
+                    },
+                    "405": {
+                        "description": "Invalid input"
+                    }
+                },
+                "summary": "",
+                "tags": [
+                    "\/logview\/logfiles\/data"
+                ]
+            }
+        },
+        "\/logview\/logfiles\/search(get)": {
+            "post": {
+                "consumes": [
+                    "application\/json"
+                ],
+                "description": "Run a log search task on a single log file.",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#\/definitions\/logview.logfiles.search.get.req"
+                        }
+                    }
+                ],
+                "produces": [
+                    "application\/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#\/definitions\/logview.logfiles.search.get.resp"
+                        }
+                    },
+                    "405": {
+                        "description": "Invalid input"
+                    }
+                },
+                "summary": "",
+                "tags": [
+                    "\/logview\/logfiles\/search"
+                ]
+            }
+        },
+        "\/logview\/logfiles\/state(get)": {
+            "post": {
+                "consumes": [
+                    "application\/json"
+                ],
+                "description": "Get file state of log file(s).",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#\/definitions\/logview.logfiles.state.get.req"
+                        }
+                    }
+                ],
+                "produces": [
+                    "application\/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#\/definitions\/logview.logfiles.state.get.resp"
+                        }
+                    },
+                    "405": {
+                        "description": "Invalid input"
+                    }
+                },
+                "summary": "",
+                "tags": [
+                    "\/logview\/logfiles\/state"
+                ]
+            }
+        },
+        "\/logview\/logsearch(add)": {
+            "post": {
+                "consumes": [
+                    "application\/json"
+                ],
+                "description": "Start a new task to search logs.",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#\/definitions\/logview.logsearch.add.req"
+                        }
+                    }
+                ],
+                "produces": [
+                    "application\/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#\/definitions\/logview.logsearch.add.resp"
+                        }
+                    },
+                    "405": {
+                        "description": "Invalid input"
+                    }
+                },
+                "summary": "",
+                "tags": [
+                    "\/logview\/logsearch"
+                ]
+            }
+        },
+        "\/logview\/logsearch\/count\/{tid}(get)": {
+            "post": {
+                "consumes": [
+                    "application\/json"
+                ],
+                "description": "Get the total number of logs with the task ID.",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#\/definitions\/logview.logsearch.count.tid.get.req"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "tid",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "application\/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#\/definitions\/logview.logsearch.count.tid.get.resp"
+                        }
+                    },
+                    "405": {
+                        "description": "Invalid input"
+                    }
+                },
+                "summary": "",
+                "tags": [
+                    "\/logview\/logsearch\/count\/<tid>"
+                ]
+            }
+        },
+        "\/logview\/logsearch\/{tid}(delete)": {
+            "post": {
+                "consumes": [
+                    "application\/json"
+                ],
+                "description": "Cancel a log search task by the task ID.",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#\/definitions\/logview.logsearch.tid.delete.req"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "tid",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "application\/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#\/definitions\/logview.logsearch.tid.delete.resp"
+                        }
+                    },
+                    "405": {
+                        "description": "Invalid input"
+                    }
+                },
+                "summary": "",
+                "tags": [
+                    "\/logview\/logsearch\/<tid>"
+                ]
+            }
+        },
+        "\/logview\/logsearch\/{tid}(get)": {
+            "post": {
+                "consumes": [
+                    "application\/json"
+                ],
+                "description": "Get the log search request result with the task ID.",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#\/definitions\/logview.logsearch.tid.get.req"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "tid",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "application\/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#\/definitions\/logview.logsearch.tid.get.resp"
+                        }
+                    },
+                    "405": {
+                        "description": "Invalid input"
+                    }
+                },
+                "summary": "",
+                "tags": [
+                    "\/logview\/logsearch\/<tid>"
+                ]
+            }
+        },
+        "\/logview\/logstats(get)": {
+            "post": {
+                "consumes": [
+                    "application\/json"
+                ],
+                "description": "the last log time and log rate per device[vdom].",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#\/definitions\/logview.logstats.get.req"
+                        }
+                    }
+                ],
+                "produces": [
+                    "application\/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#\/definitions\/logview.logstats.get.resp"
+                        }
+                    },
+                    "405": {
+                        "description": "Invalid input"
+                    }
+                },
+                "summary": "",
+                "tags": [
+                    "\/logview\/logstats"
+                ]
+            }
+        },
+        "\/logview\/pcapfile(get)": {
+            "post": {
+                "consumes": [
+                    "application\/json"
+                ],
+                "description": "Get the pcapfile associated with a log.",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#\/definitions\/logview.pcapfile.get.req"
+                        }
+                    }
+                ],
+                "produces": [
+                    "application\/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#\/definitions\/logview.pcapfile.get.resp"
+                        }
+                    },
+                    "405": {
+                        "description": "Invalid input"
+                    }
+                },
+                "summary": "",
+                "tags": [
+                    "\/logview\/pcapfile"
+                ]
+            }
+        }
+    }
+}

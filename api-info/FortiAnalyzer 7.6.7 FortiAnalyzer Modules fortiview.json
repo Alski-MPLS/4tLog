@@ -1,0 +1,701 @@
+{
+    "basePath": "\/jsonrpc",
+    "consumes": [
+        "application\/json"
+    ],
+    "host": "172.16.79.72",
+    "info": {
+        "description": "Documentation for FortiAnalyzer JSON API<br\/><br\/>This daemon controls main system functions, including log in and log out. All APIs for this module are under the prefix <b>\/sys\/<\/b>.",
+        "title": "FortiAnalyzer JSON API Documentation",
+        "version": "7.6 (Build 3737)"
+    },
+    "produces": [
+        "application\/json"
+    ],
+    "schemes": [
+        "http",
+        "https"
+    ],
+    "swagger": "2.0",
+    "x-service-type": "json-rpc",
+    "tags": [
+        {
+            "description": "Start FortiView requests.",
+            "name": "\/fortiview\/<view-name>\/run"
+        },
+        {
+            "description": "Fetch FortiView results by task ID.",
+            "name": "\/fortiview\/<view-name>\/run\/<tid>"
+        }
+    ],
+    "definitions": {
+        "fortiview.view-name.run.add.req": {
+            "properties": {
+                "id": {
+                    "description": "An identifier established by the client.",
+                    "type": "string"
+                },
+                "jsonrpc": {
+                    "description": "A string specifying the JSON-RPC protocol version.",
+                    "enum": [
+                        "2.0"
+                    ],
+                    "type": "string"
+                },
+                "method": {
+                    "description": "A string containing the method name to be invoked.",
+                    "enum": [
+                        "add"
+                    ],
+                    "type": "string"
+                },
+                "params": {
+                    "description": "A structure that holds the parameter values.",
+                    "items": {
+                        "properties": {
+                            "apiver": {
+                                "description": "Current API version.",
+                                "enum": [
+                                    3
+                                ],
+                                "type": "number"
+                            },
+                            "count-total": {
+                                "default": "false",
+                                "description": "If true, the flag will be set and the total count of results will be returned if applicable.",
+                                "example": "false",
+                                "type": "boolean"
+                            },
+                            "device": {
+                                "description": "Device filter. For all devices in some type please use the All-Device ID. <b><i>See Appendix<\/i><\/b>",
+                                "items": {
+                                    "properties": {
+                                        "csfname": {
+                                            "description": "Name of security fabric. Format: csfname. e.g. 'Corp_SF'",
+                                            "example": "Corp_SF",
+                                            "type": "string"
+                                        },
+                                        "devid": {
+                                            "description": "Format: devid[vdom]. e.g. 'FGT60C0000000001[root]'",
+                                            "enum": [
+                                                "device-id[vdom]",
+                                                "device-id",
+                                                "All_FortiGate",
+                                                "All_FortiMail",
+                                                "All_FortiWeb",
+                                                "All_FortiManager",
+                                                "All_Syslog",
+                                                "All_FortiClient",
+                                                "All_FortiCache",
+                                                "All_FortiProxy",
+                                                "All_FortiAnalyzer",
+                                                "All_FortiSandbox",
+                                                "All_FortiAuthenticator",
+                                                "All_FortiDDoS"
+                                            ],
+                                            "example": "FGT60C0000000001[root]",
+                                            "type": "string"
+                                        },
+                                        "devname": {
+                                            "description": "Format: devname[vdom]. e.g. 'FGT-vancouver[root]'",
+                                            "example": "FGT-vancouver[root]",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                },
+                                "type": "array"
+                            },
+                            "filter": {
+                                "description": "Filter expression. See appendix - Filterable Field.",
+                                "example": "devid",
+                                "type": "string"
+                            },
+                            "limit": {
+                                "default": 1000,
+                                "description": "The number of records to get.",
+                                "example": 1000,
+                                "maximum": 1000,
+                                "minimum": 1,
+                                "type": "number"
+                            },
+                            "offset": {
+                                "default": 0,
+                                "description": "The number of records to offset.",
+                                "example": 0,
+                                "minimum": 0,
+                                "type": "number"
+                            },
+                            "sort-by": {
+                                "description": "Sort by fields. Only support <b>one field<\/b> for this API.",
+                                "items": {
+                                    "properties": {
+                                        "field": {
+                                            "description": "See appendix - Sortable Field.",
+                                            "example": "sessions",
+                                            "type": "string"
+                                        },
+                                        "order": {
+                                            "default": "asc",
+                                            "description": "Sort in ascending or descending order.",
+                                            "enum": [
+                                                "asc",
+                                                "desc"
+                                            ],
+                                            "example": "asc",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "field"
+                                    ],
+                                    "type": "object"
+                                },
+                                "type": "array"
+                            },
+                            "time-range": {
+                                "description": "Time range for source data selection.",
+                                "properties": {
+                                    "end": {
+                                        "description": "Ending date time. Consider it following the timezone parameter's, ADOM's or FortiAnalyzer's timezone if timezone info is not specified within time range. Format: 'yyyy-MM-dd'T'HH:mm:ssZ' (RFC 3339) e.g. '2016-10-17T20:45:37-07:00 or 'yyyy-MM-dd HH:mm:ss' e.g. '2016-10-17 20:45:37'",
+                                        "example": "2019-07-03T17:16:35",
+                                        "format": "date-time",
+                                        "type": "string"
+                                    },
+                                    "start": {
+                                        "description": "Starting date time. Consider it following the timezone parameter's, ADOM's or FortiAnalyzer's timezone if timezone info is not specified within time range. Format: 'yyyy-MM-dd'T'HH:mm:ssZ' (RFC 3339) e.g. '2016-10-17T20:45:37-07:00 or 'yyyy-MM-dd HH:mm:ss' e.g. '2016-10-17 20:45:37'",
+                                        "example": "2019-07-02T17:16:35",
+                                        "format": "date-time",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "start",
+                                    "end"
+                                ],
+                                "type": "object"
+                            },
+                            "timezone": {
+                                "description": "The timezone index or name. Time range in request and date\/time if any in response will follow this timezone. See Appendix",
+                                "type": "string"
+                            },
+                            "url": {
+                                "description": "The resource path to <b>FortiView Name<\/b>. The list of available view names is in the Appendix.<h1 id=appendix>Appendix<\/h1><h2 id=list_of_view_names>List of Available View Names for Different Devices<\/h2><p>A list of names for the field &lt;view-name&gt;:<\/p><br><h2 id=fortigate_appendix_header>FortiGate<\/h2><table border=\"1\"><thead><tr><th class=\"table_hdr_name\">View Name<\/th><th class=\"table_hdr_desc\">Description<\/th><th class=\"table_hdr_desc\">Filterable Field<\/th><th class=\"table_hdr_desc\">Sortable Field<\/th><\/tr><\/thead><tr><td class=\"table_col_name\">app-lite-view<\/td><td class=\"tg-yw4l\">Application lite view <\/td><td class=\"tg-yw4l\">app_group, d_flags, dvid, timescale<\/td><td class=\"tg-yw4l\">app_group, appcat, bandwidth, d_risk, risk, session_block, session_pass, sessions, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">top-applications<\/td><td class=\"tg-yw4l\">Top applications view<\/td><td class=\"tg-yw4l\">app_group, avatar, d_flags, dstcountry, dstintfrole, dstip, dstowner, dstuuid, dvid, epeuid, f_user, policyid, policymode, policytype, srcintfrole, srcip, srcmac, srcuuid, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">app_group, appcat, bandwidth, d_risk, fortigate, num_users, risk, session_block, session_pass, sessions, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">application-line<\/td><td class=\"tg-yw4l\">Application line view<\/td><td class=\"tg-yw4l\">app_group, avatar, bandwidth, d_flags, dstcountry, dstintfrole, dstip, dstowner, dstuuid, dvid, epeuid, f_user, policyid, policymode, policytype, sessions, srcintfrole, srcip, srcmac, srcuuid, timescale<\/td><td class=\"tg-yw4l\">score_critical, score_high, score_low, score_medium, session_block, session_pass, time, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">application-drilldown<\/td><td class=\"tg-yw4l\">Application drilldown view<\/td><td class=\"tg-yw4l\">app_group, d_flags, dstcountry, dstintfrole, dstip, dstowner, dstuuid, dvid, f_user, policyid, policymode, policytype, srcintfrole, srcip, srcmac, srcuuid, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">app_group, avatar, bandwidth, epeuid, fortigate, session_block, session_pass, sessions, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">app-timeline<\/td><td class=\"tg-yw4l\">Application timeline view<\/td><td class=\"tg-yw4l\">app_group, avatar, d_flags, dstcountry, dstintfrole, dstip, dstowner, dstuuid, dvid, epeuid, f_user, policyid, policymode, policytype, session_block, srcintfrole, srcip, srcmac, srcuuid, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale, traffic_in, traffic_out<\/td><td class=\"tg-yw4l\">app_group, bandwidth, sessions, time<\/td><\/tr><tr><td class=\"table_col_name\">top-app-source<\/td><td class=\"tg-yw4l\">Top application source view<\/td><td class=\"tg-yw4l\">app_group, avatar, d_flags, dstcountry, dstintfrole, dstip, dstowner, dstuuid, dvid, epeuid, f_group, f_user, policyid, policymode, policytype, srcinetsvc, srcintf, srcintfrole, srcip, srcmac, srcuuid, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">app, bandwidth, groups, session_block, session_pass, sessions, srcinetsvcs, srcintf, srcips, traffic_in, traffic_out, users<\/td><\/tr><tr><td class=\"table_col_name\">source-lite-view<\/td><td class=\"tg-yw4l\">Source lite view <\/td><td class=\"tg-yw4l\">crlevel, dvid, f_user, srcintf, srcip, timescale<\/td><td class=\"tg-yw4l\">avatar, bandwidth, epeuid, f_user, session_block, session_pass, sessions, srcintf, srcip, threat_block, threat_pass, threatweight, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">top-sources<\/td><td class=\"tg-yw4l\">Top sources view<\/td><td class=\"tg-yw4l\">app_group, browsetime, catdesc, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dstowner, dstuuid, dvid, epid, f_user, incident_block, incidents, policyid, policymode, policytype, srcintf, srcintfrole, srcip, srcmac, srcuuid, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">avatar, bandwidth, dev_src_agg, epeuid, f_user, fortigate, mac_devtype_agg, session_block, session_pass, sessions, srcintf, srcip, threat_block, threat_pass, threatweight, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">srcuuid<\/td><td class=\"tg-yw4l\">Source UUID view<\/td><td class=\"tg-yw4l\">app_group, avatar, browsetime, catdesc, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dstowner, dstuuid, dvid, epeuid, epid, f_user, incident_block, incidents, policyid, policymode, policytype, srcintf, srcintfrole, srcip, srcmac, srcuuid, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">bandwidth, dev_src_agg, fortigate, mac_devtype_agg, session_block, session_pass, sessions, srcintf, srcuuid, srcuuid_name, threat_block, threat_pass, threatweight, traffic_in, traffic_out, uuid_data, uuid_type<\/td><\/tr><tr><td class=\"table_col_name\">src-dst-line<\/td><td class=\"tg-yw4l\">Source destination line view<\/td><td class=\"tg-yw4l\">app_group, avatar, bandwidth, browsetime, catdesc, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dstowner, dstuuid, dvid, epeuid, epid, f_user, incident_block, incidents, policyid, policymode, policytype, sessions, srcintf, srcintfrole, srcip, srcmac, srcuuid, threat_block, threatweight, timescale<\/td><td class=\"tg-yw4l\">score_critical, score_high, score_low, score_medium, session_block, session_pass, time, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">src-dst-threat-line<\/td><td class=\"tg-yw4l\">Source destination threat line view<\/td><td class=\"tg-yw4l\">avatar, bandwidth, dev_src, devtype, dstcountry, dstintfrole, dstip, dvid, epeuid, f_user, incidents, policyid, policytype, sessions, srcintf, srcintfrole, srcip, threat_agg, threat_block, threatlevel_agg, threattype_agg, threatweight, timescale<\/td><td class=\"tg-yw4l\">incident_block, incident_pass, session_block, session_pass, time, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">source-threat<\/td><td class=\"tg-yw4l\">Source threat view<\/td><td class=\"tg-yw4l\">dev_src, devtype, dstcountry, dstintfrole, dstip, dvid, f_user, policyid, policytype, session_block, sessions, srcintf, srcintfrole, srcip, threat_agg, threatlevel_agg, threattype_agg, timescale<\/td><td class=\"tg-yw4l\">avatar, bandwidth, dev_src, devtype, epeuid, f_user, fortigate, incident_block, incident_pass, incidents, srcintf, srcip, threat_block, threat_pass, threatweight, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">source-website<\/td><td class=\"tg-yw4l\">Source website view<\/td><td class=\"tg-yw4l\">app_group, browsetime, catdesc, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dstowner, dstuuid, dvid, epid, f_user, policyid, policymode, policytype, srcintf, srcintfrole, srcip, srcmac, srcuuid, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">avatar, bandwidth, browsetime, dev_src_agg, epeuid, f_user, fortigate, session_block, session_pass, sessions, srcintf, srcip, threat_block, threat_pass, threatweight, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">destination-lite-view<\/td><td class=\"tg-yw4l\">Destination lite view <\/td><td class=\"tg-yw4l\">dstcountry, dstip, dvid, threat_block, threatweight, timescale<\/td><td class=\"tg-yw4l\">bandwidth, dstip, session_block, session_pass, sessions, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">top-destinations<\/td><td class=\"tg-yw4l\">Top destinations view<\/td><td class=\"tg-yw4l\">app_group, avatar, browsetime, catdesc, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstowner, dstuuid, dvid, epeuid, epid, f_user, policyid, policymode, policytype, srcintf, srcintfrole, srcip, srcmac, srcuuid, threat_block, threatweight, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">agg_app, bandwidth, dstintf, dstip, dstmac, fortigate, session_block, session_pass, sessions, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">dstuuid<\/td><td class=\"tg-yw4l\">Destination UUID view<\/td><td class=\"tg-yw4l\">app_group, avatar, browsetime, catdesc, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstowner, dstuuid, dvid, epeuid, epid, f_user, policyid, policymode, policytype, srcintf, srcintfrole, srcip, srcmac, srcuuid, threat_block, threatweight, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">agg_app, bandwidth, dstintf, dstmac, dstuuid, dstuuid_name, fortigate, session_block, session_pass, sessions, traffic_in, traffic_out, uuid_data, uuid_type<\/td><\/tr><tr><td class=\"table_col_name\">dstowner<\/td><td class=\"tg-yw4l\">Destination owner view<\/td><td class=\"tg-yw4l\">app_group, avatar, browsetime, catdesc, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dstowner, dstuuid, dvid, epeuid, epid, f_user, policyid, policymode, policytype, srcintf, srcintfrole, srcip, srcmac, srcuuid, threat_block, threatweight, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">bandwidth, fortigate, owner, session_block, session_pass, sessions, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">country-lite-view<\/td><td class=\"tg-yw4l\">Country lite view <\/td><td class=\"tg-yw4l\">dstcountry, dstip, dvid, timescale<\/td><td class=\"tg-yw4l\">bandwidth, dstcountry, session_block, session_pass, sessions, threat_block, threat_pass, threatweight, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">country-line<\/td><td class=\"tg-yw4l\">Country line view<\/td><td class=\"tg-yw4l\">app_group, avatar, bandwidth, browsetime, catdesc, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dstowner, dstuuid, dvid, epeuid, epid, f_user, incident_block, incidents, policyid, policymode, policytype, sessions, srcintf, srcintfrole, srcip, srcmac, srcuuid, threat_block, threatweight, timescale<\/td><td class=\"tg-yw4l\">score_critical, score_high, score_low, score_medium, session_block, session_pass, time, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">country-threat-line<\/td><td class=\"tg-yw4l\">Country threat line view<\/td><td class=\"tg-yw4l\">avatar, bandwidth, dev_src, devtype, dstcountry, dstintfrole, dstip, dvid, epeuid, f_user, incidents, policyid, policytype, sessions, srcintf, srcintfrole, srcip, threat_agg, threat_block, threatlevel_agg, threattype_agg, threatweight, timescale<\/td><td class=\"tg-yw4l\">incident_block, incident_pass, session_block, session_pass, time, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">top-countries<\/td><td class=\"tg-yw4l\">Top countries view<\/td><td class=\"tg-yw4l\">app_group, avatar, browsetime, catdesc, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dstowner, dstuuid, dvid, epeuid, epid, f_user, policyid, policymode, policytype, srcintf, srcintfrole, srcip, srcmac, srcuuid, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">bandwidth, dstcountry, fortigate, session_block, session_pass, sessions, threat_block, threat_pass, threatweight, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">threat-country-drilldown<\/td><td class=\"tg-yw4l\">Threat country drilldown view<\/td><td class=\"tg-yw4l\">avatar, dev_src, devtype, dstcountry, dstintfrole, dstip, dvid, epeuid, f_user, incidents, policyid, policytype, srcintf, srcintfrole, srcip, threat_agg, threatlevel_agg, threattype_agg, timescale<\/td><td class=\"tg-yw4l\">bandwidth, dstcountry, fortigate, session_block, session_pass, sessions, threat_block, threat_pass, threatweight, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">destination-drilldown<\/td><td class=\"tg-yw4l\">Destination drilldown view<\/td><td class=\"tg-yw4l\">app_group, avatar, browsetime, catdesc, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dstowner, dstuuid, dvid, epeuid, epid, f_user, policyid, policymode, policytype, srcintf, srcintfrole, srcip, srcmac, srcuuid, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">bandwidth, dstip, fortigate, session_block, session_pass, sessions, threat_block, threat_pass, threatweight, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">destination-threat<\/td><td class=\"tg-yw4l\">Destination threat view<\/td><td class=\"tg-yw4l\">avatar, dev_src, devtype, dstcountry, dstintfrole, dstip, dvid, epeuid, f_user, policyid, policytype, session_block, sessions, srcintf, srcintfrole, srcip, threat_agg, threatlevel_agg, threattype_agg, timescale<\/td><td class=\"tg-yw4l\">bandwidth, dstip, fortigate, incident_block, incident_pass, incidents, threat_block, threat_pass, threatweight, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">destination-website<\/td><td class=\"tg-yw4l\">Destination website view<\/td><td class=\"tg-yw4l\">app_group, avatar, browsetime, catdesc, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dstowner, dstuuid, dvid, epeuid, epid, f_user, policyid, policymode, policytype, srcintf, srcintfrole, srcip, srcmac, srcuuid, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">bandwidth, browsetime, dstip, fortigate, session_block, session_pass, sessions, threat_block, threat_pass, threatweight, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">dst-sankey-view<\/td><td class=\"tg-yw4l\">Destination sankey view <\/td><td class=\"tg-yw4l\">app_group, browsetime, catdesc, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dstowner, dstuuid, dvid, epid, f_user, incident_block, incidents, policyid, policymode, policytype, session_block, sessions, srcintf, srcintfrole, srcip, srcmac, srcuuid, threat_block, threatweight, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale, traffic_in, traffic_out<\/td><td class=\"tg-yw4l\">avatar, bandwidth, devid, dstcountry, epeuid, srcip<\/td><\/tr><tr><td class=\"table_col_name\">dev-dst-sankey-view<\/td><td class=\"tg-yw4l\">Device destination sankey view <\/td><td class=\"tg-yw4l\">app_group, browsetime, catdesc, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dstowner, dstuuid, dvid, epid, f_user, incident_block, incidents, policyid, policymode, policytype, session_block, sessions, srcintf, srcintfrole, srcip, srcmac, srcuuid, threat_block, threatweight, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale, traffic_in, traffic_out<\/td><td class=\"tg-yw4l\">avatar, bandwidth, csf, devid, dstcountry, epeuid, srcip<\/td><\/tr><tr><td class=\"table_col_name\">dev-avatar-sankey-view<\/td><td class=\"tg-yw4l\">Device avatar sankey view <\/td><td class=\"tg-yw4l\">app_group, browsetime, catdesc, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dstowner, dstuuid, dvid, epid, f_user, incident_block, incidents, policyid, policymode, policytype, session_block, sessions, srcintf, srcintfrole, srcip, srcmac, srcuuid, threat_block, threatweight, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale, traffic_in, traffic_out<\/td><td class=\"tg-yw4l\">app_group, avatar, bandwidth, csf, devid, epeuid, srcip<\/td><\/tr><tr><td class=\"table_col_name\">avatar-sankey-view<\/td><td class=\"tg-yw4l\">Avatar sankey view <\/td><td class=\"tg-yw4l\">app_group, browsetime, catdesc, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dstowner, dstuuid, dvid, epid, f_user, incident_block, incidents, policyid, policymode, policytype, session_block, sessions, srcintf, srcintfrole, srcip, srcmac, srcuuid, threat_block, threatweight, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale, traffic_in, traffic_out<\/td><td class=\"tg-yw4l\">app_group, avatar, bandwidth, devid, epeuid, srcip<\/td><\/tr><tr><td class=\"table_col_name\">website-domain<\/td><td class=\"tg-yw4l\">Website domain view<\/td><td class=\"tg-yw4l\">avatar, browsetime, catdesc, domain, dstintfrole, dstip, dstuuid, dvid, epeuid, f_user, group_info, policyid, policymode, policytype, srcintfrole, srcip, srcmac, srcuuid, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">agg_webcat, bandwidth, browsetime, domain, fortigate, session_block, session_pass, sessions, threat_block, threat_pass, threatweight, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">top-websites<\/td><td class=\"tg-yw4l\">Top websites view<\/td><td class=\"tg-yw4l\">avatar, browsetime, catdesc, domain, dstintfrole, dstip, dstuuid, dvid, epeuid, f_user, group_info, policyid, policymode, policytype, srcintfrole, srcip, srcmac, srcuuid, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">bandwidth, browsetime, catdesc, fortigate, session_block, session_pass, sessions, threat_block, threat_pass, threatweight, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">website-line<\/td><td class=\"tg-yw4l\">Website line view<\/td><td class=\"tg-yw4l\">avatar, bandwidth, browsetime, catdesc, domain, dstintfrole, dstip, dstuuid, dvid, epeuid, f_user, group_info, policyid, policymode, policytype, sessions, srcintfrole, srcip, srcmac, srcuuid, threat_block, threatweight, timescale<\/td><td class=\"tg-yw4l\">score_critical, score_high, score_low, score_medium, session_block, session_pass, time, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">top-threats<\/td><td class=\"tg-yw4l\">Top threats view<\/td><td class=\"tg-yw4l\">app_group, dstcountry, dstintfrole, dstip, dstowner, dstuuid, dvid, f_user, logtype, policyid, policytype, srcintfrole, srcip, srcmac, srcuuid, threat_s, threatlevel_s, threattype_s, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">fortigate, incident_block, incident_pass, incidents, level_s, logtype, logtype_str, threat, threat_block, threat_pass, threatlevel, threattype, threatweight<\/td><\/tr><tr><td class=\"table_col_name\">threat-line<\/td><td class=\"tg-yw4l\">Threat line view<\/td><td class=\"tg-yw4l\">app_group, dstcountry, dstintfrole, dstip, dstowner, dstuuid, dvid, f_user, incidents, logtype, policyid, policytype, srcintfrole, srcip, srcmac, srcuuid, threat_block, threat_s, threatlevel_s, threattype_s, threatweight, timescale<\/td><td class=\"tg-yw4l\">score_critical, score_high, score_low, score_medium, session_block, session_pass, time<\/td><\/tr><tr><td class=\"table_col_name\">threat-src-dst<\/td><td class=\"tg-yw4l\">Threat source destination view<\/td><td class=\"tg-yw4l\">app_group, dstcountry, dstintfrole, dstip, dstowner, dstuuid, dvid, f_user, logtype, policyid, policytype, srcintfrole, srcip, srcmac, srcuuid, threat_s, threatlevel_s, threattype_s, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">devid, dstip, fortigate, incident_block, incident_pass, incidents, logtype, srcip, threat, threat_block, threat_pass, threatlevel, threatweight<\/td><\/tr><tr><td class=\"table_col_name\">threat-website<\/td><td class=\"tg-yw4l\">Threat website view<\/td><td class=\"tg-yw4l\">app_group, dstcountry, dstintfrole, dstip, dstowner, dstuuid, dvid, f_user, logtype, policyid, policytype, srcintfrole, srcip, srcmac, srcuuid, threat_s, threatlevel_s, threattype_s, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">fortigate, incident_block, incident_pass, incidents, level_s, threat, threat_block, threat_pass, threatlevel, threattype, threatweight<\/td><\/tr><tr><td class=\"table_col_name\">top-cloud-applications<\/td><td class=\"tg-yw4l\">Top cloud applications view<\/td><td class=\"tg-yw4l\">agg_files, app_group, d_flags, dstintfrole, dstip, dvid, srcintfrole, srcip, timescale<\/td><td class=\"tg-yw4l\">agg_files, app_group, appcat, d_risk, download_size, fortigate, num_download_files, num_files, num_loginids, num_upload_files, num_videos, risk, session_block, session_pass, sessions, total_size, upload_size<\/td><\/tr><tr><td class=\"table_col_name\">cloud-user0<\/td><td class=\"tg-yw4l\">Cloud user0 view<\/td><td class=\"tg-yw4l\">agg_files, app_group, clouduser, d_flags, dstintfrole, dstip, dvid, srcintfrole, srcip, timescale, video_files<\/td><td class=\"tg-yw4l\">agg_app, agg_files, clouduser, download_size, fortigate, num_download_files, num_files, num_upload_files, num_videos, session_block, session_pass, sessions, total_size, upload_size<\/td><\/tr><tr><td class=\"table_col_name\">cloud-application<\/td><td class=\"tg-yw4l\">Cloud application view<\/td><td class=\"tg-yw4l\">agg_files, app_group, clouduser, d_flags, dstintfrole, dstip, dvid, session_block, sessions, srcintfrole, srcip, timescale<\/td><td class=\"tg-yw4l\">agg_files, app_group, appcat, d_risk, download_size, fortigate, num_files, num_videos, risk, total_size, upload_size<\/td><\/tr><tr><td class=\"table_col_name\">cloud-app-line<\/td><td class=\"tg-yw4l\">Cloud application line view<\/td><td class=\"tg-yw4l\">agg_files, app_group, clouduser, d_flags, download_files, dstintfrole, dstip, dvid, sessions, srcintfrole, srcip, timescale, total_size, upload_files, video_files<\/td><td class=\"tg-yw4l\">download_size, session_block, session_pass, time, upload_size<\/td><\/tr><tr><td class=\"table_col_name\">cloud-user<\/td><td class=\"tg-yw4l\">Cloud user view<\/td><td class=\"tg-yw4l\">agg_files, app_group, clouduser, d_flags, download_files, dstintfrole, dstip, dvid, srcintfrole, srcip, timescale, upload_files, video_files<\/td><td class=\"tg-yw4l\">agg_files, clouduser, download_size, fortigate, num_files, num_videos, session_block, session_pass, sessions, srcip, total_size, upload_size<\/td><\/tr><tr><td class=\"table_col_name\">system-events<\/td><td class=\"tg-yw4l\">System events view<\/td><td class=\"tg-yw4l\">dvid, event_name, level, subtype, timescale<\/td><td class=\"tg-yw4l\">agg_level, counts, event_name, fortigate, logid, severity, severity_fgt, severity_s, subtype<\/td><\/tr><tr><td class=\"table_col_name\">system-event-line<\/td><td class=\"tg-yw4l\">System event line view<\/td><td class=\"tg-yw4l\">dvid, event_name, level, logid, severity, severity_fgt, subtype, timescale<\/td><td class=\"tg-yw4l\">counts, time<\/td><\/tr><tr><td class=\"table_col_name\">admin-logins<\/td><td class=\"tg-yw4l\">Admin logins view<\/td><td class=\"tg-yw4l\">dvid, f_user, timescale<\/td><td class=\"tg-yw4l\">duration, f_user, fortigate, login_fail_num, login_num, total_change<\/td><\/tr><tr><td class=\"table_col_name\">admin-login-line<\/td><td class=\"tg-yw4l\">Admin login line view<\/td><td class=\"tg-yw4l\">dvid, f_user, timescale, total_duration<\/td><td class=\"tg-yw4l\">login_fail_num, login_num, time, total_change<\/td><\/tr><tr><td class=\"table_col_name\">ssl-dialup-ipsec<\/td><td class=\"tg-yw4l\">SSL dial-up IPsec view<\/td><td class=\"tg-yw4l\">dvid, max_duration, max_traffic_in, max_traffic_out, min_duration, min_traffic_in, min_traffic_out, remip, s_time, timescale, tunneltype, user_agg, vpntunnel, vpnusergroup, xauthuser_agg<\/td><td class=\"tg-yw4l\">bandwidth, connections, device_group, duration, end_time, f_user, fv_dtime_tz_conv_e_time_t, remip, traffic_in, traffic_out, vpn_type_group<\/td><\/tr><tr><td class=\"table_col_name\">ssl-dialup-ipsec-line<\/td><td class=\"tg-yw4l\">SSL dial-up IPsec line view<\/td><td class=\"tg-yw4l\">dvid, e_time, max_duration, max_traffic_in, max_traffic_out, min_duration, min_traffic_in, min_traffic_out, remip, s_time, timescale, tunnelid, tunneltype, user_agg, vpntunnel, vpnusergroup, xauthuser_agg<\/td><td class=\"tg-yw4l\">connections, time, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">ssl-session<\/td><td class=\"tg-yw4l\">SSL session view<\/td><td class=\"tg-yw4l\">dvid, max_duration, max_traffic_in, max_traffic_out, min_duration, min_traffic_in, min_traffic_out, remip, timescale, tunnelid, tunneltype, user_agg, vpntunnel, vpnusergroup, xauthuser_agg<\/td><td class=\"tg-yw4l\">bandwidth, devid, duration, end_time, fv_dtime_tz_conv_end_time_t, fv_dtime_tz_conv_start_time_t, remip, start_time, traffic_in, traffic_out, tunnelid, tunneltype, vpntunnel, vpnusergroup<\/td><\/tr><tr><td class=\"table_col_name\">site-to-site-ipsec<\/td><td class=\"tg-yw4l\">Site to site IPsec view<\/td><td class=\"tg-yw4l\">dvid, e_time, locip, max_duration, max_traffic_in, max_traffic_out, min_duration, min_traffic_in, min_traffic_out, remip, s_time, timescale, tunnelid, vpnname<\/td><td class=\"tg-yw4l\">bandwidth, duration, locip, remip, traffic_in, traffic_out, vpnname<\/td><\/tr><tr><td class=\"table_col_name\">site-to-site-ipsec-line<\/td><td class=\"tg-yw4l\">Site to site IPsec line view<\/td><td class=\"tg-yw4l\">dvid, e_time, locip, max_duration, max_traffic_in, max_traffic_out, min_duration, min_traffic_in, min_traffic_out, remip, s_time, timescale, tunnelid, vpnname<\/td><td class=\"tg-yw4l\">connections, time, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">rogue-access-points<\/td><td class=\"tg-yw4l\">Rogue access points view<\/td><td class=\"tg-yw4l\">channel, dvid, events, first_seen, manuf, on_wire, radioband, sec_mode, ssid, timescale<\/td><td class=\"tg-yw4l\">channel, fortigate, manuf, on_wire, radioband, securitymode, ssid, total_live_time<\/td><\/tr><tr><td class=\"table_col_name\">resource-usage<\/td><td class=\"tg-yw4l\">Resource usage view<\/td><td class=\"tg-yw4l\">count, cpu_peak, disk_peak, dvid, lograte_peak, mem_peak, recv, sent, session_peak, setuprate_peak, slot, timescale, total_cpu, total_disk, total_erate, total_mem, total_orate, total_setuprate, total_trate, totalsession, transmit_peak<\/td><td class=\"tg-yw4l\">cpu_ave, devid, disk_ave, event_rate, fortigate, log_rate, mem_ave, new_sessions_rate, other_rate, recv_kbps, role, sent_kbps, session_ave, slot, traffic_rate, transmit_kbps<\/td><\/tr><tr><td class=\"table_col_name\">resource-usage-peak<\/td><td class=\"tg-yw4l\">Resource usage peak view<\/td><td class=\"tg-yw4l\">count, dvid, lograte_peak, recv, sent, setuprate_peak, slot, timescale, total_cpu, total_disk, total_erate, total_mem, total_orate, total_setuprate, total_trate, totalsession, transmit_peak<\/td><td class=\"tg-yw4l\">cpu_peak, devid, disk_peak, event_rate, fortigate, lograte_peak, mem_peak, new_sessions_peak, other_rate, recv_kbps, role, sent_kbps, session_peak, slot, traffic_rate, transmit_kbps_peak<\/td><\/tr><tr><td class=\"table_col_name\">resource-usage-drilldown<\/td><td class=\"tg-yw4l\">Resource usage drilldown view<\/td><td class=\"tg-yw4l\">count, dvid, recv, sent, setuprate_peak, slot, timescale, total_cpu, total_disk, total_erate, total_mem, total_orate, total_setuprate, total_trate, totalsession, transmit_peak<\/td><td class=\"tg-yw4l\">cpu_ave, cpu_peak, disk_ave, disk_peak, fortigate, hodex, log_rate, lograte_peak, mem_ave, mem_peak, new_sessions_peak, new_sessions_rate, recv_kbps, sent_kbps, session_peak, sessions, transmit_kbps, transmit_kbps_peak<\/td><\/tr><tr><td class=\"table_col_name\">authorized-ssids<\/td><td class=\"tg-yw4l\">Authorized SSID view<\/td><td class=\"tg-yw4l\">ap, channel, dvid, hostname_mac, session_block, sessions, srcip, srcssid, timescale, user_src<\/td><td class=\"tg-yw4l\">ap_name, bandwidth, devid, num_users, srcssid, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">authorized-ssids-drilldown<\/td><td class=\"tg-yw4l\">Authorized SSID drilldown view<\/td><td class=\"tg-yw4l\">ap, channel, dvid, hostname_mac, srcip, srcssid, timescale, user_src<\/td><td class=\"tg-yw4l\">ap, bandwidth, fortigate, hostname_mac, session_block, session_pass, sessions, srcip, traffic_in, traffic_out, user_src<\/td><\/tr><tr><td class=\"table_col_name\">authorized-access-points<\/td><td class=\"tg-yw4l\">Authorized access points view<\/td><td class=\"tg-yw4l\">ap, channel, dvid, hostname_mac, ssid, timescale<\/td><td class=\"tg-yw4l\">ap, devid, events, num_users<\/td><\/tr><tr><td class=\"table_col_name\">authorized-aps-drilldown<\/td><td class=\"tg-yw4l\">Authorized APs drilldown view<\/td><td class=\"tg-yw4l\">ap, channel, dvid, hostname_mac, ssid, timescale, user_src<\/td><td class=\"tg-yw4l\">channel, events, hostname_mac, ssid, user_src<\/td><\/tr><tr><td class=\"table_col_name\">authorized-conn-line<\/td><td class=\"tg-yw4l\">Authorized connection line view<\/td><td class=\"tg-yw4l\">ap, bandwidth, channel, dvid, hostname_mac, sessions, srcip, srcssid, timescale<\/td><td class=\"tg-yw4l\">num_users, session_block, session_pass, time, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">wifi-clients<\/td><td class=\"tg-yw4l\">Wi-Fi clients view<\/td><td class=\"tg-yw4l\">ap, app_group, apsn, d_flags, devtype, dstintfrole, dvid, hostname_mac, mac, srcintfrole, srcip, srcssid, timescale, user_src<\/td><td class=\"tg-yw4l\">ap, bandwidth, dev_type, fortigate, hostname_mac, session_block, session_pass, sessions, srcssid, traffic_in, traffic_out, user_src<\/td><\/tr><tr><td class=\"table_col_name\">wifi-clients-fgt<\/td><td class=\"tg-yw4l\">Wi-Fi clients FGT view<\/td><td class=\"tg-yw4l\">app_group, d_flags, dstintfrole, dvid, hostname_mac, mac, srcintfrole, timescale<\/td><td class=\"tg-yw4l\">ap, apsn, bandwidth, devtype, f_user, fortigate, mac, session_block, session_pass, sessions, srcip, srcssid, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">wifi-client-line<\/td><td class=\"tg-yw4l\">Wi-Fi client line view<\/td><td class=\"tg-yw4l\">ap, app_group, apsn, bandwidth, d_flags, devtype, dstintfrole, dvid, hostname_mac, mac, sessions, srcintfrole, srcip, srcssid, timescale, user_src<\/td><td class=\"tg-yw4l\">session_block, session_pass, time, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">wifi-clients-drilldown<\/td><td class=\"tg-yw4l\">Wi-Fi clients drilldown view<\/td><td class=\"tg-yw4l\">app_group, apsn, d_flags, devtype, dstintfrole, dvid, hostname_mac, mac, srcintfrole, srcip, srcssid, timescale, user_src<\/td><td class=\"tg-yw4l\">app_group, appcat, bandwidth, d_risk, fortigate, risk, session_block, session_pass, sessions, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">failed-authentication-attempts<\/td><td class=\"tg-yw4l\">Failed authentication attempts view<\/td><td class=\"tg-yw4l\">community, dstip, dvid, initiator, interface, logid, logintype, method, policyid, remip, srcip, ssid, stamac, subtype, timescale, ui, user, vpntunnel, xauthuser<\/td><td class=\"tg-yw4l\">agg_logid, fortigate, int_tunnelname, login_type, logintype, logview_filter, src_ip, subtype, total_num, user_src<\/td><\/tr><tr><td class=\"table_col_name\">unauthorized-connection-line<\/td><td class=\"tg-yw4l\">Unauthorized connection line view<\/td><td class=\"tg-yw4l\">community, dstip, dvid, initiator, interface, logid, logintype, method, policyid, remip, srcip, ssid, stamac, subtype, timescale, ui, user, vpntunnel, xauthuser<\/td><td class=\"tg-yw4l\">time, total_num<\/td><\/tr><tr><td class=\"table_col_name\">endpoints<\/td><td class=\"tg-yw4l\">Endpoints view<\/td><td class=\"tg-yw4l\">dvid, emsserial, events, f_user, fctver, fgtserial, hostname, os, subtype, timescale, uid<\/td><td class=\"tg-yw4l\">f_user, fctver, hostname, malware_events, os, securityfeature, srcip, uid<\/td><\/tr><tr><td class=\"table_col_name\">endpoints-drilldown-app<\/td><td class=\"tg-yw4l\">Endpoints drilldown application view<\/td><td class=\"tg-yw4l\">dstip, dvid, emsserial, f_user, fgtserial, hostname, remotename, srcname, srcproduct, threat, timescale, utmaction<\/td><td class=\"tg-yw4l\">destination, session_block, session_pass, sessions, srcname, srcproduct<\/td><\/tr><tr><td class=\"table_col_name\">endpoints-drilldown-web<\/td><td class=\"tg-yw4l\">Endpoints drilldown web view<\/td><td class=\"tg-yw4l\">dstip, dvid, emsserial, f_user, fgtserial, hostname, remotename, session_block, srcname, srcproduct, threat, timescale, utmaction<\/td><td class=\"tg-yw4l\">remotename, threat, times_blocked<\/td><\/tr><tr><td class=\"table_col_name\">endpoints-drilldown-malware<\/td><td class=\"tg-yw4l\">Endpoints drilldown malware view<\/td><td class=\"tg-yw4l\">action, dvid, emsserial, events, fgtserial, file, hostname, timescale, virus<\/td><td class=\"tg-yw4l\">action, file, virus<\/td><\/tr><tr><td class=\"table_col_name\">top-fct-threats<\/td><td class=\"tg-yw4l\">Top FCT threats view<\/td><td class=\"tg-yw4l\">dstip, dvid, emsserial, f_user, fgtserial, logtype, srcip, threat_s, threatlevel, timescale<\/td><td class=\"tg-yw4l\">incident_block, incident_pass, incidents, level, logtype, threat, threatlevel<\/td><\/tr><tr><td class=\"table_col_name\">top-fct-applications<\/td><td class=\"tg-yw4l\">Top FCT applications view<\/td><td class=\"tg-yw4l\">app, d_risk, dvid, emsserial, f_user, fgtserial, timescale<\/td><td class=\"tg-yw4l\">app, bandwidth, d_risk, risk, session_block, session_pass, sessions, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">top-fct-websites<\/td><td class=\"tg-yw4l\">Top FCT websites view<\/td><td class=\"tg-yw4l\">domain, dvid, emsserial, f_user, fgtserial, timescale<\/td><td class=\"tg-yw4l\">bandwidth, domain, session_block, session_pass, sessions, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">threat-detect-summary<\/td><td class=\"tg-yw4l\">Threat detect summary view<\/td><td class=\"tg-yw4l\">ack_note, ack_time, bl_count, bmp_logtype, cs_count, cs_score, csf, devid, devname, devtype, epid, epname, euid, f_user, fctuid, ip_reversed, itime, last_bl, osname, osversion, rescan, srcip, srcmac, threat_num, unauthuser, vd, verdict<\/td><td class=\"tg-yw4l\">ack_note, ack_time, bl_count, cs_count, cs_score, devtype, epid, epname, euid, f_user, fctuid, fortigate, ip_reversed, last_detected_time, last_detected_time_s, logtype, logtype_mask, osname, osversion, rescan, srcip, srcmac, threat_num, unauthuser, vd, verdict, verdict_s<\/td><\/tr><tr><td class=\"table_col_name\">threat-detect-drilldown-crowdsrcing<\/td><td class=\"tg-yw4l\">Threat detect drilldown crowdsrcing view<\/td><td class=\"tg-yw4l\">action, dstip, dvid, epid, f_user, srcip, tdinfoid, tdpattern, tdscantime, tdthreatname, tdthreattype, tdtype, tdwfcate, threatname, threattype, timescale, webcat<\/td><td class=\"tg-yw4l\">action, epid, event_num, f_user, fortigate, logtype, srcip, tdpattern, tdscore, tdthreatname, tdthreattype, tdtype, tdwfcate, threatname, threattype, vd, webcat<\/td><\/tr><tr><td class=\"table_col_name\">threat-detect-drilldown-blacklist<\/td><td class=\"tg-yw4l\">Threat detect drilldown blacklist view<\/td><td class=\"tg-yw4l\">action, dstip, dvid, epid, event_num, f_user, srcip, tdinfoid, tdpattern, tdscantime, tdscore, tdthreatname, tdthreattype, tdtype, tdwfcate, threatname, threattype, timescale, webcat<\/td><td class=\"tg-yw4l\"><\/td><\/tr><tr><td class=\"table_col_name\">threat-rescan-drilldown-blacklist<\/td><td class=\"tg-yw4l\">Threat rescan drilldown blacklist view<\/td><td class=\"tg-yw4l\">action, dstip, dvid, epid, event_num, f_user, srcip, tdinfoid, tdpattern, tdscantime, tdscore, tdthreatname, tdthreattype, tdtype, tdwfcate, threatname, threattype, timescale, webcat<\/td><td class=\"tg-yw4l\"><\/td><\/tr><tr><td class=\"table_col_name\">ioc-ep-drilldown-bl-cs<\/td><td class=\"tg-yw4l\">IOC endpoint drilldown blacklist crowdsrcing view<\/td><td class=\"tg-yw4l\">action, dstip, dvid, epid, event_num, f_user, srcip, tdinfoid, tdpattern, tdscantime, tdscore, tdthreatname, tdthreattype, tdtype, tdwfcate, threatname, threattype, timescale, webcat<\/td><td class=\"tg-yw4l\"><\/td><\/tr><tr><td class=\"table_col_name\">noc-ep-drilldown-bl-cs<\/td><td class=\"tg-yw4l\">NOC endpoint drilldown blacklist crowdsrcing view<\/td><td class=\"tg-yw4l\">action, dstip, dvid, epid, event_num, f_user, srcip, tdinfoid, tdpattern, tdscantime, tdscore, tdthreatname, tdthreattype, tdtype, tdwfcate, threatname, threattype, timescale, webcat<\/td><td class=\"tg-yw4l\"><\/td><\/tr><tr><td class=\"table_col_name\">policy-hits<\/td><td class=\"tg-yw4l\">Policy hits view<\/td><td class=\"tg-yw4l\">dstintf, dstintfrole, dvid, logtime, policyid, policytype, poluuid, srcintf, srcintfrole, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">agg_policyid, agg_poluuid, bandwidth, count_block, count_pass, counts, devid, dstintf, fortigate, policy, policy_filter, policytype, srcintf, time_stamp, traffic_in, traffic_out, vd<\/td><\/tr><tr><td class=\"table_col_name\">policy-line<\/td><td class=\"tg-yw4l\">Policy line view<\/td><td class=\"tg-yw4l\">bandwidth, counts, dstintf, dstintfrole, dvid, logtime, policyid, policytype, poluuid, srcintf, srcintfrole, timescale<\/td><td class=\"tg-yw4l\">score_critical, score_high, score_low, score_medium, session_block, session_pass, time, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">top-browsing-users<\/td><td class=\"tg-yw4l\">Top browsing users view<\/td><td class=\"tg-yw4l\">browsetime, catdesc, dstintfrole, dstip, dstuuid, dvid, f_user, group_info, policyid, policymode, policytype, srcintfrole, srcip, srcmac, srcuuid, threat_block, threatweight, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">avatar, bandwidth, browsetime, epeuid, f_user, fortigate, group_info, session_block, session_pass, sessions, srcip, sum_sites, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">web-user-domain<\/td><td class=\"tg-yw4l\">Web user domain view<\/td><td class=\"tg-yw4l\">avatar, browsetime, catdesc, domain, dstintfrole, dstip, dstuuid, dvid, epeuid, f_user, group_info, policyid, policymode, policytype, srcintfrole, srcip, srcmac, srcuuid, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">agg_webcat, bandwidth, browsetime, domain, fortigate, session_block, session_pass, sessions, threat_block, threat_pass, threatweight, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">web-user-category<\/td><td class=\"tg-yw4l\">Web user category view<\/td><td class=\"tg-yw4l\">avatar, browsetime, catdesc, domain, dstintfrole, dstip, dstuuid, dvid, epeuid, f_user, group_info, policyid, policymode, policytype, srcintfrole, srcip, srcmac, srcuuid, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">bandwidth, browsetime, catdesc, fortigate, session_block, session_pass, sessions, threat_block, threat_pass, threatweight, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">top-fct-vulnerabilities-dev<\/td><td class=\"tg-yw4l\">Top FCT vulnerabilities device view<\/td><td class=\"tg-yw4l\">cveid, devtype, dvid, epeuid, f_user, fctuid, scantime, sev, severity, srcip, srcmac, srcname, timescale, unauthuser, vendorurl, vulncat, vulnid, vulnname<\/td><td class=\"tg-yw4l\">devtype, epeuid, f_user, fctuid, srcip, srcmac, srcname, unauthuser, vuln_category, vuln_count, vuln_count_critical, vuln_count_high, vuln_count_low, vuln_count_medium<\/td><\/tr><tr><td class=\"table_col_name\">vulnscan-dev-drilldown<\/td><td class=\"tg-yw4l\">Vulnscan device drilldown view<\/td><td class=\"tg-yw4l\">cveid, dvid, fctuid, sev, severity, timescale, vendorurl, vulncat, vulnid, vulnname<\/td><td class=\"tg-yw4l\">devtype, epeuid, f_user, fctuid, scantime, scantime_s, srcip, srcmac, srcname, unauthuser<\/td><\/tr><tr><td class=\"table_col_name\">top-fct-vulnerabilities-vuln<\/td><td class=\"tg-yw4l\">Top FCT vulnerabilities vuln view<\/td><td class=\"tg-yw4l\">cveid, devtype, dvid, epeuid, f_user, fctuid, scantime, sev, severity, srcip, srcmac, timescale, unauthuser, vendorurl, vulncat, vulnid, vulnname<\/td><td class=\"tg-yw4l\">cveid, fortigate, host_count, sev, severity, severity_code, vulncat, vulnid, vulnname<\/td><\/tr><tr><td class=\"table_col_name\">fct-vuln-drilldown<\/td><td class=\"tg-yw4l\">FCT vuln drilldown view<\/td><td class=\"tg-yw4l\">cveid, devtype, dvid, epeuid, f_user, fctuid, scantime, sev, severity, srcip, srcmac, srcname, timescale, unauthuser, vendorurl, vulncat, vulnid, vulnname<\/td><td class=\"tg-yw4l\">cveid, sev, severity, severity_code, vendorurl, vulncat, vulnid, vulnname<\/td><\/tr><tr><td class=\"table_col_name\">vulnscan-sev-freq<\/td><td class=\"tg-yw4l\">Vulnscan service frequency view<\/td><td class=\"tg-yw4l\">cveid, devtype, dvid, epeuid, f_user, fctuid, scantime, sev, severity, srcip, srcmac, srcname, timescale, unauthuser, vendorurl, vulncat, vulnname<\/td><td class=\"tg-yw4l\">host_count, sev, severity, severity_code, vuln_count, vulncat<\/td><\/tr><tr><td class=\"table_col_name\">fsa-verdict<\/td><td class=\"tg-yw4l\">FSA verdict view<\/td><td class=\"tg-yw4l\">dvid, fctuid, timescale, total_verdict_cnt, unauthuser, user_src<\/td><td class=\"tg-yw4l\">hodex, verdict_clean_cnt, verdict_malicious_cnt, verdict_other_cnt, verdict_suspicious_cnt<\/td><\/tr><tr><td class=\"table_col_name\">fsa-verdict-user<\/td><td class=\"tg-yw4l\">FSA verdict user view<\/td><td class=\"tg-yw4l\">analyticscksum, avatar, dvid, f_user, srcip, timescale<\/td><td class=\"tg-yw4l\">avatar, epeuid, total_verdict_cnt, user_src, verdict_clean_cnt, verdict_malicious_cnt, verdict_suspicious_cnt<\/td><\/tr><tr><td class=\"table_col_name\">fsa-detection<\/td><td class=\"tg-yw4l\">FSA detection view<\/td><td class=\"tg-yw4l\">action, analyticscksum, avatar, doc_name, dstip, dvid, epeuid, itime, service, sessionid, srcip, timescale, user_src, verdict_level<\/td><td class=\"tg-yw4l\">(all fields)<\/td><\/tr><tr><td class=\"table_col_name\">web-search-phrases-line<\/td><td class=\"tg-yw4l\">Web search phrases line view<\/td><td class=\"tg-yw4l\">avatar, dvid, epeuid, f_user, hostname, keyword, srcip, timescale, userfield<\/td><td class=\"tg-yw4l\">search_count, time<\/td><\/tr><tr><td class=\"table_col_name\">src-dst-intf-line<\/td><td class=\"tg-yw4l\">Source destination interface line view<\/td><td class=\"tg-yw4l\">app_group, avatar, bandwidth, browsetime, catdesc, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dstowner, dstuuid, dvid, epeuid, epid, f_user, incidents, policyid, policymode, policytype, sessions, srcintf, srcintfrole, srcip, srcmac, srcuuid, threat_block, threatweight, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">session_allow, session_block, time, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">endpoints-virus<\/td><td class=\"tg-yw4l\">Endpoints virus view<\/td><td class=\"tg-yw4l\">dtime, dvid, epid, euid, malware_type, srcintf, timescale, virus, virusid<\/td><td class=\"tg-yw4l\">epid, euid, events, last_detected, malware_type, srcintf, virus, virusid<\/td><\/tr><tr><td class=\"table_col_name\">dns-log-view<\/td><td class=\"tg-yw4l\">DNS log view <\/td><td class=\"tg-yw4l\">app_group, avatar, browsetime, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dstowner, dstuuid, dvid, epeuid, epid, incident_block, incidents, policyid, policymode, policytype, srcintf, srcintfrole, srcmac, srcuuid, threat_block, threatweight, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">bandwidth, catdesc, num_users, qname, session_block, session_pass, sessions, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">source-dns-view<\/td><td class=\"tg-yw4l\">Source DNS view <\/td><td class=\"tg-yw4l\">app_group, avatar, browsetime, catdesc, crlevel, d_flags, dev_src, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dstowner, dstuuid, dvid, epeuid, epid, f_user, incident_block, incidents, policyid, policymode, policytype, srcintf, srcintfrole, srcip, srcuuid, threat_block, threatweight, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">bandwidth, devtype, f_user, session_block, session_pass, sessions, srcip, srcmac, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">destination-dns-view<\/td><td class=\"tg-yw4l\">Destination DNS view <\/td><td class=\"tg-yw4l\">app_group, avatar, browsetime, catdesc, crlevel, d_flags, dev_src, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dstowner, dstuuid, dvid, epeuid, epid, f_user, incident_block, incidents, policyid, policymode, policytype, srcintf, srcintfrole, srcip, srcuuid, threat_block, threatweight, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">bandwidth, devtype, dstip, session_block, session_pass, sessions, srcmac, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">country-dns-view<\/td><td class=\"tg-yw4l\">Country DNS view <\/td><td class=\"tg-yw4l\">app_group, avatar, browsetime, catdesc, crlevel, d_flags, dev_src, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dstowner, dstuuid, dvid, epeuid, epid, f_user, incident_block, incidents, policyid, policymode, policytype, srcintf, srcintfrole, srcip, srcuuid, threat_block, threatweight, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">bandwidth, devtype, dstcountry, session_block, session_pass, sessions, srcmac, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">sdwan-dev-stats<\/td><td class=\"tg-yw4l\">SD-WAN device stats view<\/td><td class=\"tg-yw4l\">bibandwidthused, count, count_linkup, dvid, inbandwidthused, interface, jitter, latency, level, outbandwidthused, packetloss, sdwan_status, sla, timescale<\/td><td class=\"tg-yw4l\">sdwan_stats<\/td><\/tr><tr><td class=\"table_col_name\">sdwan-dev-status-line<\/td><td class=\"tg-yw4l\">SD-WAN device status line view<\/td><td class=\"tg-yw4l\">bibandwidthused, count, count_linkup, dvid, inbandwidthused, interface, jitter, latency, level, outbandwidthused, packetloss, sla, timescale<\/td><td class=\"tg-yw4l\">sdwan_status, time<\/td><\/tr><tr><td class=\"table_col_name\">sdwan-intf-status-line<\/td><td class=\"tg-yw4l\">SD-WAN interface status line view<\/td><td class=\"tg-yw4l\">bibandwidthused, count, count_linkup, dvid, inbandwidthused, interface, jitter, latency, level, outbandwidthused, packetloss, sdwan_status, sla, timescale<\/td><td class=\"tg-yw4l\">(all fields)<\/td><\/tr><tr><td class=\"table_col_name\">sdwan-intf-sla-status<\/td><td class=\"tg-yw4l\">SD-WAN interface SLA status view<\/td><td class=\"tg-yw4l\">bibandwidthused, count, count_linkup, dvid, inbandwidthused, interface, jitter, latency, level, outbandwidthused, packetloss, sdwan_status, sla, timescale<\/td><td class=\"tg-yw4l\">available, interface, sla<\/td><\/tr><tr><td class=\"table_col_name\">sdwan-intf-sla-status-line<\/td><td class=\"tg-yw4l\">SD-WAN interface SLA status line view<\/td><td class=\"tg-yw4l\">bibandwidthused, count, count_linkup, dvid, inbandwidthused, interface, jitter, latency, level, outbandwidthused, packetloss, sdwan_status, sla, timescale<\/td><td class=\"tg-yw4l\">interface, intf_available, sla, sla_available, time<\/td><\/tr><tr><td class=\"table_col_name\">sdwan-perf-stats-line<\/td><td class=\"tg-yw4l\">SD-WAN perf stats line view<\/td><td class=\"tg-yw4l\">bibandwidthused, count, count_linkup, dvid, inbandwidthused, interface, jitter, latency, level, outbandwidthused, packetloss, sdwan_status, sla, timescale<\/td><td class=\"tg-yw4l\">interface, jitter, latency, packetloss, sla, time<\/td><\/tr><tr><td class=\"table_col_name\">sdwan-latency-line<\/td><td class=\"tg-yw4l\">SD-WAN latency line view<\/td><td class=\"tg-yw4l\">bibandwidthused, count, count_linkup, dvid, inbandwidthused, interface, jitter, latency, level, outbandwidthused, packetloss, sdwan_status, sla, timescale<\/td><td class=\"tg-yw4l\">interface, latency, sla, time<\/td><\/tr><tr><td class=\"table_col_name\">sdwan-jitter-line<\/td><td class=\"tg-yw4l\">SD-WAN jitter line view<\/td><td class=\"tg-yw4l\">bibandwidthused, count, count_linkup, dvid, inbandwidthused, interface, jitter, latency, level, outbandwidthused, packetloss, sdwan_status, sla, timescale<\/td><td class=\"tg-yw4l\">interface, jitter, sla, time<\/td><\/tr><tr><td class=\"table_col_name\">sdwan-packetloss-line<\/td><td class=\"tg-yw4l\">SD-WAN packetloss line view<\/td><td class=\"tg-yw4l\">bibandwidthused, count, count_linkup, dvid, inbandwidthused, interface, jitter, latency, level, outbandwidthused, packetloss, sdwan_status, sla, timescale<\/td><td class=\"tg-yw4l\">interface, packetloss, sla, time<\/td><\/tr><tr><td class=\"table_col_name\">sdwan-app-view<\/td><td class=\"tg-yw4l\">SD-WAN application view <\/td><td class=\"tg-yw4l\">app_group, dstintf, dstintfrole, dvid, rulename, sessions, timescale, traffic_in, traffic_out<\/td><td class=\"tg-yw4l\">app_group, bandwidth, intf_bandwidth_agg<\/td><\/tr><tr><td class=\"table_col_name\">sdwan-rules-view<\/td><td class=\"tg-yw4l\">SD-WAN rules view <\/td><td class=\"tg-yw4l\">app_group, dstintf, dstintfrole, dvid, rulename, sessions, timescale, traffic_in, traffic_out<\/td><td class=\"tg-yw4l\">bandwidth, vwlservice<\/td><\/tr><tr><td class=\"table_col_name\">sdwan-link-view<\/td><td class=\"tg-yw4l\">SD-WAN link view <\/td><td class=\"tg-yw4l\">app_group, dstintf, dstintfrole, dvid, rulename, sessions, timescale, traffic_in, traffic_out<\/td><td class=\"tg-yw4l\">bandwidth, dstintf<\/td><\/tr><tr><td class=\"table_col_name\">sdwan-event-view<\/td><td class=\"tg-yw4l\">SD-WAN event view <\/td><td class=\"tg-yw4l\">bibandwidthused, dvid, inbandwidthused, interface, jitter, latency, level, outbandwidthused, packetloss, sdwan_status, sla, timescale<\/td><td class=\"tg-yw4l\">count, level<\/td><\/tr><tr><td class=\"table_col_name\">sdwan-rules-intf-view<\/td><td class=\"tg-yw4l\">SD-WAN rules interface view <\/td><td class=\"tg-yw4l\">app_group, dstintf, dstintfrole, dvid, rulename, sessions, timescale, traffic_in, traffic_out<\/td><td class=\"tg-yw4l\">bandwidth, interface, vwlservice<\/td><\/tr><tr><td class=\"table_col_name\">sdwan-rules-app-view<\/td><td class=\"tg-yw4l\">SD-WAN rules application view <\/td><td class=\"tg-yw4l\">app_group, dstintf, dstintfrole, dvid, rulename, sessions, timescale, traffic_in, traffic_out<\/td><td class=\"tg-yw4l\">app_group, app_id, bandwidth, interface, vwlservice<\/td><\/tr><tr><td class=\"table_col_name\">sdwan-intf-bandwidth-line<\/td><td class=\"tg-yw4l\">SD-WAN interface bandwidth line view<\/td><td class=\"tg-yw4l\">bibandwidthused, count, count_linkup, dvid, inbandwidthused, interface, jitter, latency, level, outbandwidthused, packetloss, sdwan_status, sla, timescale<\/td><td class=\"tg-yw4l\">bibandwidth, inbandwidth, interface, outbandwidth, time<\/td><\/tr><tr><td class=\"table_col_name\">sdwan-intf-traffic-line<\/td><td class=\"tg-yw4l\">SD-WAN interface traffic line view<\/td><td class=\"tg-yw4l\">app_group, bandwidth, dstintf, dstintfrole, dvid, rulename, sessions, timescale<\/td><td class=\"tg-yw4l\">interface, time, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">intf-sent-timeline<\/td><td class=\"tg-yw4l\">Interface sent timeline view<\/td><td class=\"tg-yw4l\">count, cpu_peak, disk_peak, dvid, lograte_peak, mem_peak, recv, sent, session_peak, setuprate_peak, slot, timescale, total_cpu, total_disk, total_erate, total_mem, total_orate, total_setuprate, total_trate, totalsession, transmit_peak<\/td><td class=\"tg-yw4l\">dev_intf, sent_kbps, time<\/td><\/tr><tr><td class=\"table_col_name\">intf-rcvd-timeline<\/td><td class=\"tg-yw4l\">Interface received timeline view<\/td><td class=\"tg-yw4l\">count, cpu_peak, disk_peak, dvid, lograte_peak, mem_peak, recv, sent, session_peak, setuprate_peak, slot, timescale, total_cpu, total_disk, total_erate, total_mem, total_orate, total_setuprate, total_trate, totalsession, transmit_peak<\/td><td class=\"tg-yw4l\">dev_intf, rcvd_kbps, time<\/td><\/tr><tr><td class=\"table_col_name\">soc-sources<\/td><td class=\"tg-yw4l\">SOC sources view<\/td><td class=\"tg-yw4l\">app_group, avatar, bandwidth, browsetime, catdesc, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dstowner, dstuuid, dvid, epeuid, epid, f_user, incident_block, incidents, policyid, policymode, policytype, session_block, sessions, srcintf, srcintfrole, srcip, srcmac, srcuuid, threat_block, threatweight, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale, traffic_in, traffic_out<\/td><td class=\"tg-yw4l\"><\/td><\/tr><tr><td class=\"table_col_name\">soc-destinations<\/td><td class=\"tg-yw4l\">SOC destinations view<\/td><td class=\"tg-yw4l\">app_group, avatar, bandwidth, browsetime, catdesc, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dstowner, dstuuid, dvid, epeuid, epid, f_user, incident_block, incidents, policyid, policymode, policytype, session_block, sessions, srcintf, srcintfrole, srcip, srcmac, srcuuid, threat_block, threatweight, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale, traffic_in, traffic_out<\/td><td class=\"tg-yw4l\"><\/td><\/tr><tr><td class=\"table_col_name\">soc-threats<\/td><td class=\"tg-yw4l\">SOC threats view<\/td><td class=\"tg-yw4l\">app_group, dstcountry, dstintfrole, dstip, dstowner, dstuuid, dvid, f_user, incident_block, incidents, logtype, policyid, policytype, srcintfrole, srcip, srcmac, srcuuid, threat_block, threat_s, threatlevel_s, threattype_s, threatweight, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\"><\/td><\/tr><tr><td class=\"table_col_name\">soc-sdwan-stats<\/td><td class=\"tg-yw4l\">SOC SD-WAN stats view<\/td><td class=\"tg-yw4l\">bibandwidthused, count, count_linkup, dvid, inbandwidthused, interface, jitter, latency, level, outbandwidthused, packetloss, sdwan_status, sla, timescale<\/td><td class=\"tg-yw4l\"><\/td><\/tr><tr><td class=\"table_col_name\">shadowit-unsanctioned-app-usage<\/td><td class=\"tg-yw4l\">Shadow IT unsanctioned application usage view<\/td><td class=\"tg-yw4l\">agg_files, app_group, application, category, d_flags, dstintfrole, dstip, dvid, is_unsanc, risk, srcintfrole, srcip, timescale, total_size<\/td><td class=\"tg-yw4l\">app_id, application, bandwidth, category, file_count, file_download, file_upload, recv_bytes, risk, sent_bytes, session_block, session_count, session_pass, user_count, user_list, video_count<\/td><\/tr><tr><td class=\"table_col_name\">shadowit-unsanctioned-app-line<\/td><td class=\"tg-yw4l\">Shadow IT unsanctioned application line view<\/td><td class=\"tg-yw4l\">agg_files, app_group, application, category, clouduser, d_flags, download_files, dstintfrole, dstip, dvid, is_unsanc, risk, session_block, sessions, srcintfrole, srcip, timescale, total_size, upload_files, video_files<\/td><td class=\"tg-yw4l\">recv_bytes, sent_bytes, time<\/td><\/tr><tr><td class=\"table_col_name\">shadowit-file-exfiltration-detection<\/td><td class=\"tg-yw4l\">Shadow IT file exfiltration detection view<\/td><td class=\"tg-yw4l\">clouduser, data_pattern, dvid, file_name, from_application, ip, timescale, to_application<\/td><td class=\"tg-yw4l\">clouduser, data_pattern, file_name, from_application, ip, time, to_application<\/td><\/tr><tr><td class=\"table_col_name\">ztna-line<\/td><td class=\"tg-yw4l\">ZTNA line view<\/td><td class=\"tg-yw4l\">accessproxy, app_group, dev_src, devtype, dstcountry, dstintf, dstip, dvid, f_user, fctuid, policyid, policyname, policytype, saasname, service, srcintf, srcip, srcmac, timescale<\/td><td class=\"tg-yw4l\">bandwidth, session_block, session_pass, sessions, time, total_user, traffic_in, traffic_out, user_block, user_pass<\/td><\/tr><tr><td class=\"table_col_name\">ztna-servers<\/td><td class=\"tg-yw4l\">ZTNA servers view<\/td><td class=\"tg-yw4l\">accessproxy, app_group, dev_src, devtype, dstcountry, dstintf, dstip, dvid, f_user, fctuid, policyid, policyname, policytype, saasname, service, srcintf, srcip, srcmac, timescale<\/td><td class=\"tg-yw4l\">accessproxy, bandwidth, session_block, session_pass, sessions, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">ztna-sources<\/td><td class=\"tg-yw4l\">ZTNA sources view<\/td><td class=\"tg-yw4l\">accessproxy, app_group, dev_src, devtype, dstcountry, dstintf, dstip, dvid, f_user, policyid, policyname, policytype, saasname, service, srcintf, srcip, srcmac, timescale<\/td><td class=\"tg-yw4l\">bandwidth, dev_src_agg, f_user, fctuid, mac_devtype_agg, session_block, session_pass, sessions, srcintf_agg, srcip, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">ztna-rules<\/td><td class=\"tg-yw4l\">ZTNA rules view<\/td><td class=\"tg-yw4l\">accessproxy, app_group, dev_src, devtype, dstcountry, dstintf, dstip, dvid, f_user, fctuid, policyid, policyname, policytype, saasname, service, srcintf, srcip, srcmac, timescale<\/td><td class=\"tg-yw4l\">bandwidth, dstintf_agg, policyid, policyname, policytype, session_block, session_pass, sessions, srcintf_agg, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">ztna-real-servers<\/td><td class=\"tg-yw4l\">ZTNA real servers view<\/td><td class=\"tg-yw4l\">accessproxy, app_group, dev_src, devtype, dstcountry, dstintf, dstip, dvid, f_user, fctuid, policyid, policyname, policytype, saasname, service, srcintf, srcip, srcmac, timescale<\/td><td class=\"tg-yw4l\">agg_app, bandwidth, dev_src_agg, dstintf_agg, dstip, session_block, session_pass, sessions, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">ztna-statistics<\/td><td class=\"tg-yw4l\">ZTNA statistics view<\/td><td class=\"tg-yw4l\">accessproxy, app_group, bandwidth, dev_src, devtype, dstcountry, dstintf, dstip, dvid, f_user, fctuid, policyid, policyname, policytype, saasname, service, session_block, sessions, srcintf, srcip, srcmac, timescale, traffic_in, traffic_out<\/td><td class=\"tg-yw4l\">bandwidth, dev_block, dev_pass, session_block, session_pass, sessions, total_dev, total_devtags, total_user, traffic_in, traffic_out, user_block<\/td><\/tr><tr><td class=\"table_col_name\">ztna-users<\/td><td class=\"tg-yw4l\">ZTNA users view<\/td><td class=\"tg-yw4l\">accessproxy, app_group, bandwidth, dev_src, devtype, dstcountry, dstintf, dstip, dvid, f_user, fctuid, policyid, policyname, policytype, saasname, service, srcintf, srcip, srcmac, timescale, traffic_in, traffic_out<\/td><td class=\"tg-yw4l\">session_block, session_pass, sessions, user_src<\/td><\/tr><tr><td class=\"table_col_name\">ztna-devices<\/td><td class=\"tg-yw4l\">ZTNA users view<\/td><td class=\"tg-yw4l\">accessproxy, app_group, bandwidth, dev_src, devtype, dstcountry, dstintf, dstip, dvid, f_user, fctuid, policyid, policyname, policytype, saasname, service, sessions, srcintf, srcip, srcmac, timescale, traffic_in, traffic_out<\/td><td class=\"tg-yw4l\">dev_src, session_block<\/td><\/tr><tr><td class=\"table_col_name\">ztna-private-app<\/td><td class=\"tg-yw4l\">ZTNA private APP view<\/td><td class=\"tg-yw4l\">accessproxy, app_group, bandwidth, dev_src, devtype, dstcountry, dstintf, dstip, dvid, f_user, fctuid, policyid, policyname, policytype, saasname, service, srcintf, srcip, srcmac, timescale, traffic_in, traffic_out<\/td><td class=\"tg-yw4l\">accessproxy, session_block, session_pass, sessions<\/td><\/tr><tr><td class=\"table_col_name\">ztna-public-app<\/td><td class=\"tg-yw4l\">ZTNA public APP view<\/td><td class=\"tg-yw4l\">accessproxy, app_group, bandwidth, dev_src, devtype, dstcountry, dstintf, dstip, dvid, f_user, fctuid, policyid, policyname, policytype, saasname, service, srcintf, srcip, srcmac, timescale, traffic_in, traffic_out<\/td><td class=\"tg-yw4l\">app_group, appid, description, session_block, session_pass, sessions<\/td><\/tr><tr><td class=\"table_col_name\">ztna-casb-app<\/td><td class=\"tg-yw4l\">ZTNA CASB APP view<\/td><td class=\"tg-yw4l\">accessproxy, app_group, bandwidth, dev_src, devtype, dstcountry, dstintf, dstip, dvid, f_user, fctuid, policyid, policyname, policytype, saasname, service, srcintf, srcip, srcmac, timescale, traffic_in, traffic_out<\/td><td class=\"tg-yw4l\">saasname, session_block, session_pass, sessions<\/td><\/tr><tr><td class=\"table_col_name\">ztna-app-line<\/td><td class=\"tg-yw4l\">ZTNA APP line view<\/td><td class=\"tg-yw4l\">accessproxy, app_group, bandwidth, dev_src, devtype, dstcountry, dstintf, dstip, dvid, f_user, fctuid, policyid, policyname, policytype, saasname, service, sessions, srcintf, srcip, srcmac, timescale, traffic_in, traffic_out<\/td><td class=\"tg-yw4l\">app_group, appid, session_block, time<\/td><\/tr><\/table><br><h2 id=fortigate_appendix_header>FortiDDoS<\/h2><table border=\"1\"><thead><tr><th class=\"table_hdr_name\">View Name<\/th><th class=\"table_hdr_desc\">Description<\/th><th class=\"table_hdr_desc\">Filterable Field<\/th><th class=\"table_hdr_desc\">Sortable Field<\/th><\/tr><\/thead><tr><td class=\"table_col_name\">fddos-source<\/td><td class=\"tg-yw4l\">FDDOS source view<\/td><td class=\"tg-yw4l\">description, dip, dvid, sip, timescale, type<\/td><td class=\"tg-yw4l\">description, devid, dropcount, sip<\/td><\/tr><tr><td class=\"table_col_name\">fddos-destination<\/td><td class=\"tg-yw4l\">FDDOS destination view<\/td><td class=\"tg-yw4l\">description, dip, dvid, sip, timescale, type<\/td><td class=\"tg-yw4l\">description, devid, dip, dropcount<\/td><\/tr><tr><td class=\"table_col_name\">top-type<\/td><td class=\"tg-yw4l\">Top type view<\/td><td class=\"tg-yw4l\">description, dip, dvid, sip, timescale, type<\/td><td class=\"tg-yw4l\">description, devid, dropcount, type<\/td><\/tr><\/table><br><h2 id=fortigate_appendix_header>FortiProxy<\/h2><table border=\"1\"><thead><tr><th class=\"table_hdr_name\">View Name<\/th><th class=\"table_hdr_desc\">Description<\/th><th class=\"table_hdr_desc\">Filterable Field<\/th><th class=\"table_hdr_desc\">Sortable Field<\/th><\/tr><\/thead><tr><td class=\"table_col_name\">fpx-top-sources<\/td><td class=\"tg-yw4l\">FPX top sources view<\/td><td class=\"tg-yw4l\">app_group, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dvid, f_user, incident_block, incidents, policymode, srcintf, srcintfrole, srcip, srcmac, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">avatar, bandwidth, dev_src_agg, f_user, fortigate, mac_devtype_agg, session_block, session_pass, sessions, srcintf, srcip, threat_block, threat_pass, threatweight, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">fpx-top-destinations<\/td><td class=\"tg-yw4l\">FPX top destinations view<\/td><td class=\"tg-yw4l\">app_group, avatar, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dvid, f_user, policymode, srcintf, srcintfrole, srcip, srcmac, threat_block, threatweight, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">agg_app, bandwidth, dstintf, dstip, dstmac, fortigate, session_block, session_pass, sessions, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">fpx-destination-drilldown<\/td><td class=\"tg-yw4l\">FPX destination drilldown view<\/td><td class=\"tg-yw4l\">app_group, avatar, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dvid, f_user, policymode, srcintf, srcintfrole, srcip, srcmac, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">bandwidth, dstip, fortigate, session_block, session_pass, sessions, threat_block, threat_pass, threatweight, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">fpx-top-cloud-applications<\/td><td class=\"tg-yw4l\">FPX top cloud applications view<\/td><td class=\"tg-yw4l\">agg_files, app_group, d_flags, dstintfrole, dstip, dvid, srcintfrole, srcip, timescale<\/td><td class=\"tg-yw4l\">agg_files, app_group, appcat, d_risk, download_size, fortigate, num_download_files, num_files, num_loginids, num_upload_files, num_videos, risk, session_block, session_pass, sessions, total_size, upload_size<\/td><\/tr><tr><td class=\"table_col_name\">fpx-top-applications<\/td><td class=\"tg-yw4l\">FPX top applications view<\/td><td class=\"tg-yw4l\">app_group, avatar, d_flags, dstcountry, dstintfrole, dstip, dvid, f_user, policymode, srcintfrole, srcip, srcmac, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">app_group, appcat, bandwidth, d_risk, fortigate, num_users, risk, session_block, session_pass, sessions, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">fpx-application-drilldown<\/td><td class=\"tg-yw4l\">FPX application drilldown view<\/td><td class=\"tg-yw4l\">app_group, d_flags, dstcountry, dstintfrole, dstip, dvid, f_user, policymode, srcintfrole, srcip, srcmac, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">app_group, avatar, bandwidth, fortigate, session_block, session_pass, sessions, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">fpx-top-countries<\/td><td class=\"tg-yw4l\">FPX top countries view<\/td><td class=\"tg-yw4l\">app_group, avatar, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dvid, f_user, policymode, srcintf, srcintfrole, srcip, srcmac, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">bandwidth, dstcountry, fortigate, session_block, session_pass, sessions, threat_block, threat_pass, threatweight, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">fpx-top-threats<\/td><td class=\"tg-yw4l\">FPX top threats view<\/td><td class=\"tg-yw4l\">app_group, dstcountry, dstintfrole, dstip, dvid, f_user, logtype, srcintfrole, srcip, srcmac, threat_s, threatlevel_s, threattype_s, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">fortigate, incident_block, incident_pass, incidents, level_s, logtype, logtype_str, threat, threat_block, threat_pass, threatlevel, threattype, threatweight<\/td><\/tr><tr><td class=\"table_col_name\">fpx-system-events<\/td><td class=\"tg-yw4l\">FPX system events view<\/td><td class=\"tg-yw4l\">dvid, event_name, level, severity, subtype, timescale<\/td><td class=\"tg-yw4l\">agg_level, counts, event_name, logid, severity, severity_s, subtype<\/td><\/tr><tr><td class=\"table_col_name\">fpx-policy-hits<\/td><td class=\"tg-yw4l\">FPX policy hits view<\/td><td class=\"tg-yw4l\">dstintfrole, dvid, logtime, policyid, policytype, poluuid, srcintfrole, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">agg_policyid, agg_poluuid, bandwidth, count_block, count_pass, counts, devid, fortigate, policy, policy_filter, policytype, time_stamp, traffic_in, traffic_out, vd<\/td><\/tr><tr><td class=\"table_col_name\">fpx-source-website<\/td><td class=\"tg-yw4l\">FPX source website view<\/td><td class=\"tg-yw4l\">app_group, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dvid, f_user, policymode, srcintf, srcintfrole, srcip, srcmac, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">avatar, bandwidth, dev_src_agg, f_user, fortigate, session_block, session_pass, sessions, srcintf, srcip, threat_block, threat_pass, threatweight, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">fpx-website-domain<\/td><td class=\"tg-yw4l\">FPX website domain view<\/td><td class=\"tg-yw4l\">avatar, domain, dstintfrole, dstip, dvid, f_user, group_info, policymode, srcintfrole, srcip, srcmac, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">bandwidth, domain, fortigate, session_block, session_pass, sessions, threat_block, threat_pass, threatweight, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">fpx-top-websites<\/td><td class=\"tg-yw4l\">FPX top websites view<\/td><td class=\"tg-yw4l\">avatar, domain, dstintfrole, dstip, dvid, f_user, group_info, policymode, srcintfrole, srcip, srcmac, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">bandwidth, catdesc, fortigate, session_block, session_pass, sessions, threat_block, threat_pass, threatweight, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">fpx-cloud-user0<\/td><td class=\"tg-yw4l\">FPX cloud user0 view<\/td><td class=\"tg-yw4l\">agg_files, app_group, clouduser, d_flags, dstintfrole, dstip, dvid, srcintfrole, srcip, timescale, video_files<\/td><td class=\"tg-yw4l\">agg_app, agg_files, clouduser, download_size, fortigate, num_download_files, num_files, num_upload_files, num_videos, session_block, session_pass, sessions, total_size, upload_size<\/td><\/tr><tr><td class=\"table_col_name\">fpx-failed-authentication-attempts<\/td><td class=\"tg-yw4l\">FPX failed authentication attempts view<\/td><td class=\"tg-yw4l\">community, dstip, dvid, initiator, interface, logid, logintype, method, policyid, remip, srcip, ssid, stamac, subtype, timescale, ui, user, vpntunnel, xauthuser<\/td><td class=\"tg-yw4l\">agg_logid, fortigate, int_tunnelname, login_type, logintype, logview_filter, src_ip, subtype, total_num, user_src<\/td><\/tr><tr><td class=\"table_col_name\">fpx-admin-logins<\/td><td class=\"tg-yw4l\">FPX admin logins view<\/td><td class=\"tg-yw4l\">dvid, f_user, timescale<\/td><td class=\"tg-yw4l\">duration, f_user, fortigate, login_fail_num, login_num, total_change<\/td><\/tr><\/table><br><h2 id=fortigate_appendix_header>FortiFirewall<\/h2><table border=\"1\"><thead><tr><th class=\"table_hdr_name\">View Name<\/th><th class=\"table_hdr_desc\">Description<\/th><th class=\"table_hdr_desc\">Filterable Field<\/th><th class=\"table_hdr_desc\">Sortable Field<\/th><\/tr><\/thead><tr><td class=\"table_col_name\">ffw-top-sources<\/td><td class=\"tg-yw4l\">FFW top sources view<\/td><td class=\"tg-yw4l\">app_group, browsetime, catdesc, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dstowner, dstuuid, dvid, epid, f_user, incident_block, incidents, policyid, policymode, policytype, srcintf, srcintfrole, srcip, srcmac, srcuuid, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">avatar, bandwidth, dev_src_agg, epeuid, f_user, fortigate, mac_devtype_agg, session_block, session_pass, sessions, srcintf, srcip, threat_block, threat_pass, threatweight, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">ffw-srcuuid<\/td><td class=\"tg-yw4l\">FFW source UUID view<\/td><td class=\"tg-yw4l\">app_group, avatar, browsetime, catdesc, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dstowner, dstuuid, dvid, epeuid, epid, f_user, incident_block, incidents, policyid, policymode, policytype, srcintf, srcintfrole, srcip, srcmac, srcuuid, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">bandwidth, dev_src_agg, fortigate, mac_devtype_agg, session_block, session_pass, sessions, srcintf, srcuuid, srcuuid_name, threat_block, threat_pass, threatweight, traffic_in, traffic_out, uuid_data, uuid_type<\/td><\/tr><tr><td class=\"table_col_name\">ffw-src-dst-line<\/td><td class=\"tg-yw4l\">FFW source destination line view<\/td><td class=\"tg-yw4l\">app_group, avatar, bandwidth, browsetime, catdesc, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dstowner, dstuuid, dvid, epeuid, epid, f_user, incident_block, incidents, policyid, policymode, policytype, sessions, srcintf, srcintfrole, srcip, srcmac, srcuuid, threat_block, threatweight, timescale<\/td><td class=\"tg-yw4l\">score_critical, score_high, score_low, score_medium, session_block, session_pass, time, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">ffw-top-destinations<\/td><td class=\"tg-yw4l\">FFW top destinations view<\/td><td class=\"tg-yw4l\">app_group, avatar, browsetime, catdesc, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstowner, dstuuid, dvid, epeuid, epid, f_user, policyid, policymode, policytype, srcintf, srcintfrole, srcip, srcmac, srcuuid, threat_block, threatweight, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">agg_app, bandwidth, dstintf, dstip, dstmac, fortigate, session_block, session_pass, sessions, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">ffw-dstuuid<\/td><td class=\"tg-yw4l\">FFW destination UUID view<\/td><td class=\"tg-yw4l\">app_group, avatar, browsetime, catdesc, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstowner, dstuuid, dvid, epeuid, epid, f_user, policyid, policymode, policytype, srcintf, srcintfrole, srcip, srcmac, srcuuid, threat_block, threatweight, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">agg_app, bandwidth, dstintf, dstmac, dstuuid, dstuuid_name, fortigate, session_block, session_pass, sessions, traffic_in, traffic_out, uuid_data, uuid_type<\/td><\/tr><tr><td class=\"table_col_name\">ffw-destination-drilldown-view<\/td><td class=\"tg-yw4l\">FFW destination drilldown view <\/td><td class=\"tg-yw4l\">app_group, avatar, browsetime, catdesc, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dstowner, dstuuid, dvid, epeuid, epid, f_user, policyid, policymode, policytype, srcintf, srcintfrole, srcip, srcmac, srcuuid, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">bandwidth, dstip, fortigate, session_block, session_pass, sessions, threat_block, threat_pass, threatweight, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">ffw-top-threats<\/td><td class=\"tg-yw4l\">FFW top threats view<\/td><td class=\"tg-yw4l\">app_group, dstcountry, dstintfrole, dstip, dstowner, dstuuid, dvid, f_user, logtype, policyid, policytype, srcintfrole, srcip, srcmac, srcuuid, threat_s, threatlevel_s, threattype_s, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">fortigate, incident_block, incident_pass, incidents, level_s, logtype, logtype_str, threat, threat_block, threat_pass, threatlevel, threattype, threatweight<\/td><\/tr><tr><td class=\"table_col_name\">ffw-threat-line<\/td><td class=\"tg-yw4l\">FFW threat line view<\/td><td class=\"tg-yw4l\">app_group, dstcountry, dstintfrole, dstip, dstowner, dstuuid, dvid, f_user, incidents, logtype, policyid, policytype, srcintfrole, srcip, srcmac, srcuuid, threat_block, threat_s, threatlevel_s, threattype_s, threatweight, timescale<\/td><td class=\"tg-yw4l\">score_critical, score_high, score_low, score_medium, session_block, session_pass, time<\/td><\/tr><tr><td class=\"table_col_name\">ffw-policy-hits<\/td><td class=\"tg-yw4l\">FFW policy hits view<\/td><td class=\"tg-yw4l\">app_group, catdesc, domain, dstcountry, dstintf, dstintfrole, dstip, dstowner, dvid, f_user, logtime, policyid, policytype, poluuid, srcintf, srcintfrole, srcip, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">agg_policyid, agg_poluuid, bandwidth, count_block, count_pass, counts, devid, dstintf, fortigate, policy, policy_filter, policytype, srcintf, time_stamp, traffic_in, traffic_out, vd<\/td><\/tr><tr><td class=\"table_col_name\">ffw-policy-line<\/td><td class=\"tg-yw4l\">FFW policy line view<\/td><td class=\"tg-yw4l\">app_group, bandwidth, catdesc, counts, domain, dstcountry, dstintf, dstintfrole, dstip, dstowner, dvid, f_user, logtime, policyid, policytype, poluuid, srcintf, srcintfrole, srcip, timescale<\/td><td class=\"tg-yw4l\">score_critical, score_high, score_low, score_medium, session_block, session_pass, time, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">ffw-top-countries<\/td><td class=\"tg-yw4l\">FFW top countries view<\/td><td class=\"tg-yw4l\">app_group, avatar, browsetime, catdesc, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dstowner, dstuuid, dvid, epeuid, epid, f_user, policyid, policymode, policytype, srcintf, srcintfrole, srcip, srcmac, srcuuid, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">bandwidth, dstcountry, fortigate, session_block, session_pass, sessions, threat_block, threat_pass, threatweight, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">ffw-dev-avatar-sankey-view<\/td><td class=\"tg-yw4l\">FFW device avatar sankey view <\/td><td class=\"tg-yw4l\">app_group, browsetime, catdesc, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dstowner, dstuuid, dvid, epid, f_user, incident_block, incidents, policyid, policymode, policytype, session_block, sessions, srcintf, srcintfrole, srcip, srcmac, srcuuid, threat_block, threatweight, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale, traffic_in, traffic_out<\/td><td class=\"tg-yw4l\">app_group, avatar, bandwidth, csf, devid, epeuid, srcip<\/td><\/tr><tr><td class=\"table_col_name\">ffw-avatar-sankey-view<\/td><td class=\"tg-yw4l\">FFW avatar sankey view <\/td><td class=\"tg-yw4l\">app_group, browsetime, catdesc, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dstowner, dstuuid, dvid, epid, f_user, incident_block, incidents, policyid, policymode, policytype, session_block, sessions, srcintf, srcintfrole, srcip, srcmac, srcuuid, threat_block, threatweight, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale, traffic_in, traffic_out<\/td><td class=\"tg-yw4l\">app_group, avatar, bandwidth, devid, epeuid, srcip<\/td><\/tr><tr><td class=\"table_col_name\">ffw-country-line<\/td><td class=\"tg-yw4l\">FFW country line view<\/td><td class=\"tg-yw4l\">app_group, avatar, bandwidth, browsetime, catdesc, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dstowner, dstuuid, dvid, epeuid, epid, f_user, incident_block, incidents, policyid, policymode, policytype, sessions, srcintf, srcintfrole, srcip, srcmac, srcuuid, threat_block, threatweight, timescale<\/td><td class=\"tg-yw4l\">score_critical, score_high, score_low, score_medium, session_block, session_pass, time, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">ffw-dstowner<\/td><td class=\"tg-yw4l\">FFW destination owner view<\/td><td class=\"tg-yw4l\">app_group, avatar, browsetime, catdesc, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dstowner, dstuuid, dvid, epeuid, epid, f_user, policyid, policymode, policytype, srcintf, srcintfrole, srcip, srcmac, srcuuid, threat_block, threatweight, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">bandwidth, fortigate, owner, session_block, session_pass, sessions, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">ffw-dns-log-view<\/td><td class=\"tg-yw4l\">FFW DNS log view <\/td><td class=\"tg-yw4l\">app_group, avatar, browsetime, crlevel, d_flags, dev_src, devtype, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dstowner, dstuuid, dvid, epeuid, epid, incident_block, incidents, policyid, policymode, policytype, srcintf, srcintfrole, srcmac, srcuuid, threat_block, threatweight, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">bandwidth, catdesc, num_users, qname, session_block, session_pass, sessions, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">ffw-device-group-fgt<\/td><td class=\"tg-yw4l\">FFW device group FGT view<\/td><td class=\"tg-yw4l\">app_group, avatar, browsetime, catdesc, d_flags, dev_src, domain, dstcountry, dstintf, dstintfrole, dstip, dstmac, dstowner, dstuuid, dvid, epeuid, epid, f_user, policyid, policymode, policytype, srcintf, srcintfrole, srcmac, srcuuid, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">bytes, devtype, dstintf, fctuid, fortigate, level, mac, rcvdbyte, score, score_allow, score_block, sentbyte, session_allow, session_block, sessions, srcintf, srcip<\/td><\/tr><tr><td class=\"table_col_name\">ffw-website-domain<\/td><td class=\"tg-yw4l\">FFW website domain view<\/td><td class=\"tg-yw4l\">avatar, browsetime, catdesc, domain, dstcountry, dstintfrole, dstip, dstowner, dstuuid, dvid, epeuid, f_user, group_info, policyid, policymode, policytype, srcintfrole, srcip, srcmac, srcuuid, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">agg_webcat, bandwidth, browsetime, domain, fortigate, session_block, session_pass, sessions, threat_block, threat_pass, threatweight, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">ffw-top-websites<\/td><td class=\"tg-yw4l\">FFW top websites view<\/td><td class=\"tg-yw4l\">avatar, browsetime, catdesc, domain, dstcountry, dstintfrole, dstip, dstowner, dstuuid, dvid, epeuid, f_user, group_info, policyid, policymode, policytype, srcintfrole, srcip, srcmac, srcuuid, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">bandwidth, browsetime, catdesc, fortigate, session_block, session_pass, sessions, threat_block, threat_pass, threatweight, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">ffw-website-line<\/td><td class=\"tg-yw4l\">FFW website line view<\/td><td class=\"tg-yw4l\">avatar, bandwidth, browsetime, catdesc, domain, dstcountry, dstintfrole, dstip, dstowner, dstuuid, dvid, epeuid, f_user, group_info, policyid, policymode, policytype, sessions, srcintfrole, srcip, srcmac, srcuuid, threat_block, threatweight, timescale<\/td><td class=\"tg-yw4l\">score_critical, score_high, score_low, score_medium, session_block, session_pass, time, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">ffw-top-applications<\/td><td class=\"tg-yw4l\">FFW top applications view<\/td><td class=\"tg-yw4l\">app_group, avatar, d_flags, dstcountry, dstintfrole, dstip, dstowner, dstuuid, dvid, epeuid, f_user, policyid, policymode, policytype, srcintfrole, srcip, srcmac, srcuuid, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">app_group, appcat, bandwidth, d_risk, fortigate, num_users, risk, session_block, session_pass, sessions, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">ffw-application-line<\/td><td class=\"tg-yw4l\">FFW application line view<\/td><td class=\"tg-yw4l\">app_group, avatar, bandwidth, d_flags, dstcountry, dstintfrole, dstip, dstowner, dstuuid, dvid, epeuid, f_user, policyid, policymode, policytype, sessions, srcintfrole, srcip, srcmac, srcuuid, timescale<\/td><td class=\"tg-yw4l\">score_critical, score_high, score_low, score_medium, session_block, session_pass, time, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">ffw-application-drilldown<\/td><td class=\"tg-yw4l\">FFW application drilldown view<\/td><td class=\"tg-yw4l\">app_group, d_flags, dstcountry, dstintfrole, dstip, dstowner, dstuuid, dvid, f_user, policyid, policymode, policytype, srcintfrole, srcip, srcmac, srcuuid, thwgt_cri, thwgt_hig, thwgt_low, thwgt_med, timescale<\/td><td class=\"tg-yw4l\">app_group, avatar, bandwidth, epeuid, fortigate, session_block, session_pass, sessions, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">ffw-threat-detect-summary<\/td><td class=\"tg-yw4l\">FFW threat detect summary view<\/td><td class=\"tg-yw4l\">ack_note, ack_time, bl_count, bmp_logtype, cs_count, cs_score, csf, devid, devname, devtype, epid, epname, euid, f_user, fctuid, itime, last_bl, osname, osversion, rescan, srcip, srcmac, threat_num, unauthuser, vd, verdict<\/td><td class=\"tg-yw4l\">ack_note, ack_time, bl_count, cs_count, cs_score, devtype, epid, epname, euid, f_user, fctuid, fortigate, last_detected_time, logtype, logtype_mask, osname, osversion, rescan, srcip, srcmac, threat_num, unauthuser, vd, verdict, verdict_s<\/td><\/tr><tr><td class=\"table_col_name\">ffw-admin-logins<\/td><td class=\"tg-yw4l\">FFW admin logins view<\/td><td class=\"tg-yw4l\">dvid, f_user, timescale<\/td><td class=\"tg-yw4l\">duration, f_user, fortigate, login_fail_num, login_num, total_change<\/td><\/tr><tr><td class=\"table_col_name\">ffw-admin-login-line<\/td><td class=\"tg-yw4l\">FFW admin login line view<\/td><td class=\"tg-yw4l\">dvid, f_user, timescale, total_duration<\/td><td class=\"tg-yw4l\">login_fail_num, login_num, time, total_change<\/td><\/tr><tr><td class=\"table_col_name\">ffw-failed-authentication-attempts<\/td><td class=\"tg-yw4l\">FFW failed authentication attempts view<\/td><td class=\"tg-yw4l\">community, dstip, dvid, initiator, interface, logid, logintype, method, policyid, remip, srcip, ssid, stamac, subtype, timescale, ui, user, vpntunnel, xauthuser<\/td><td class=\"tg-yw4l\">agg_logid, fortigate, int_tunnelname, login_type, logintype, logview_filter, src_ip, subtype, total_num, user_src<\/td><\/tr><tr><td class=\"table_col_name\">ffw-unauthorized-connection-line<\/td><td class=\"tg-yw4l\">FFW unauthorized connection line view<\/td><td class=\"tg-yw4l\">community, dstip, dvid, initiator, interface, logid, logintype, method, policyid, remip, srcip, ssid, stamac, subtype, timescale, ui, user, vpntunnel, xauthuser<\/td><td class=\"tg-yw4l\">time, total_num<\/td><\/tr><tr><td class=\"table_col_name\">ffw-site-to-site-ipsec<\/td><td class=\"tg-yw4l\">FFW site to site IPsec view<\/td><td class=\"tg-yw4l\">dvid, e_time, locip, max_duration, max_traffic_in, max_traffic_out, min_duration, min_traffic_in, min_traffic_out, remip, s_time, timescale, tunnelid, vpnname<\/td><td class=\"tg-yw4l\">bandwidth, duration, locip, remip, traffic_in, traffic_out, vpnname<\/td><\/tr><tr><td class=\"table_col_name\">ffw-site-to-site-ipsec-line<\/td><td class=\"tg-yw4l\">FFW site to site IPsec line view<\/td><td class=\"tg-yw4l\">dvid, e_time, locip, max_duration, max_traffic_in, max_traffic_out, min_duration, min_traffic_in, min_traffic_out, remip, s_time, timescale, tunnelid, vpnname<\/td><td class=\"tg-yw4l\">connections, time, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">ffw-ssl-dialup-ipsec<\/td><td class=\"tg-yw4l\">FFW SSL dial-up IPsec view<\/td><td class=\"tg-yw4l\">dvid, max_duration, max_traffic_in, max_traffic_out, min_duration, min_traffic_in, min_traffic_out, remip, s_time, timescale, tunneltype, user_agg, vpntunnel, vpnusergroup, xauthuser_agg<\/td><td class=\"tg-yw4l\">bandwidth, connections, device_group, duration, end_time, f_user, fv_dtime_tz_conv_e_time_t, remip, traffic_in, traffic_out, vpn_type_group<\/td><\/tr><tr><td class=\"table_col_name\">ffw-ssl-dialup-ipsec-line<\/td><td class=\"tg-yw4l\">FFW SSL dial-up IPsec line view<\/td><td class=\"tg-yw4l\">dvid, e_time, max_duration, max_traffic_in, max_traffic_out, min_duration, min_traffic_in, min_traffic_out, remip, s_time, timescale, tunnelid, tunneltype, user_agg, vpntunnel, vpnusergroup, xauthuser_agg<\/td><td class=\"tg-yw4l\">connections, time, traffic_in, traffic_out<\/td><\/tr><tr><td class=\"table_col_name\">ffw-system-events<\/td><td class=\"tg-yw4l\">FFW system events view<\/td><td class=\"tg-yw4l\">dvid, event_name, level, severity, subtype, timescale<\/td><td class=\"tg-yw4l\">agg_level, counts, event_name, logid, severity, severity_s, subtype<\/td><\/tr><tr><td class=\"table_col_name\">ffw-system-event-line<\/td><td class=\"tg-yw4l\">FFW system event line view<\/td><td class=\"tg-yw4l\">dvid, event_name, level, logid, severity, subtype, timescale<\/td><td class=\"tg-yw4l\">counts, time<\/td><\/tr><\/table>",
+                                "enum": [
+                                    "\/fortiview\/adom\/<adom-name>\/<view-name>\/run",
+                                    "\/fortiview\/adom\/<adom-name>\/top-threats\/run",
+                                    "\/fortiview\/adom\/<adom-name>\/top-sources\/run",
+                                    "\/fortiview\/adom\/<adom-name>\/top-destinations\/run",
+                                    "\/fortiview\/adom\/<adom-name>\/top-countries\/run",
+                                    "\/fortiview\/adom\/<adom-name>\/policy-hits\/run",
+                                    "\/fortiview\/adom\/<adom-name>\/top-applications\/run",
+                                    "\/fortiview\/adom\/<adom-name>\/top-cloud-applications\/run",
+                                    "\/fortiview\/adom\/<adom-name>\/top-websites\/run",
+                                    "\/fortiview\/adom\/<adom-name>\/top-browsing-users\/run",
+                                    "\/fortiview\/adom\/<adom-name>\/ssl-dialup-ipsec\/run",
+                                    "\/fortiview\/adom\/<adom-name>\/site-to-site-ipsec\/run",
+                                    "\/fortiview\/adom\/<adom-name>\/rogue-access-points\/run",
+                                    "\/fortiview\/adom\/<adom-name>\/authorized-access-points\/run",
+                                    "\/fortiview\/adom\/<adom-name>\/authorized-ssids\/run",
+                                    "\/fortiview\/adom\/<adom-name>\/wifi-clients\/run",
+                                    "\/fortiview\/adom\/<adom-name>\/admin-logins\/run",
+                                    "\/fortiview\/adom\/<adom-name>\/system-events\/run",
+                                    "\/fortiview\/adom\/<adom-name>\/resource-usage\/run",
+                                    "\/fortiview\/adom\/<adom-name>\/failed-authentication-attempts\/run",
+                                    "\/fortiview\/adom\/<adom-name>\/endpoints\/run",
+                                    "\/fortiview\/adom\/<adom-name>\/top-fct-vulnerabilities-dev\/run",
+                                    "\/fortiview\/adom\/<adom-name>\/top-fct-vulnerabilities-vuln\/run",
+                                    "\/fortiview\/adom\/<adom-name>\/top-fct-threats\/run",
+                                    "\/fortiview\/adom\/<adom-name>\/top-fct-applications\/run",
+                                    "\/fortiview\/adom\/<adom-name>\/top-fct-websites\/run",
+                                    "\/fortiview\/adom\/<adom-name>\/top-type\/run",
+                                    "\/fortiview\/adom\/<adom-name>\/siem-interesting-fields-summary\/run",
+                                    "\/fortiview\/adom\/<adom-name>\/siem-interesting-field-top-count\/run",
+                                    "\/fortiview\/adom\/<adom-name>\/siem-interesting-field-top-stats\/run",
+                                    "\/fortiview\/adom\/<adom-name>\/siem-event-histogram\/run",
+                                    "..."
+                                ],
+                                "example": "\/fortiview\/adom\/root\/top-threats\/run",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "url",
+                            "apiver",
+                            "time-range"
+                        ],
+                        "type": "object"
+                    },
+                    "type": "array"
+                },
+                "session": {
+                    "description": "The cookie of an active session in FortiAnalyzer.",
+                    "type": "string"
+                }
+            }
+        },
+        "fortiview.view-name.run.add.resp": {
+            "properties": {
+                "id": {
+                    "description": "An identifier established by the client.",
+                    "type": "string"
+                },
+                "jsonrpc": {
+                    "description": "A string specifying the JSON-RPC protocol version.",
+                    "enum": [
+                        "2.0"
+                    ],
+                    "type": "string"
+                },
+                "result": {
+                    "description": "A structured value responding to FortiView run method.",
+                    "properties": {
+                        "tid": {
+                            "description": "Task ID. It must be used in following 'fetch' and 'delete' request.",
+                            "type": "number"
+                        }
+                    },
+                    "required": [
+                        "tid"
+                    ],
+                    "type": "object"
+                }
+            }
+        },
+        "fortiview.view-name.run.tid.delete.req": {
+            "properties": {
+                "id": {
+                    "description": "An identifier established by the client.",
+                    "type": "string"
+                },
+                "jsonrpc": {
+                    "description": "A string specifying the JSON-RPC protocol version.",
+                    "enum": [
+                        "2.0"
+                    ],
+                    "type": "string"
+                },
+                "method": {
+                    "description": "A string containing the method name to be invoked.",
+                    "enum": [
+                        "delete"
+                    ],
+                    "type": "string"
+                },
+                "params": {
+                    "description": "A structure that holds the parameter values.",
+                    "items": {
+                        "properties": {
+                            "apiver": {
+                                "description": "Current API version.",
+                                "enum": [
+                                    3
+                                ],
+                                "type": "number"
+                            },
+                            "url": {
+                                "description": "The resource path to <b>FortiView task<\/b>. The list of available view names is in the Appendix.",
+                                "enum": [
+                                    "\/fortiview\/adom\/<adom-name>\/<view-name>\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/top-threats\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/top-sources\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/top-destinations\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/top-countries\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/policy-hits\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/top-applications\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/top-cloud-applications\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/top-websites\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/top-browsing-users\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/ssl-dialup-ipsec\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/site-to-site-ipsec\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/rogue-access-points\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/authorized-access-points\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/authorized-ssids\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/wifi-clients\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/admin-logins\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/system-events\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/resource-usage\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/failed-authentication-attempts\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/endpoints\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/top-fct-vulnerabilities-dev\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/top-fct-vulnerabilities-vuln\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/top-fct-threats\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/top-fct-applications\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/top-fct-websites\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/top-type\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/siem-interesting-fields-summary\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/siem-interesting-field-top-count\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/siem-interesting-field-top-stats\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/siem-event-histogram\/run\/<tid>",
+                                    "..."
+                                ],
+                                "example": [
+                                    "\/fortiview\/adom\/root\/top-threats\/run\/<tid>"
+                                ],
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "url",
+                            "apiver"
+                        ],
+                        "type": "object"
+                    },
+                    "type": "array"
+                },
+                "session": {
+                    "description": "The cookie of an active session in FortiAnalyzer.",
+                    "type": "string"
+                }
+            }
+        },
+        "fortiview.view-name.run.tid.delete.resp": {
+            "properties": {
+                "id": {
+                    "description": "An identifier established by the client.",
+                    "type": "string"
+                },
+                "jsonrpc": {
+                    "description": "A string specifying the JSON-RPC protocol version.",
+                    "enum": [
+                        "2.0"
+                    ],
+                    "type": "string"
+                },
+                "result": {
+                    "description": "A structured value responding to FortiView <b>cancel<\/b> method.",
+                    "properties": {
+                        "status": {
+                            "description": "Status of the current task",
+                            "properties": {
+                                "code": {
+                                    "description": "Status code",
+                                    "type": "number"
+                                },
+                                "message": {
+                                    "description": "Status description",
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "required": [
+                        "status"
+                    ],
+                    "type": "object"
+                }
+            }
+        },
+        "fortiview.view-name.run.tid.get.req": {
+            "properties": {
+                "id": {
+                    "description": "An identifier established by the client.",
+                    "type": "string"
+                },
+                "jsonrpc": {
+                    "description": "A string specifying the JSON-RPC protocol version.",
+                    "enum": [
+                        "2.0"
+                    ],
+                    "type": "string"
+                },
+                "method": {
+                    "description": "A string containing the method name to be invoked.",
+                    "enum": [
+                        "get"
+                    ],
+                    "type": "string"
+                },
+                "params": {
+                    "description": "A structure that holds the parameter values.",
+                    "items": {
+                        "properties": {
+                            "apiver": {
+                                "description": "Current API version.",
+                                "enum": [
+                                    3
+                                ],
+                                "type": "number"
+                            },
+                            "url": {
+                                "description": "The resource path to <b>FortiView task<\/b>. The list of available view names is in the Appendix.",
+                                "enum": [
+                                    "\/fortiview\/adom\/<adom-name>\/<view-name>\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/top-threats\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/top-sources\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/top-destinations\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/top-countries\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/policy-hits\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/top-applications\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/top-cloud-applications\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/top-websites\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/top-browsing-users\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/ssl-dialup-ipsec\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/site-to-site-ipsec\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/rogue-access-points\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/authorized-access-points\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/authorized-ssids\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/wifi-clients\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/admin-logins\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/system-events\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/resource-usage\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/failed-authentication-attempts\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/endpoints\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/top-fct-vulnerabilities-dev\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/top-fct-vulnerabilities-vuln\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/top-fct-threats\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/top-fct-applications\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/top-fct-websites\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/top-type\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/siem-interesting-fields-summary\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/siem-interesting-field-top-count\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/siem-interesting-field-top-stats\/run\/<tid>",
+                                    "\/fortiview\/adom\/<adom-name>\/siem-event-histogram\/run\/<tid>",
+                                    "..."
+                                ],
+                                "example": "\/fortiview\/adom\/root\/top-threats\/run\/<tid>",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "url",
+                            "apiver"
+                        ],
+                        "type": "object"
+                    },
+                    "type": "array"
+                },
+                "session": {
+                    "description": "The cookie of an active session in FortiAnalyzer.",
+                    "type": "string"
+                }
+            }
+        },
+        "fortiview.view-name.run.tid.get.resp": {
+            "properties": {
+                "id": {
+                    "description": "An identifier established by the client.",
+                    "type": "string"
+                },
+                "jsonrpc": {
+                    "description": "A string specifying the JSON-RPC protocol version.",
+                    "enum": [
+                        "2.0"
+                    ],
+                    "type": "string"
+                },
+                "result": {
+                    "description": "A structured value responding to FortiView <b>fetch<\/b> method.",
+                    "properties": {
+                        "data": {
+                            "description": "Dataset",
+                            "items": {
+                                "properties": {
+                                    "field": {
+                                        "description": "Result field.",
+                                        "type": "string"
+                                    },
+                                    "value": {
+                                        "description": "Result value.",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            },
+                            "type": "array"
+                        },
+                        "db_start_time": {
+                            "description": "The start time of the database.",
+                            "type": "number"
+                        },
+                        "masked-fields": {
+                            "description": "datamasked field list.",
+                            "items": {
+                                "description": "field name.",
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        "max-value": {
+                            "description": "The max values of some fields in the returned data.",
+                            "type": "object"
+                        },
+                        "percentage": {
+                            "description": "The percentage of FortiView data prepared for the FortiView task.",
+                            "type": "number"
+                        },
+                        "return-lines": {
+                            "description": "Number of returned lines.",
+                            "type": "number"
+                        },
+                        "status": {
+                            "description": "Status of the current task",
+                            "properties": {
+                                "code": {
+                                    "description": "Status code",
+                                    "type": "number"
+                                },
+                                "message": {
+                                    "description": "Status description",
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "total-count-all": {
+                            "description": "The total count of the results for the task.",
+                            "type": "number"
+                        }
+                    },
+                    "required": [
+                        "percentage",
+                        "data",
+                        "status"
+                    ],
+                    "type": "object"
+                }
+            }
+        }
+    },
+    "paths": {
+        "\/fortiview\/{view-name}\/run(add)": {
+            "post": {
+                "consumes": [
+                    "application\/json"
+                ],
+                "description": "Run a FortiView new task.",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#\/definitions\/fortiview.view-name.run.add.req"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "view-name",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "application\/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#\/definitions\/fortiview.view-name.run.add.resp"
+                        }
+                    },
+                    "405": {
+                        "description": "Invalid input"
+                    }
+                },
+                "summary": "",
+                "tags": [
+                    "\/fortiview\/<view-name>\/run"
+                ]
+            }
+        },
+        "\/fortiview\/{view-name}\/run\/{tid}(delete)": {
+            "post": {
+                "consumes": [
+                    "application\/json"
+                ],
+                "description": "Cancel a FortiView task by the task ID.",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#\/definitions\/fortiview.view-name.run.tid.delete.req"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "view-name",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "path",
+                        "name": "tid",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "application\/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#\/definitions\/fortiview.view-name.run.tid.delete.resp"
+                        }
+                    },
+                    "405": {
+                        "description": "Invalid input"
+                    }
+                },
+                "summary": "",
+                "tags": [
+                    "\/fortiview\/<view-name>\/run\/<tid>"
+                ]
+            }
+        },
+        "\/fortiview\/{view-name}\/run\/{tid}(get)": {
+            "post": {
+                "consumes": [
+                    "application\/json"
+                ],
+                "description": "Get the FortiView request result with the task ID.",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#\/definitions\/fortiview.view-name.run.tid.get.req"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "view-name",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "path",
+                        "name": "tid",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "produces": [
+                    "application\/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#\/definitions\/fortiview.view-name.run.tid.get.resp"
+                        }
+                    },
+                    "405": {
+                        "description": "Invalid input"
+                    }
+                },
+                "summary": "",
+                "tags": [
+                    "\/fortiview\/<view-name>\/run\/<tid>"
+                ]
+            }
+        }
+    }
+}
