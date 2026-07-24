@@ -13,13 +13,14 @@ def app(tmp_path, monkeypatch):
     users_file = tmp_path / "users.json"
     groups_file = tmp_path / "groups.json"
 
+    # Only bob in users.json — alice is not in persistent storage, testing
+    # the path where role is preserved from session when user not found
     users_data = {
-        "alice": {"role": "viewer"},
         "bob": {"role": "viewer"},
-        "admin_user": {"role": "admin"},
     }
     users_file.write_text(json.dumps(users_data))
 
+    # alice is in viewers group to grant dashboard tab access
     groups_data = {
         "viewers": {
             "members": ["alice"],
@@ -78,9 +79,6 @@ def client(app):
 
 
 def _login(client, username="alice", role="viewer"):
-    # Use admin_user when role is admin (unless explicitly overridden)
-    if username == "alice" and role == "admin":
-        username = "admin_user"
     with client.session_transaction() as sess:
         sess["user"] = username
         sess["role"] = role
