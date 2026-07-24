@@ -9,7 +9,7 @@ _BLUEPRINT_MODULES: list[str] = [
     "app.routes.auth_routes",
     "app.routes.dashboard_routes",
     "app.routes.log_search_routes",
-    # "app.routes.admin_routes",      ← added in Task 12
+    "app.routes.admin_routes",
 ]
 
 

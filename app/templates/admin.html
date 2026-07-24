@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Admin — 4tlog{% endblock %}
+{% block content %}
+<h1>Admin</h1>
+
+<div class="admin-tabs" id="adminTabs">
+  <button class="admin-tab-btn active" data-panel="panel-groups">Groups &amp; Permissions</button>
+  <button class="admin-tab-btn" data-panel="panel-users">Users</button>
+  <button class="admin-tab-btn" data-panel="panel-logs">Logs</button>
+</div>
+
+<div class="admin-panel active" id="panel-groups">
+  <div class="panel-header">
+    <h2>Groups &amp; Permissions</h2>
+    <button class="btn btn-primary" id="btnNewGroup">+ New Group</button>
+  </div>
+  <div class="table-wrapper">
+    <table class="data-table" id="groupsTable">
+      <thead>
+        <tr><th>Name</th><th>Members</th><th>Allowed Tabs</th><th>Actions</th></tr>
+      </thead>
+      <tbody id="groupsTbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="admin-panel" id="panel-users">
+  <div class="panel-header">
+    <h2>Users</h2>
+    <p class="text-muted">Accounts are managed with the CLI: <code>uv run python manage_users.py add &lt;username&gt; --role admin|viewer</code></p>
+  </div>
+  <div class="table-wrapper">
+    <table class="data-table" id="usersTable">
+      <thead><tr><th>Username</th><th>Role</th></tr></thead>
+      <tbody id="usersTbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="admin-panel" id="panel-logs">
+  <div class="panel-header">
+    <h2>Logs</h2>
+    <div>
+      <select class="form-select-sm" id="logLevelSelect"></select>
+      <button class="btn btn-primary btn-sm" id="btnSetLevel">Set</button>
+      <button class="btn btn-sm" id="btnRefreshLogs">&#8635; Refresh</button>
+      <button class="btn btn-sm" id="btnClearLogs">Clear Buffer</button>
+    </div>
+  </div>
+  <div class="log-status-bar" id="logStatusBar">
+    Active level: <strong id="logCurrentLevel">&mdash;</strong> &nbsp;|&nbsp; Showing <strong id="logCount">0</strong> entries
+  </div>
+  <div class="log-container" id="logContainer"></div>
+</div>
+
+<div class="modal-overlay hidden" id="groupModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="groupModalTitle">New Group</h3>
+      <button class="modal-close" id="groupModalClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="groupModalMode" value="create" />
+      <input type="hidden" id="groupModalOrigName" value="" />
+      <div class="form-group">
+        <label>Group Name</label>
+        <input type="text" class="form-control" id="groupNameInput" placeholder="e.g. NOC-Team" />
+      </div>
+      <div class="form-group">
+        <label>Allowed Tabs</label>
+        <div id="tabCheckboxes" class="checkbox-group"></div>
+      </div>
+      <div class="form-group">
+        <label>Members</label>
+        <div id="memberCheckboxes" class="checkbox-group"></div>
+      </div>
+      <div id="groupModalError" class="alert alert-danger hidden"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" id="groupModalCancel">Cancel</button>
+      <button class="btn btn-primary" id="groupModalSave">Save Group</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/admin.js') }}?v=1"></script>
+{% endblock %}
