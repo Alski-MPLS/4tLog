@@ -57,6 +57,10 @@ def app_log(level: str, component: str, message: str, **extra) -> None:
 def get_log_entries(
     level: str | None = None, component: str | None = None, limit: int = 500
 ) -> list[dict]:
+    # Clamp limit to a sane range: entries[-limit:] with limit=0 would
+    # return the whole buffer (Python slice semantics), and a negative
+    # limit would slice from the front instead of failing outright.
+    limit = max(1, min(limit, _MAX_ENTRIES))
     with _lock:
         entries = list(_buffer)
     if level:

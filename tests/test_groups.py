@@ -18,7 +18,7 @@ def no_users(monkeypatch):
 
 
 def test_create_list_get_group(groups_file, no_users):
-    from app.groups import create_group, list_groups, get_group
+    from app.groups import create_group, get_group, list_groups
     assert create_group("noc", members=["alice"], allowed_tabs=["dashboard"]) is True
     assert create_group("noc", allowed_tabs=["dashboard"]) is False  # duplicate
     assert [g["name"] for g in list_groups()] == ["noc"]
@@ -29,7 +29,7 @@ def test_create_list_get_group(groups_file, no_users):
 
 
 def test_update_group_filters_unknown_tabs(groups_file, no_users):
-    from app.groups import create_group, update_group, get_group
+    from app.groups import create_group, get_group, update_group
     create_group("noc", allowed_tabs=["dashboard"])
     ok = update_group("noc", members=["bob"], allowed_tabs=["dashboard", "bogus_tab"])
     assert ok is True

@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request, session
 from werkzeug.exceptions import RequestEntityTooLarge
+
 from app.config import Config
 from app.security import csrf_error_response, ensure_csrf_token, validate_csrf_request
 
@@ -63,8 +64,7 @@ def create_app() -> Flask:
         if hasattr(mod, "bp"):
             app.register_blueprint(mod.bp)
 
-    from app import registry
-    from app import groups
+    from app import groups, registry
 
     groups.KNOWN_TABS = registry.known_tabs()
 

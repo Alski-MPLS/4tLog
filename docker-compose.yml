@@ -8,6 +8,10 @@ services:
       - "8100:8100"
     env_file:
       - .env
+      # If TLS terminates at a reverse proxy in front of this container
+      # (the expected topology), set COOKIE_SECURE=true and
+      # TRUSTED_PROXY_COUNT accordingly in .env — COOKIE_SECURE=auto only
+      # detects local certs/cert.pem, which won't exist here.
     volumes:
       - ./users.json:/app/users.json:rw
       - ./groups.json:/app/groups.json:rw

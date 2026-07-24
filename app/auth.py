@@ -29,8 +29,14 @@ def authenticate(username: str, password: str) -> "tuple[str, list] | None":
     if not entry:
         return None
     stored_hash = entry.get("password_hash", "")
-    if bcrypt.checkpw(password.encode(), stored_hash.encode()):
-        return entry.get("role", "viewer"), []
+    try:
+        if bcrypt.checkpw(password.encode(), stored_hash.encode()):
+            return entry.get("role", "viewer"), []
+    except ValueError:
+        # Malformed (non-bcrypt) password_hash — e.g. the users.example.json
+        # placeholder value used before `manage_users.py add` is run. Treat
+        # it as an authentication failure rather than a 500.
+        return None
     return None
 
 

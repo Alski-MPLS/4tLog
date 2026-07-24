@@ -16,7 +16,7 @@
   </div>
   <nav class="topbar-nav">
     {% for key, tab in nav_registry.items() %}
-      {% if key in allowed_tabs %}
+      {% if key in allowed_tabs and key != 'admin' %}
     <a href="{{ url_for(tab.endpoint) }}" class="nav-link {% if request.endpoint == tab.endpoint %}active{% endif %}">{{ tab.icon ~ ' ' if tab.icon }}{{ tab.name }}</a>
       {% endif %}
     {% endfor %}

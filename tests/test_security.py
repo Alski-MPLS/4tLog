@@ -1,5 +1,6 @@
 import pytest
 from flask import Flask
+
 from app.security import ensure_csrf_token, validate_csrf_request
 
 
@@ -25,7 +26,7 @@ def test_validate_csrf_request_accepts_matching_header(app):
         token = ensure_csrf_token()
     with app.test_request_context(
         "/", method="POST", headers={"X-CSRF-Token": token}
-    ) as ctx:
+    ):
         from flask import session
         session["_csrf_token"] = token
         assert validate_csrf_request() is True

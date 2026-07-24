@@ -1,10 +1,13 @@
 import os
-from app import create_app
+
 from dotenv import load_dotenv
+
+from app import create_app
 
 load_dotenv()
 
-app = create_app()
+flask_app = create_app()
+app = flask_app
 
 try:
     _proxy_count = int(os.environ.get("TRUSTED_PROXY_COUNT", "0"))
@@ -16,7 +19,10 @@ except ValueError:
 if _proxy_count > 0:
     from werkzeug.middleware.proxy_fix import ProxyFix
 
-    app = ProxyFix(app, x_for=_proxy_count, x_proto=_proxy_count, x_host=_proxy_count)
+    # `app` is rebound to the ProxyFix-wrapped WSGI middleware here — this is
+    # what gunicorn (`wsgi:app`) picks up. The dev server below always uses
+    # `flask_app` (the real Flask object with a `.run()` method) instead.
+    app = ProxyFix(flask_app, x_for=_proxy_count, x_proto=_proxy_count, x_host=_proxy_count)
 
 if __name__ == "__main__":
     cert = os.environ.get("SSL_CERT", "certs/cert.pem")
@@ -30,4 +36,4 @@ if __name__ == "__main__":
         ssl_ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         ssl_ctx.load_cert_chain(cert, key)
 
-    app.run(host="0.0.0.0", port=port, debug=False, ssl_context=ssl_ctx)
+    flask_app.run(host="0.0.0.0", port=port, debug=False, ssl_context=ssl_ctx)

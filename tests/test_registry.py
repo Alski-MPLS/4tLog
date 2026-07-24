@@ -1,4 +1,21 @@
+import pytest
+
 from app import registry
+
+
+@pytest.fixture(autouse=True)
+def _restore_registry():
+    """Snapshot and restore the module-global registry around each test.
+
+    Without this, tests here permanently mutate app.registry._registry,
+    corrupting global state for any test file that runs afterward and
+    depends on real blueprint registration (e.g. test_admin_routes.py,
+    test_tab_routes.py).
+    """
+    snapshot = dict(registry._registry)
+    yield
+    registry._registry.clear()
+    registry._registry.update(snapshot)
 
 
 def test_register_and_get_registry():

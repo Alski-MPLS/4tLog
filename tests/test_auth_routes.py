@@ -1,4 +1,5 @@
 import os
+
 import pytest
 
 
@@ -63,6 +64,11 @@ def test_logout_clears_session(client):
         "/login",
         data={"username": "alice", "password": "Str0ng!Passw0rd", "csrf_token": csrf},
     )
+    # login() now calls session.clear() (finding #14 fix), so the pre-login
+    # CSRF token doesn't survive into the authenticated session — a request
+    # must happen first to let before_request's ensure_csrf_token()
+    # establish a fresh one.
+    client.get("/")
     with client.session_transaction() as sess:
         assert sess["user"] == "alice"  # confirm login actually succeeded this time
         logout_csrf = sess.get("_csrf_token", "")

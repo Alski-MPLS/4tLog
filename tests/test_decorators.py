@@ -1,7 +1,8 @@
-import time
 import json
+import time
+
 import pytest
-from flask import Flask, session, jsonify
+from flask import Flask, jsonify
 
 
 @pytest.fixture
@@ -37,8 +38,9 @@ def app(tmp_path, monkeypatch):
     flask_app.config["SECRET_KEY"] = "test"
     flask_app.config["SESSION_ABSOLUTE_LIFETIME"] = 36000
 
-    from app.decorators import login_required, tab_required, admin_required
     from flask import Blueprint
+
+    from app.decorators import admin_required, login_required, tab_required
 
     # Create auth blueprint to provide auth.login endpoint
     auth_bp = Blueprint("auth", __name__)
@@ -129,6 +131,33 @@ def test_admin_required_allows_admin(client):
     _login(client, role="admin")
     resp = client.get("/admin-only")
     assert resp.status_code == 200
+
+
+def test_local_user_session_cleared_when_deleted_from_users_json(client):
+    # bob exists in users.json in the fixture; simulate him being deleted by
+    # an admin mid-session, with auth_source="local" as set by login().
+    # Since role is always set in the session, without the auth_source
+    # check this would never clear — the deleted user's session would stay
+    # valid forever.
+    _login(client, username="bob", role="viewer")
+    with client.session_transaction() as sess:
+        sess["auth_source"] = "local"
+
+    import app.auth as auth_mod
+
+    # Remove bob from the backing store.
+    users = auth_mod._load_users()
+    del users["bob"]
+    import json as _json
+
+    auth_mod.USERS_FILE.write_text(_json.dumps(users))
+
+    resp = client.get("/protected")
+    assert resp.status_code == 302
+    assert "/login" in resp.headers["Location"]
+
+    with client.session_transaction() as sess:
+        assert "user" not in sess
 
 
 def test_session_expires_after_absolute_lifetime(client, app):

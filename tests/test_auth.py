@@ -1,4 +1,5 @@
 import json
+
 import pytest
 
 
@@ -25,6 +26,18 @@ def test_authenticate_success_and_failure(users_file):
     assert authenticate("bob", "Str0ng!Passw0rd") == ("viewer", [])
     assert authenticate("bob", "wrong-password") is None
     assert authenticate("nobody", "whatever") is None
+
+
+def test_authenticate_with_malformed_hash_returns_none(users_file):
+    # Mirrors users.example.json's placeholder password_hash, which is not
+    # a valid bcrypt hash — bcrypt.checkpw raises ValueError('Invalid salt')
+    # for it. authenticate() must treat this as auth failure, not crash.
+    from app.auth import authenticate
+
+    users_file.write_text(
+        json.dumps({"placeholder": {"password_hash": "not-a-real-bcrypt-hash", "role": "viewer"}})
+    )
+    assert authenticate("placeholder", "whatever") is None
 
 
 def test_delete_user(users_file):

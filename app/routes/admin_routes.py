@@ -20,19 +20,20 @@ Logs API (JSON):
   DELETE /admin/api/logs             clears the buffer
 """
 
-from flask import Blueprint, render_template, session, jsonify, request
-from app.decorators import admin_required as _admin_required
-from app.groups import list_groups, get_group, create_group, update_group, delete_group
+from flask import Blueprint, jsonify, render_template, request, session
+
 from app import registry
-from app.auth import list_users
 from app.app_logger import (
     app_log,
+    clear_log_entries,
     get_log_entries,
     get_log_level,
     get_log_levels,
     set_log_level,
-    clear_log_entries,
 )
+from app.auth import list_users
+from app.decorators import admin_required as _admin_required
+from app.groups import create_group, delete_group, get_group, list_groups, update_group
 
 bp = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -81,11 +82,18 @@ def api_groups_create():
 @_admin_required
 def api_groups_update(name: str):
     data = request.get_json(silent=True) or {}
-    members = data.get("members", [])
-    ad_groups = data.get("ad_groups", [])
-    allowed_tabs = data.get("allowed_tabs", [])
-    adom_restrict = bool(data.get("adom_restrict", False))
-    allowed_adoms = data.get("allowed_adoms", [])
+    existing = get_group(name)
+    if existing is None:
+        return jsonify({"error": f"Group '{name}' not found"}), 404
+    # Any field not present in the incoming body keeps its current value —
+    # the Phase 1 admin UI only sends `members`/`allowed_tabs`, and without
+    # this it would silently wipe ad_groups/adom_restrict/allowed_adoms on
+    # every save.
+    members = data.get("members", existing["members"])
+    ad_groups = data.get("ad_groups", existing["ad_groups"])
+    allowed_tabs = data.get("allowed_tabs", existing["allowed_tabs"])
+    adom_restrict = bool(data.get("adom_restrict", existing["adom_restrict"]))
+    allowed_adoms = data.get("allowed_adoms", existing["allowed_adoms"])
     if not update_group(
         name, members, allowed_tabs, adom_restrict, allowed_adoms, ad_groups=ad_groups
     ):
@@ -118,7 +126,11 @@ def api_users_list():
 @bp.route("/api/tabs")
 @_admin_required
 def api_tabs_list():
-    return jsonify([{"key": k, "name": v} for k, v in registry.known_tabs().items()])
+    # "admin" access is role-based (the user's `role` field), not a
+    # tab-permission grantable via the group editor, so it's excluded here.
+    return jsonify(
+        [{"key": k, "name": v} for k, v in registry.known_tabs().items() if k != "admin"]
+    )
 
 
 # ── Logs API ──────────────────────────────────────────────────────────────────

@@ -2,11 +2,13 @@ import threading
 import time
 from collections import defaultdict
 from urllib.parse import urlparse
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+
+from flask import Blueprint, flash, redirect, render_template, request, session, url_for
+
+from app import registry
+from app.app_logger import app_log
 from app.auth import authenticate
 from app.groups import get_allowed_tabs
-from app.app_logger import app_log
-from app import registry
 
 # In-memory sliding-window rate limiter for /login:
 # 10 attempts per IP per 10 minutes, 5 attempts per username per 10 minutes.
@@ -91,10 +93,12 @@ def login():
         if auth_result is not None:
             role, ad_groups = auth_result
             _clear_failures(ip, username)
+            session.clear()
             session.permanent = True
             session["user"] = username
             session["role"] = role
             session["ad_groups"] = ad_groups
+            session["auth_source"] = "local"
             allowed = list(get_allowed_tabs(username, ad_groups=ad_groups, role=role))
             session["allowed_tabs"] = allowed
             session["login_at"] = int(time.time())
@@ -102,6 +106,11 @@ def login():
             next_url = request.args.get("next", "").strip()
             if next_url and _safe_redirect(next_url):
                 return redirect(next_url)
+            if not allowed:
+                flash(
+                    "Your account has no tabs assigned. Contact an administrator.",
+                    "warning",
+                )
             return redirect(_first_allowed_url(allowed))
 
         _record_failure(ip, username)

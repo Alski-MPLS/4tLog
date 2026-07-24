@@ -13,7 +13,8 @@ for the full design.
 ## Current features (Phase 1)
 
 - **Authentication**: bcrypt-secured local user accounts
-- **Admin Tab**: manage users and groups, configure FAZ targets, view system logs
+- **Admin Tab**: view users (read-only — accounts are managed via the
+  `manage_users.py` CLI) and manage groups/tab permissions, view system logs
 - **Dashboard Tab**: placeholder for FortiAnalyzer health cards (Phase 2)
 - **Log Search Tab**: placeholder for query builder and results (Phase 3)
 - **Deployment**: Docker and RHEL bare-metal (Gunicorn/Nginx/systemd)
@@ -26,7 +27,7 @@ cp .env.example .env               # set SECRET_KEY (uv run python manage_users.
 cp users.example.json users.json
 cp groups.example.json groups.json
 uv run python manage_users.py add admin --role admin
-uv run python wsgi.py              # http://localhost:5000 (or https://localhost:5443 with certs/)
+uv run python wsgi.py              # http://localhost:5443 (PORT defaults to 5443; add certs/ for HTTPS)
 ```
 
 ## Deployment

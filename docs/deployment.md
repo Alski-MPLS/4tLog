@@ -104,7 +104,19 @@ server {
 ```
 
 Set `TRUSTED_PROXY_COUNT=1` in `.env` so Flask trusts Nginx's
-`X-Forwarded-*` headers for HSTS and client-IP-based rate limiting.
+`X-Forwarded-*` headers for HSTS and client-IP-based rate limiting. Also set
+`COOKIE_SECURE=true` explicitly in `.env`:
+
+```bash
+# .env
+TRUSTED_PROXY_COUNT=1
+COOKIE_SECURE=true
+```
+
+`COOKIE_SECURE=auto` only sets the cookie's `Secure` flag when local
+`certs/cert.pem`/`certs/key.pem` files are present — but in this topology
+TLS terminates at Nginx, so the Gunicorn/Flask process itself never sees a
+cert on disk, and `auto` would silently leave session cookies insecure.
 
 ```bash
 sudo systemctl enable --now nginx

@@ -1,10 +1,16 @@
 """Shared route decorators — import these instead of redefining in every blueprint."""
 
 from __future__ import annotations
-from functools import wraps
+
 import time as _time
-from flask import session as flask_session, redirect, url_for, abort, jsonify, request
-from flask import current_app
+from functools import wraps
+
+from flask import abort, current_app, jsonify, redirect, request, url_for
+from flask import session as flask_session
+
+
+def _is_api_path(path: str) -> bool:
+    return path.startswith("/api/") or path.startswith("/admin/api/")
 
 
 def _revalidate_session() -> "tuple | None":
@@ -17,7 +23,7 @@ def _revalidate_session() -> "tuple | None":
     lifetime = current_app.config.get("SESSION_ABSOLUTE_LIFETIME", 36000)
     if _time.time() - login_at > lifetime:
         flask_session.clear()
-        if request.path.startswith("/api/") or request.path.startswith("/admin/api/"):
+        if _is_api_path(request.path):
             return jsonify({"error": "Session expired"}), 401
         return redirect(url_for("auth.login")), 302
 
@@ -30,9 +36,14 @@ def _revalidate_session() -> "tuple | None":
         entry = users.get(username)
         ad_groups = flask_session.get("ad_groups", [])
         if entry is None:
-            if not flask_session.get("role"):
+            # A local-auth user whose entry has disappeared from users.json
+            # (e.g. deleted by an admin) must always lose their session,
+            # regardless of whether `role` happens to still be set. Only
+            # non-local auth sources (future RADIUS/AD) may fall back to
+            # session-cached role data when there's no local entry to check.
+            if flask_session.get("auth_source") == "local" or not flask_session.get("role"):
                 flask_session.clear()
-                if request.path.startswith("/api/") or request.path.startswith("/admin/api/"):
+                if _is_api_path(request.path):
                     return jsonify({"error": "Not authenticated"}), 401
                 return redirect(url_for("auth.login")), 302
         else:
@@ -48,7 +59,7 @@ def login_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         if "user" not in flask_session:
-            if request.path.startswith("/api/") or request.path.startswith("/admin/api/"):
+            if _is_api_path(request.path):
                 return jsonify({"error": "Not authenticated"}), 401
             return redirect(url_for("auth.login", next=request.path))
         err = _revalidate_session()
@@ -64,7 +75,7 @@ def tab_required(tab_key: str):
         @wraps(f)
         def decorated(*args, **kwargs):
             if "user" not in flask_session:
-                if request.path.startswith("/api/"):
+                if _is_api_path(request.path):
                     return jsonify({"error": "Not authenticated"}), 401
                 return redirect(url_for("auth.login", next=request.path))
             err = _revalidate_session()
@@ -73,7 +84,7 @@ def tab_required(tab_key: str):
             if flask_session.get("role") != "admin" and tab_key not in set(
                 flask_session.get("allowed_tabs", [])
             ):
-                if request.path.startswith("/api/"):
+                if _is_api_path(request.path):
                     return jsonify({"error": "Access denied"}), 403
                 abort(403)
             return f(*args, **kwargs)
@@ -87,14 +98,14 @@ def admin_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         if "user" not in flask_session:
-            if request.path.startswith("/api/") or request.path.startswith("/admin/api/"):
+            if _is_api_path(request.path):
                 return jsonify({"error": "Not authenticated"}), 401
             return redirect(url_for("auth.login", next=request.path))
         err = _revalidate_session()
         if err is not None:
             return err
         if flask_session.get("role") != "admin":
-            if request.path.startswith("/api/") or request.path.startswith("/admin/api/"):
+            if _is_api_path(request.path):
                 return jsonify({"error": "Admin role required"}), 403
             abort(403)
         return f(*args, **kwargs)

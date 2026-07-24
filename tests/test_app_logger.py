@@ -1,6 +1,9 @@
 from app.app_logger import (
-    app_log, set_log_level, get_log_level, get_log_levels,
-    get_log_entries, clear_log_entries,
+    app_log,
+    clear_log_entries,
+    get_log_entries,
+    get_log_level,
+    set_log_level,
 )
 
 
@@ -42,3 +45,25 @@ def test_invalid_level_raises():
     import pytest
     with pytest.raises(ValueError):
         set_log_level("BOGUS")
+
+
+def test_get_log_entries_clamps_zero_limit():
+    clear_log_entries()
+    set_log_level("INFO")
+    for i in range(5):
+        app_log("INFO", "test", f"msg{i}")
+    # limit=0 would otherwise return the whole buffer due to Python's
+    # entries[-0:] == entries[:] slice semantics.
+    entries = get_log_entries(limit=0)
+    assert len(entries) == 1
+
+
+def test_get_log_entries_clamps_negative_limit():
+    clear_log_entries()
+    set_log_level("INFO")
+    for i in range(5):
+        app_log("INFO", "test", f"msg{i}")
+    # A negative limit would otherwise slice from the front instead of
+    # failing or being treated sanely.
+    entries = get_log_entries(limit=-3)
+    assert len(entries) == 1

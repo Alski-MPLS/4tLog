@@ -1,4 +1,5 @@
 import os
+
 import pytest
 
 
@@ -32,6 +33,11 @@ def _login(client, username, password="Str0ng!Passw0rd"):
 
 
 def _csrf(client):
+    # login() now calls session.clear() (finding #14 fix), so the
+    # pre-login CSRF token no longer survives into the authenticated
+    # session. A request must happen post-login to let before_request's
+    # ensure_csrf_token() establish a fresh one before we can read it.
+    client.get("/admin/api/tabs")
     with client.session_transaction() as sess:
         return sess.get("_csrf_token", "")
 
@@ -60,7 +66,16 @@ def test_admin_tabs_list_includes_registered_tabs(client):
     _login(client, "admin1")
     resp = client.get("/admin/api/tabs")
     keys = {t["key"] for t in resp.get_json()}
-    assert {"dashboard", "log_search", "admin"} <= keys
+    assert {"dashboard", "log_search"} <= keys
+
+
+def test_admin_tabs_list_excludes_admin_tab(client):
+    # "admin" access is role-based, not tab-permission-based, so it must
+    # never be offered as a grantable tab in the group editor.
+    _login(client, "admin1")
+    resp = client.get("/admin/api/tabs")
+    keys = {t["key"] for t in resp.get_json()}
+    assert "admin" not in keys
 
 
 def test_admin_group_crud(client):
@@ -86,6 +101,37 @@ def test_admin_group_crud(client):
     resp = client.delete("/admin/api/groups/noc", headers={"X-CSRF-Token": csrf})
     assert resp.status_code == 200
     assert client.get("/admin/api/groups").get_json() == []
+
+
+def test_admin_group_update_preserves_unset_fields(client):
+    # The Phase 1 admin UI only sends members/allowed_tabs in its PUT body.
+    # Fields set via direct API use (adom_restrict/allowed_adoms/ad_groups)
+    # must survive a UI-driven edit rather than being silently wiped.
+    _login(client, "admin1")
+    csrf = _csrf(client)
+    resp = client.post(
+        "/admin/api/groups",
+        json={
+            "name": "restricted",
+            "members": ["viewer1"],
+            "allowed_tabs": ["dashboard"],
+            "adom_restrict": True,
+            "allowed_adoms": ["adom1"],
+        },
+        headers={"X-CSRF-Token": csrf},
+    )
+    assert resp.status_code == 201
+
+    resp = client.put(
+        "/admin/api/groups/restricted",
+        json={"members": ["viewer1"], "allowed_tabs": ["dashboard", "log_search"]},
+        headers={"X-CSRF-Token": csrf},
+    )
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert body["adom_restrict"] is True
+    assert body["allowed_adoms"] == ["adom1"]
+    assert set(body["allowed_tabs"]) == {"dashboard", "log_search"}
 
 
 def test_admin_logs_endpoints(client):

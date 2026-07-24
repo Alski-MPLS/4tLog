@@ -1,6 +1,7 @@
 """Application configuration loaded from environment / .env file."""
 
 import os
+
 from dotenv import load_dotenv
 
 load_dotenv()
