@@ -7,8 +7,8 @@ from app.security import csrf_error_response, ensure_csrf_token, validate_csrf_r
 # time.  To add a new module, append its dotted path here and nothing else.
 _BLUEPRINT_MODULES: list[str] = [
     "app.routes.auth_routes",
-    # "app.routes.dashboard_routes",  ← added in Task 11
-    # "app.routes.log_search_routes", ← added in Task 11
+    "app.routes.dashboard_routes",
+    "app.routes.log_search_routes",
     # "app.routes.admin_routes",      ← added in Task 12
 ]
 
