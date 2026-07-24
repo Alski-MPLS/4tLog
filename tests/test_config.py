@@ -1,6 +1,8 @@
 import importlib
 import os
 
+import app.config  # noqa: F401 - pre-cache module in sys.modules for test isolation
+
 
 def test_config_requires_secret_key(monkeypatch):
     monkeypatch.delenv("SECRET_KEY", raising=False)
