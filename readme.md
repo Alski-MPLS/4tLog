@@ -4,7 +4,9 @@ A Flask web application for interacting with FortiAnalyzer. Phase 1 provides
 a working dashboard frame with bcrypt login, group-based access control, an
 admin interface for managing users, groups, and targets, plus placeholder tabs
 for FortiAnalyzer health monitoring (Phase 2) and log search with filtering,
-pagination, and export (Phase 3).
+pagination, and export (Phase 3). Phase 2 also covers TLS for the Docker
+deployment (reverse-proxy container terminating TLS in front of the app,
+mirroring the RHEL/Nginx setup) — see [container.md](container.md).
 
 See [CLAUDE.md](CLAUDE.md) for architecture notes and
 [docs/superpowers/specs/2026-07-24-web-app-design.md](docs/superpowers/specs/2026-07-24-web-app-design.md)

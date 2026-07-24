@@ -35,3 +35,9 @@ of the container — the Dockerfile does not bake in or mount any certs for
 TLS termination inside the container in Phase 1. Set `COOKIE_SECURE=true`
 and `TRUSTED_PROXY_COUNT` accordingly in `.env` for that topology (see
 `docs/deployment.md` §5 for the reasoning).
+
+**Planned (Phase 2):** add a reverse-proxy service (Nginx or Caddy) to
+`docker-compose.yml` that terminates TLS and proxies plain HTTP to
+`app:8100` over the internal Docker network — the same shape as the
+Nginx config in `docs/deployment.md` §3/§5, just pointing `proxy_pass` at
+`app:8100` instead of `127.0.0.1:8100`.
