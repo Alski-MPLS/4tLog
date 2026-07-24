@@ -1,0 +1,6 @@
+{
+  "admin": {
+    "password_hash": "REPLACE_ME - generate accounts with: uv run python manage_users.py add admin --role admin",
+    "role": "admin"
+  }
+}
