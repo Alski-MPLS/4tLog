@@ -1,0 +1,9 @@
+{
+  "everyone": {
+    "members": [],
+    "ad_groups": [],
+    "allowed_tabs": ["dashboard", "log_search"],
+    "adom_restrict": false,
+    "allowed_adoms": []
+  }
+}
