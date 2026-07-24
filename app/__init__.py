@@ -1,0 +1,85 @@
+from flask import Flask, jsonify, request, session
+from werkzeug.exceptions import RequestEntityTooLarge
+from app.config import Config
+from app.security import csrf_error_response, ensure_csrf_token, validate_csrf_request
+
+# Blueprint modules to import — each one calls registry.register() at import
+# time.  To add a new module, append its dotted path here and nothing else.
+_BLUEPRINT_MODULES: list[str] = [
+    # "app.routes.auth_routes",       ← added in Task 10
+    # "app.routes.dashboard_routes",  ← added in Task 11
+    # "app.routes.log_search_routes", ← added in Task 11
+    # "app.routes.admin_routes",      ← added in Task 12
+]
+
+
+def create_app() -> Flask:
+    app = Flask(__name__, template_folder="templates", static_folder="static")
+    app.config.from_object(Config)
+
+    @app.before_request
+    def _security_filters():
+        ensure_csrf_token()
+        if request.method in {"POST", "PUT", "PATCH", "DELETE"}:
+            if request.endpoint == "static":
+                return None
+            if not validate_csrf_request():
+                return csrf_error_response()
+        return None
+
+    @app.after_request
+    def _set_security_headers(resp):
+        resp.headers["X-Content-Type-Options"] = "nosniff"
+        resp.headers["X-Frame-Options"] = "DENY"
+        resp.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        resp.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+        resp.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline'; "
+            "style-src 'self' 'unsafe-inline'; "
+            "img-src 'self' data:; "
+            "font-src 'self' data:; "
+            "connect-src 'self'; "
+            "object-src 'none'; "
+            "base-uri 'self'; "
+            "form-action 'self'; "
+            "frame-ancestors 'none'"
+        )
+        forwarded_proto = request.headers.get("X-Forwarded-Proto", "")
+        if request.is_secure or forwarded_proto.lower() == "https":
+            resp.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        return resp
+
+    @app.errorhandler(RequestEntityTooLarge)
+    def _file_too_large(_exc):
+        if request.path.startswith("/api/") or request.path.startswith("/admin/api/"):
+            return jsonify({"error": "Uploaded file is too large"}), 413
+        return "Uploaded file is too large", 413
+
+    import importlib
+
+    for module_path in _BLUEPRINT_MODULES:
+        mod = importlib.import_module(module_path)
+        if hasattr(mod, "bp"):
+            app.register_blueprint(mod.bp)
+
+    from app import registry
+    from app import groups
+
+    groups.KNOWN_TABS = registry.known_tabs()
+
+    @app.context_processor
+    def inject_session_globals():
+        role = session.get("role", "viewer")
+        if role == "admin":
+            allowed = set(registry.known_tabs().keys())
+        else:
+            allowed = set(session.get("allowed_tabs", []))
+        return {
+            "current_role": role,
+            "allowed_tabs": allowed,
+            "nav_registry": registry.get_registry(),
+            "csrf_token": ensure_csrf_token(),
+        }
+
+    return app
