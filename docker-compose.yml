@@ -1,0 +1,20 @@
+services:
+  app:
+    build: .
+    image: 4tlog:latest
+    container_name: 4tlog
+    restart: unless-stopped
+    ports:
+      - "8100:8100"
+    env_file:
+      - .env
+    volumes:
+      - ./users.json:/app/users.json:rw
+      - ./groups.json:/app/groups.json:rw
+    healthcheck:
+      test: ["CMD", "python3", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8100/login', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
