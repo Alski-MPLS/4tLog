@@ -11,6 +11,12 @@ Groups API (JSON):
   DELETE /admin/api/groups/<name>
   GET    /admin/api/users            list of {username, role} for member picker
 
+FAZ Targets API (JSON):
+  GET    /admin/api/faz-targets
+  POST   /admin/api/faz-targets           {"label": str, "host": str, "adom": str, "token": str, ...snmp overrides}
+  PUT    /admin/api/faz-targets/<label>   {"host": str, "adom": str, "token": str, ...snmp overrides}
+  DELETE /admin/api/faz-targets/<label>
+
 Tab registry:
   GET    /admin/api/tabs             known tab keys + display names
 
@@ -33,6 +39,7 @@ from app.app_logger import (
 )
 from app.auth import list_users
 from app.decorators import admin_required as _admin_required
+from app.faz_targets import create_target, delete_target, get_target, list_targets, update_target
 from app.groups import create_group, delete_group, get_group, list_groups, update_group
 
 bp = Blueprint("admin", __name__, url_prefix="/admin")
@@ -109,6 +116,65 @@ def api_groups_delete(name: str):
         return jsonify({"error": f"Group '{name}' not found"}), 404
     app_log("INFO", "admin", "Group deleted", by=session["user"], group=name)
     return jsonify({"deleted": name})
+
+
+# ── FAZ Targets API ────────────────────────────────────────────────────────────
+
+
+@bp.route("/api/faz-targets")
+@_admin_required
+def api_faz_targets_list():
+    return jsonify(list_targets())
+
+
+@bp.route("/api/faz-targets", methods=["POST"])
+@_admin_required
+def api_faz_targets_create():
+    data = request.get_json(silent=True) or {}
+    label = (data.get("label") or "").strip()
+    if not label:
+        return jsonify({"error": "label is required"}), 400
+    host = data.get("host", "")
+    adom = data.get("adom", "root")
+    token = data.get("token", "")
+    snmp_overrides = {
+        k: data[k]
+        for k in ("snmp_user", "snmp_auth_key", "snmp_priv_key", "snmp_auth_protocol", "snmp_priv_protocol")
+        if data.get(k)
+    }
+    ok = create_target(label, host, adom, token, snmp_overrides)
+    if not ok:
+        return jsonify({"error": f"Target '{label}' already exists"}), 409
+    app_log("INFO", "admin", "FAZ target created", by=session["user"], target=label)
+    return jsonify(get_target(label)), 201
+
+
+@bp.route("/api/faz-targets/<label>", methods=["PUT"])
+@_admin_required
+def api_faz_targets_update(label: str):
+    data = request.get_json(silent=True) or {}
+    host = data.get("host", "")
+    adom = data.get("adom", "root")
+    token = data.get("token", "")
+    snmp_overrides = {
+        k: data[k]
+        for k in ("snmp_user", "snmp_auth_key", "snmp_priv_key", "snmp_auth_protocol", "snmp_priv_protocol")
+        if data.get(k)
+    }
+    ok = update_target(label, host, adom, token, snmp_overrides)
+    if not ok:
+        return jsonify({"error": f"Target '{label}' not found"}), 404
+    app_log("INFO", "admin", "FAZ target updated", by=session["user"], target=label)
+    return jsonify(get_target(label))
+
+
+@bp.route("/api/faz-targets/<label>", methods=["DELETE"])
+@_admin_required
+def api_faz_targets_delete(label: str):
+    if not delete_target(label):
+        return jsonify({"error": f"Target '{label}' not found"}), 404
+    app_log("INFO", "admin", "FAZ target deleted", by=session["user"], target=label)
+    return jsonify({"deleted": label})
 
 
 # ── Users API (for member picker) ─────────────────────────────────────────────

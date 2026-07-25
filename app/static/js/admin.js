@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  const state = { groups: [], users: [], tabs: [] };
+  const state = { groups: [], users: [], tabs: [], fazTargets: [] };
 
   function el(tag, attrs, children) {
     const e = document.createElement(tag);
@@ -88,6 +88,18 @@
       memberWrap.appendChild(label);
     });
 
+    document.getElementById('groupAdomRestrictInput').checked = !!(group && group.adom_restrict);
+    const targetWrap = document.getElementById('groupTargetCheckboxes');
+    targetWrap.innerHTML = '';
+    state.fazTargets.forEach((t) => {
+      const label = el('label', { class: 'checkbox-item' });
+      const input = el('input', { type: 'checkbox', value: t.label });
+      input.checked = !!(group && group.allowed_adoms && group.allowed_adoms.includes(t.label));
+      label.appendChild(input);
+      label.appendChild(document.createTextNode(' ' + t.label));
+      targetWrap.appendChild(label);
+    });
+
     modal.classList.remove('hidden');
   }
 
@@ -105,6 +117,10 @@
     const members = Array.from(
       document.querySelectorAll('#memberCheckboxes input:checked')
     ).map((i) => i.value);
+    const adom_restrict = document.getElementById('groupAdomRestrictInput').checked;
+    const allowed_adoms = Array.from(
+      document.querySelectorAll('#groupTargetCheckboxes input:checked')
+    ).map((i) => i.value);
 
     const errBox = document.getElementById('groupModalError');
     errBox.classList.add('hidden');
@@ -114,13 +130,13 @@
       resp = await fetch('/admin/api/groups', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, members, allowed_tabs }),
+        body: JSON.stringify({ name, members, allowed_tabs, adom_restrict, allowed_adoms }),
       });
     } else {
       resp = await fetch(`/admin/api/groups/${encodeURIComponent(origName)}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ members, allowed_tabs }),
+        body: JSON.stringify({ members, allowed_tabs, adom_restrict, allowed_adoms }),
       });
     }
     if (!resp.ok) {
@@ -137,6 +153,97 @@
   document.getElementById('groupModalClose').addEventListener('click', closeGroupModal);
   document.getElementById('groupModalCancel').addEventListener('click', closeGroupModal);
   document.getElementById('groupModalSave').addEventListener('click', saveGroup);
+
+  // ── FAZ Targets ────────────────────────────────────────────────────────────
+  function renderFazTargets() {
+    const tbody = document.getElementById('fazTargetsTbody');
+    tbody.innerHTML = '';
+    state.fazTargets.forEach((t) => {
+      const tr = el('tr', {});
+      tr.appendChild(el('td', { text: t.label }));
+      tr.appendChild(el('td', { text: t.host }));
+      tr.appendChild(el('td', { text: t.adom }));
+      const actions = el('td', {});
+      const editBtn = el('button', { class: 'btn btn-sm', text: 'Edit' });
+      editBtn.addEventListener('click', () => openFazTargetModal(t));
+      const delBtn = el('button', { class: 'btn btn-sm', text: 'Delete' });
+      delBtn.addEventListener('click', () => deleteFazTarget(t.label));
+      actions.appendChild(editBtn);
+      actions.appendChild(delBtn);
+      tr.appendChild(actions);
+      tbody.appendChild(tr);
+    });
+  }
+
+  async function loadFazTargets() {
+    const resp = await fetch('/admin/api/faz-targets');
+    state.fazTargets = await resp.json();
+    renderFazTargets();
+  }
+
+  async function deleteFazTarget(label) {
+    if (!confirm(`Delete FAZ target "${label}"?`)) return;
+    await fetch(`/admin/api/faz-targets/${encodeURIComponent(label)}`, { method: 'DELETE' });
+    await loadFazTargets();
+  }
+
+  function openFazTargetModal(target) {
+    const modal = document.getElementById('fazTargetModal');
+    document.getElementById('fazTargetModalMode').value = target ? 'edit' : 'create';
+    document.getElementById('fazTargetModalOrigLabel').value = target ? target.label : '';
+    document.getElementById('fazTargetModalTitle').textContent = target ? 'Edit FAZ Target' : 'New FAZ Target';
+    document.getElementById('fazTargetLabelInput').value = target ? target.label : '';
+    document.getElementById('fazTargetLabelInput').disabled = !!target;
+    document.getElementById('fazTargetHostInput').value = target ? target.host : '';
+    document.getElementById('fazTargetAdomInput').value = target ? target.adom : 'root';
+    document.getElementById('fazTargetTokenInput').value = target ? target.token : '';
+    document.getElementById('fazTargetModalError').classList.add('hidden');
+    modal.classList.remove('hidden');
+  }
+
+  function closeFazTargetModal() {
+    document.getElementById('fazTargetModal').classList.add('hidden');
+  }
+
+  async function saveFazTarget() {
+    const mode = document.getElementById('fazTargetModalMode').value;
+    const origLabel = document.getElementById('fazTargetModalOrigLabel').value;
+    const label = document.getElementById('fazTargetLabelInput').value.trim();
+    const host = document.getElementById('fazTargetHostInput').value.trim();
+    const adom = document.getElementById('fazTargetAdomInput').value.trim() || 'root';
+    const token = document.getElementById('fazTargetTokenInput').value.trim();
+
+    const errBox = document.getElementById('fazTargetModalError');
+    errBox.classList.add('hidden');
+
+    let resp;
+    if (mode === 'create') {
+      resp = await fetch('/admin/api/faz-targets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ label, host, adom, token }),
+      });
+    } else {
+      resp = await fetch(`/admin/api/faz-targets/${encodeURIComponent(origLabel)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ host, adom, token }),
+      });
+    }
+    if (!resp.ok) {
+      const body = await resp.json().catch(() => ({}));
+      errBox.textContent = body.error || 'Save failed.';
+      errBox.classList.remove('hidden');
+      return;
+    }
+    closeFazTargetModal();
+    await loadFazTargets();
+  }
+
+  document.getElementById('btnNewFazTarget').addEventListener('click', () => openFazTargetModal(null));
+  document.getElementById('fazTargetModalClose').addEventListener('click', closeFazTargetModal);
+  document.getElementById('fazTargetModalCancel').addEventListener('click', closeFazTargetModal);
+  document.getElementById('fazTargetModalSave').addEventListener('click', saveFazTarget);
 
   // ── Users ──────────────────────────────────────────────────────────────────
   function renderUsers() {
@@ -207,6 +314,7 @@
     const tabsResp = await fetch('/admin/api/tabs');
     state.tabs = await tabsResp.json();
     await loadUsers();
+    await loadFazTargets();
     await loadGroups();
     await loadLogLevels();
   }

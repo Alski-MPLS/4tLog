@@ -7,6 +7,7 @@
   <button class="admin-tab-btn active" data-panel="panel-groups">Groups &amp; Permissions</button>
   <button class="admin-tab-btn" data-panel="panel-users">Users</button>
   <button class="admin-tab-btn" data-panel="panel-logs">Logs</button>
+  <button class="admin-tab-btn" data-panel="panel-faz-targets">FAZ Targets</button>
 </div>
 
 <div class="admin-panel active" id="panel-groups">
@@ -53,6 +54,21 @@
   <div class="log-container" id="logContainer"></div>
 </div>
 
+<div class="admin-panel" id="panel-faz-targets">
+  <div class="panel-header">
+    <h2>FAZ Targets</h2>
+    <button class="btn btn-primary" id="btnNewFazTarget">+ New Target</button>
+  </div>
+  <div class="table-wrapper">
+    <table class="data-table" id="fazTargetsTable">
+      <thead>
+        <tr><th>Label</th><th>Host</th><th>ADOM</th><th>Actions</th></tr>
+      </thead>
+      <tbody id="fazTargetsTbody"></tbody>
+    </table>
+  </div>
+</div>
+
 <div class="modal-overlay hidden" id="groupModal">
   <div class="modal">
     <div class="modal-header">
@@ -74,11 +90,55 @@
         <label>Members</label>
         <div id="memberCheckboxes" class="checkbox-group"></div>
       </div>
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="groupAdomRestrictInput" />
+          Restrict to specific FAZ targets
+        </label>
+      </div>
+      <div class="form-group" id="groupTargetCheckboxesWrap">
+        <label>Allowed FAZ Targets</label>
+        <div id="groupTargetCheckboxes" class="checkbox-group"></div>
+      </div>
       <div id="groupModalError" class="alert alert-danger hidden"></div>
     </div>
     <div class="modal-footer">
       <button class="btn" id="groupModalCancel">Cancel</button>
       <button class="btn btn-primary" id="groupModalSave">Save Group</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="fazTargetModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="fazTargetModalTitle">New FAZ Target</h3>
+      <button class="modal-close" id="fazTargetModalClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="fazTargetModalMode" value="create" />
+      <input type="hidden" id="fazTargetModalOrigLabel" value="" />
+      <div class="form-group">
+        <label>Label</label>
+        <input type="text" class="form-control" id="fazTargetLabelInput" placeholder="e.g. FortiAnalyzer Primary" />
+      </div>
+      <div class="form-group">
+        <label>Host</label>
+        <input type="text" class="form-control" id="fazTargetHostInput" placeholder="e.g. 192.168.64.4" />
+      </div>
+      <div class="form-group">
+        <label>ADOM</label>
+        <input type="text" class="form-control" id="fazTargetAdomInput" placeholder="root" />
+      </div>
+      <div class="form-group">
+        <label>API Token</label>
+        <input type="text" class="form-control" id="fazTargetTokenInput" placeholder="Bearer token" />
+      </div>
+      <div id="fazTargetModalError" class="alert alert-danger hidden"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" id="fazTargetModalCancel">Cancel</button>
+      <button class="btn btn-primary" id="fazTargetModalSave">Save Target</button>
     </div>
   </div>
 </div>

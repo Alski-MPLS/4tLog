@@ -158,3 +158,78 @@ def test_admin_api_blocked_without_csrf(client):
     _login(client, "admin1")
     resp = client.post("/admin/api/groups", json={"name": "x", "allowed_tabs": []})
     assert resp.status_code == 400
+
+
+@pytest.fixture
+def faz_targets_file(tmp_path, monkeypatch):
+    path = tmp_path / "faz_targets.json"
+    import app.faz_targets as faz_targets_mod
+
+    monkeypatch.setattr(faz_targets_mod, "FAZ_TARGETS_FILE", path)
+    yield path
+
+
+def test_faz_targets_blocked_for_viewer(client, faz_targets_file):
+    _login(client, "viewer1")
+    resp = client.get("/admin/api/faz-targets")
+    assert resp.status_code == 403
+
+
+def test_faz_targets_crud_for_admin(client, faz_targets_file):
+    _login(client, "admin1")
+    csrf = _csrf(client)
+
+    resp = client.get("/admin/api/faz-targets")
+    assert resp.status_code == 200
+    assert resp.get_json() == []
+
+    resp = client.post(
+        "/admin/api/faz-targets",
+        json={"label": "Primary", "host": "192.168.64.4", "adom": "root", "token": "abc"},
+        headers={"X-CSRF-Token": csrf},
+    )
+    assert resp.status_code == 201
+    assert resp.get_json()["label"] == "Primary"
+
+    resp = client.post(
+        "/admin/api/faz-targets",
+        json={"label": "Primary", "host": "10.0.0.9"},
+        headers={"X-CSRF-Token": csrf},
+    )
+    assert resp.status_code == 409
+
+    resp = client.put(
+        "/admin/api/faz-targets/Primary",
+        json={"host": "10.0.0.9", "adom": "lab", "token": "xyz"},
+        headers={"X-CSRF-Token": csrf},
+    )
+    assert resp.status_code == 200
+    assert resp.get_json()["host"] == "10.0.0.9"
+
+    resp = client.delete("/admin/api/faz-targets/Primary", headers={"X-CSRF-Token": csrf})
+    assert resp.status_code == 200
+
+    resp = client.get("/admin/api/faz-targets")
+    assert resp.get_json() == []
+
+
+def test_faz_targets_missing_label_rejected(client, faz_targets_file):
+    _login(client, "admin1")
+    csrf = _csrf(client)
+    resp = client.post(
+        "/admin/api/faz-targets",
+        json={"host": "192.168.64.4"},
+        headers={"X-CSRF-Token": csrf},
+    )
+    assert resp.status_code == 400
+
+
+def test_faz_targets_update_missing_returns_404(client, faz_targets_file):
+    _login(client, "admin1")
+    csrf = _csrf(client)
+    resp = client.put(
+        "/admin/api/faz-targets/Ghost",
+        json={"host": "10.0.0.9", "adom": "root", "token": "x"},
+        headers={"X-CSRF-Token": csrf},
+    )
+    assert resp.status_code == 404
