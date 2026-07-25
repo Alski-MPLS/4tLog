@@ -61,7 +61,12 @@ def test_poll_all_targets_populates_cache_on_success(targets_file, monkeypatch):
     monkeypatch.setattr(Config, "SNMP_ENABLED", False)
 
     def fake_get_sys_status(self):
-        return {"hostname": "FAZ-TEST", "version": "v7.6.7", "serial": "SN1", "ha-mode": "standalone"}
+        return {
+            "hostname": "FAZ-TEST",
+            "version": "v7.6.7",
+            "serial": "SN1",
+            "ha-mode": "standalone",
+        }
 
     def fake_preflight(self):
         return True

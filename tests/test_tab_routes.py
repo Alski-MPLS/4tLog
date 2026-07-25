@@ -79,8 +79,8 @@ def test_admin_nav_has_exactly_one_admin_link(client, app, tmp_path):
 
 @pytest.fixture
 def faz_dashboard_setup(tmp_path, monkeypatch):
-    import app.faz_targets as faz_targets_mod
     import app.faz_health_cache as cache_mod
+    import app.faz_targets as faz_targets_mod
 
     monkeypatch.setattr(faz_targets_mod, "FAZ_TARGETS_FILE", tmp_path / "faz_targets.json")
     monkeypatch.setattr(cache_mod, "_cache", {})
@@ -108,7 +108,11 @@ def test_api_dashboard_filters_by_group_restriction(client, app, faz_dashboard_s
     import app.groups as groups_mod
 
     groups_mod.update_group(
-        "g1", members=["alice"], allowed_tabs=["dashboard"], adom_restrict=True, allowed_adoms=["Primary"]
+        "g1",
+        members=["alice"],
+        allowed_tabs=["dashboard"],
+        adom_restrict=True,
+        allowed_adoms=["Primary"],
     )
     _login(client)
     resp = client.get("/api/dashboard")

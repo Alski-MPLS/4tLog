@@ -13,8 +13,10 @@ Groups API (JSON):
 
 FAZ Targets API (JSON):
   GET    /admin/api/faz-targets
-  POST   /admin/api/faz-targets           {"label": str, "host": str, "adom": str, "token": str, ...snmp overrides}
-  PUT    /admin/api/faz-targets/<label>   {"host": str, "adom": str, "token": str, ...snmp overrides}
+  POST   /admin/api/faz-targets           {"label": str, "host": str, "adom": str, "token": str,
+                                           ...snmp overrides}
+  PUT    /admin/api/faz-targets/<label>   {"host": str, "adom": str, "token": str,
+                                           ...snmp overrides}
   DELETE /admin/api/faz-targets/<label>
 
 Tab registry:
@@ -45,6 +47,14 @@ from app.groups import create_group, delete_group, get_group, list_groups, updat
 bp = Blueprint("admin", __name__, url_prefix="/admin")
 
 registry.register("admin", "Admin", "admin.admin_page")
+
+_SNMP_OVERRIDE_FIELDS = (
+    "snmp_user",
+    "snmp_auth_key",
+    "snmp_priv_key",
+    "snmp_auth_protocol",
+    "snmp_priv_protocol",
+)
 
 
 @bp.route("/")
@@ -137,11 +147,7 @@ def api_faz_targets_create():
     host = data.get("host", "")
     adom = data.get("adom", "root")
     token = data.get("token", "")
-    snmp_overrides = {
-        k: data[k]
-        for k in ("snmp_user", "snmp_auth_key", "snmp_priv_key", "snmp_auth_protocol", "snmp_priv_protocol")
-        if data.get(k)
-    }
+    snmp_overrides = {k: data[k] for k in _SNMP_OVERRIDE_FIELDS if data.get(k)}
     ok = create_target(label, host, adom, token, snmp_overrides)
     if not ok:
         return jsonify({"error": f"Target '{label}' already exists"}), 409
@@ -156,11 +162,7 @@ def api_faz_targets_update(label: str):
     host = data.get("host", "")
     adom = data.get("adom", "root")
     token = data.get("token", "")
-    snmp_overrides = {
-        k: data[k]
-        for k in ("snmp_user", "snmp_auth_key", "snmp_priv_key", "snmp_auth_protocol", "snmp_priv_protocol")
-        if data.get(k)
-    }
+    snmp_overrides = {k: data[k] for k in _SNMP_OVERRIDE_FIELDS if data.get(k)}
     ok = update_target(label, host, adom, token, snmp_overrides)
     if not ok:
         return jsonify({"error": f"Target '{label}' not found"}), 404
