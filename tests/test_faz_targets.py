@@ -1,0 +1,74 @@
+import pytest
+
+
+@pytest.fixture
+def targets_file(tmp_path, monkeypatch):
+    path = tmp_path / "faz_targets.json"
+    import app.faz_targets as faz_targets_mod
+
+    monkeypatch.setattr(faz_targets_mod, "FAZ_TARGETS_FILE", path)
+    yield path
+
+
+def test_list_empty_when_no_file(targets_file):
+    from app.faz_targets import list_targets
+
+    assert list_targets() == []
+
+
+def test_create_list_get(targets_file):
+    from app.faz_targets import create_target, get_target, list_targets
+
+    assert create_target("Primary", host="192.168.64.4", adom="root", token="abc123") is True
+    assert [t["label"] for t in list_targets()] == ["Primary"]
+    t = get_target("Primary")
+    assert t["host"] == "192.168.64.4"
+    assert t["adom"] == "root"
+    assert t["token"] == "abc123"
+
+
+def test_create_duplicate_label_fails(targets_file):
+    from app.faz_targets import create_target
+
+    assert create_target("Primary", host="192.168.64.4") is True
+    assert create_target("Primary", host="10.0.0.9") is False
+
+
+def test_create_with_snmp_overrides(targets_file):
+    from app.faz_targets import create_target, get_target
+
+    create_target(
+        "Primary",
+        host="192.168.64.4",
+        snmp_overrides={"snmp_user": "monitor2", "snmp_auth_key": "k1"},
+    )
+    t = get_target("Primary")
+    assert t["snmp_user"] == "monitor2"
+    assert t["snmp_auth_key"] == "k1"
+
+
+def test_update_target(targets_file):
+    from app.faz_targets import create_target, get_target, update_target
+
+    create_target("Primary", host="192.168.64.4", adom="root", token="abc123")
+    ok = update_target("Primary", host="10.0.0.9", adom="lab", token="xyz789")
+    assert ok is True
+    t = get_target("Primary")
+    assert t["host"] == "10.0.0.9"
+    assert t["adom"] == "lab"
+    assert t["token"] == "xyz789"
+
+
+def test_update_missing_target_fails(targets_file):
+    from app.faz_targets import update_target
+
+    assert update_target("Ghost", host="10.0.0.9", adom="root", token="x") is False
+
+
+def test_delete_target(targets_file):
+    from app.faz_targets import create_target, delete_target, list_targets
+
+    create_target("Primary", host="192.168.64.4")
+    assert delete_target("Primary") is True
+    assert list_targets() == []
+    assert delete_target("Primary") is False
