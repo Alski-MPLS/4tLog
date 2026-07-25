@@ -62,10 +62,10 @@ def test_poll_all_targets_populates_cache_on_success(targets_file, monkeypatch):
 
     def fake_get_sys_status(self):
         return {
-            "hostname": "FAZ-TEST",
-            "version": "v7.6.7",
-            "serial": "SN1",
-            "ha-mode": "standalone",
+            "Hostname": "FAZ-TEST",
+            "Version": "v7.6.7",
+            "Serial Number": "SN1",
+            "Disk Usage": "Free 100GB, Total 200GB",
         }
 
     def fake_preflight(self):
@@ -80,6 +80,8 @@ def test_poll_all_targets_populates_cache_on_success(targets_file, monkeypatch):
     assert entry is not None
     assert entry["status"] == "green"
     assert entry["hostname"] == "FAZ-TEST"
+    assert entry["serial"] == "SN1"
+    assert entry["disk_used"] == "Free 100GB, Total 200GB"
     assert entry["error"] is None
 
 
@@ -115,10 +117,9 @@ def test_poll_all_targets_survives_malformed_target(targets_file, monkeypatch):
 
     def fake_get_sys_status(self):
         return {
-            "hostname": "FAZ-TEST",
-            "version": "v7.6.7",
-            "serial": "SN1",
-            "ha-mode": "standalone",
+            "Hostname": "FAZ-TEST",
+            "Version": "v7.6.7",
+            "Serial Number": "SN1",
         }
 
     def fake_preflight(self):

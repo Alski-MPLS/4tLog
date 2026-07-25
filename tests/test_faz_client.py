@@ -39,6 +39,17 @@ def test_preflight_success(monkeypatch):
     assert calls[0]["json"]["params"][0]["url"] == "/logview/adom/root/logfields"
 
 
+def test_preflight_success_with_bare_result_and_no_status_field(monkeypatch):
+    # Confirmed live against 192.168.64.4: /logview/adom/<adom>/logfields
+    # returns result as a bare dict ({"data": [...]}) with no "status" key
+    # at all — absence of "status" means success, not an implicit error.
+    client, _ = _client(
+        monkeypatch,
+        [{"jsonrpc": "2.0", "id": 1, "result": {"data": [{"index": 10, "field": []}]}}],
+    )
+    assert client.preflight() is True
+
+
 def test_preflight_permission_denied_raises(monkeypatch):
     from app.faz_client import FAZError
 

@@ -74,8 +74,13 @@ class FAZClient:
             result = result[0] if result else {}
         if not isinstance(result, dict):
             raise FAZError(f"Unexpected FortiAnalyzer response shape: {data!r}")
-        status = result.get("status", {})
-        if status.get("code", -1) != 0:
+        # Confirmed live against 192.168.64.4: only some resources (e.g.
+        # /sys/status) nest a "status" field in their result item. Others
+        # (e.g. /logview/adom/<adom>/logfields) return a bare {"data": [...]}
+        # with no "status" key at all — its absence means success, not
+        # failure, so it must not be treated as an implicit error code.
+        status = result.get("status")
+        if status is not None and status.get("code", 0) != 0:
             raise FAZError(status.get("message", "Unknown FortiAnalyzer error"))
         return result
 
