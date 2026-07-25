@@ -8,7 +8,14 @@ function escHtml(str) {
 }
 
 function toFazTime(date) {
-  return date.toISOString().replace(/\.\d{3}Z$/, '');
+  // FortiAnalyzer interprets time-range.start/end in the appliance's own
+  // local timezone, not UTC (confirmed live: an otherwise-valid filter
+  // returned "-32603 Internal error" when passed a UTC-based window that
+  // fell in the future relative to the appliance's local clock, and
+  // succeeded once given the same wall-clock hour in local time). Format
+  // in the browser's local time, not toISOString()'s UTC.
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
 }
 
 function presetToRange(preset) {
