@@ -9,9 +9,9 @@ and adds TLS for the Docker deployment (reverse-proxy container terminating
 TLS in front of the app, mirroring the RHEL/Nginx setup) — see
 [container.md](container.md). Phase 3 makes the Log Search tab real: a
 targeted FortiAnalyzer traffic-log search (required source/destination IP,
-optional port/service and advanced field filters, time range) with
-results in a scrollable table (up to the configured result cap) and
-client-side CSV/JSON export.
+optional port/service and advanced field filters, time range) with a
+paginated results table (client-side, page size 10/25/50/100, up to the
+configured result cap) and client-side CSV/JSON export.
 
 See [CLAUDE.md](CLAUDE.md) for architecture notes and
 [docs/superpowers/specs/2026-07-24-web-app-design.md](docs/superpowers/specs/2026-07-24-web-app-design.md)
@@ -34,9 +34,12 @@ for the full design.
   the same `adom_restrict`/`allowed_adoms` group fields as ADOM access
   control.
 - **Log Search Tab**: targeted FAZ log search — source/destination IP
-  (required, no ANY/ANY), optional port/service and advanced field filters,
-  time range (presets or custom), results in a scrollable table (up to the
-  configured result cap), CSV/JSON export of the currently-loaded results
+  (required, no ANY/ANY; either side may be `ANY`/`ALL` or left blank to mean
+  "no filter on this field"), optional port/service and advanced field
+  filters, time range (presets or custom), a paginated results table
+  (client-side, page size 10/25/50/100, Source/Destination IP columns pinned
+  first, up to the configured result cap), CSV/JSON export of the
+  currently-loaded results
 - **Inline Help**: a "?" button in the nav opens a help panel with
   Dashboard/Log Search/Admin guidance, filtered to the logged-in user's
   permitted tabs

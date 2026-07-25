@@ -2,6 +2,20 @@
 
 let currentRows = [];
 let currentFields = [];
+let currentPage = 1;
+let pageSize = 25;
+
+// Pinned to the front of the results table (in this order) when present,
+// with friendlier header labels — the rest of the returned fields follow
+// in their existing (alphabetical) order.
+const PINNED_FIELDS = ['srcip', 'dstip'];
+const FIELD_LABELS = { srcip: 'Source IP', dstip: 'Destination IP' };
+
+function orderFields(fields) {
+  const pinned = PINNED_FIELDS.filter((f) => fields.includes(f));
+  const rest = fields.filter((f) => !pinned.includes(f));
+  return [...pinned, ...rest];
+}
 
 function escHtml(str) {
   return String(str ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -95,15 +109,43 @@ function collectExtraFilters() {
   })).filter((f) => f.field && f.value);
 }
 
-function renderResults(result) {
-  currentRows = result.rows;
-  currentFields = result.fields;
+function totalPages() {
+  return Math.max(1, Math.ceil(currentRows.length / pageSize));
+}
+
+function goToPage(page) {
+  currentPage = Math.min(Math.max(1, page), totalPages());
+  renderPage();
+}
+
+function renderPage() {
   const headerRow = document.getElementById('resultsHeaderRow');
   const body = document.getElementById('resultsBody');
-  headerRow.innerHTML = currentFields.map((f) => `<th>${escHtml(f)}</th>`).join('');
-  body.innerHTML = currentRows.map((row) =>
+  headerRow.innerHTML = currentFields.map((f) => `<th>${escHtml(FIELD_LABELS[f] || f)}</th>`).join('');
+
+  const start = (currentPage - 1) * pageSize;
+  const pageRows = currentRows.slice(start, start + pageSize);
+  body.innerHTML = pageRows.map((row) =>
     `<tr>${currentFields.map((f) => `<td>${escHtml(row[f])}</td>`).join('')}</tr>`
   ).join('');
+
+  const total = currentRows.length;
+  const pages = totalPages();
+  document.getElementById('resultsSummary').textContent = total === 0
+    ? 'No results'
+    : `Showing ${start + 1}–${Math.min(start + pageSize, total)} of ${total}`;
+  document.getElementById('pageIndicator').textContent = `Page ${currentPage} of ${pages}`;
+  document.getElementById('firstPageBtn').disabled = currentPage <= 1;
+  document.getElementById('prevPageBtn').disabled = currentPage <= 1;
+  document.getElementById('nextPageBtn').disabled = currentPage >= pages;
+  document.getElementById('lastPageBtn').disabled = currentPage >= pages;
+}
+
+function renderResults(result) {
+  currentRows = result.rows;
+  currentFields = orderFields(result.fields);
+  currentPage = 1;
+  renderPage();
   document.getElementById('truncatedBanner').classList.toggle('hidden', !result.truncated);
   document.getElementById('exportCsvBtn').disabled = currentRows.length === 0;
   document.getElementById('exportJsonBtn').disabled = currentRows.length === 0;
@@ -207,5 +249,14 @@ document.getElementById('addFilterBtn').addEventListener('click', addFilterRow);
 document.getElementById('searchForm').addEventListener('submit', runSearch);
 document.getElementById('exportCsvBtn').addEventListener('click', exportCsv);
 document.getElementById('exportJsonBtn').addEventListener('click', exportJson);
+document.getElementById('pageSizeSelect').addEventListener('change', function () {
+  pageSize = parseInt(this.value, 10);
+  goToPage(1);
+});
+document.getElementById('firstPageBtn').addEventListener('click', () => goToPage(1));
+document.getElementById('prevPageBtn').addEventListener('click', () => goToPage(currentPage - 1));
+document.getElementById('nextPageBtn').addEventListener('click', () => goToPage(currentPage + 1));
+document.getElementById('lastPageBtn').addEventListener('click', () => goToPage(totalPages()));
 
+renderPage();
 loadTargets();

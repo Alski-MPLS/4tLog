@@ -432,6 +432,7 @@ a:hover { text-decoration: underline; }
   color: var(--text-muted);
 }
 
+.table-controls-left { display: flex; align-items: center; gap: .5rem; }
 .table-controls-right { display: flex; align-items: center; gap: .4rem; }
 
 .data-table {

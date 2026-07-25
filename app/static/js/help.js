@@ -47,8 +47,10 @@ const SECTIONS = [
 <p>Accepts a port number (<code>443</code>), <code>tcp:443</code>/<code>udp:53</code>, a range (<code>tcp:1000-1200</code>), or a bare service name (<code>HTTPS</code>). Leave blank to match any port/service.</p>
 <h3>Advanced filters</h3>
 <p>Use "+ Add filter" to add extra field/operator/value rows beyond the basics — narrows the search further.</p>
+<h3>Results table</h3>
+<p>Source IP and Destination IP are always shown as the first two columns when present. Use "Show" to pick how many rows appear per page (10/25/50/100) and the &laquo;/&lsaquo;/&rsaquo;/&raquo; controls to move between pages.</p>
 <h3>Export</h3>
-<p>"Export CSV"/"Export JSON" download exactly the rows currently shown in the results table.</p>
+<p>"Export CSV"/"Export JSON" download the full set of currently-loaded results (up to the result cap), not just the page currently shown.</p>
 `,
   },
   {

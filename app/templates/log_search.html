@@ -81,6 +81,16 @@
 
 <div class="table-wrapper">
   <div class="table-controls">
+    <div class="table-controls-left">
+      <span id="resultsSummary"></span>
+      <label for="pageSizeSelect">Show</label>
+      <select id="pageSizeSelect" class="form-select-sm">
+        <option value="10">10</option>
+        <option value="25" selected>25</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select>
+    </div>
     <div class="table-controls-right">
       <button class="btn btn-sm btn-secondary" id="exportCsvBtn" disabled>Export CSV</button>
       <button class="btn btn-sm btn-secondary" id="exportJsonBtn" disabled>Export JSON</button>
@@ -90,9 +100,16 @@
     <thead><tr id="resultsHeaderRow"></tr></thead>
     <tbody id="resultsBody"></tbody>
   </table>
+  <div class="pagination" id="paginationControls">
+    <button type="button" class="pg-btn" id="firstPageBtn" title="First page">&laquo;</button>
+    <button type="button" class="pg-btn" id="prevPageBtn" title="Previous page">&lsaquo;</button>
+    <span id="pageIndicator"></span>
+    <button type="button" class="pg-btn" id="nextPageBtn" title="Next page">&rsaquo;</button>
+    <button type="button" class="pg-btn" id="lastPageBtn" title="Last page">&raquo;</button>
+  </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/log_search.js') }}?v=3"></script>
+<script src="{{ url_for('static', filename='js/log_search.js') }}?v=4"></script>
 {% endblock %}
