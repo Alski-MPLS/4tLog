@@ -7,6 +7,8 @@ This folder contains a local Ansible playbook for querying FortiAnalyzer log dat
 - print the raw response in the terminal
 - write the response to a JSON export file under `ansible/output/`
 
+As of Phase 3, the Flask app's Log Search tab (`/log-search`) supersedes this playbook for interactive use — it ports the same filter-building and submit/poll/fetch logic into `app/faz_client.py`/`app/log_search_filters.py` with a web UI, required source/destination IP filters, and CSV/JSON export. This playbook remains for reference and for any scripted/CLI use case outside the web app.
+
 The current playbook uses the FAZ test server at `192.168.64.4` and authenticates with an API key passed in at runtime. The exact log-search resource path is configurable because FortiAnalyzer permissions and firmware versions can change the route that is exposed to a given API key.
 
 ## Files

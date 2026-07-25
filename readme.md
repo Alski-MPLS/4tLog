@@ -7,8 +7,10 @@ Dashboard tab real — live FortiAnalyzer health cards backed by a background
 poller, plus an Admin sub-tab for managing which FAZ appliances are polled —
 and adds TLS for the Docker deployment (reverse-proxy container terminating
 TLS in front of the app, mirroring the RHEL/Nginx setup) — see
-[container.md](container.md). The Log Search tab (filtering, pagination,
-export) remains a placeholder pending Phase 3.
+[container.md](container.md). Phase 3 makes the Log Search tab real: a
+targeted FortiAnalyzer traffic-log search (required source/destination IP,
+optional port/service and advanced field filters, time range) with
+paginated results and client-side CSV/JSON export.
 
 See [CLAUDE.md](CLAUDE.md) for architecture notes and
 [docs/superpowers/specs/2026-07-24-web-app-design.md](docs/superpowers/specs/2026-07-24-web-app-design.md)
@@ -30,7 +32,13 @@ for the full design.
   Group membership can restrict which targets a user's cards show, reusing
   the same `adom_restrict`/`allowed_adoms` group fields as ADOM access
   control.
-- **Log Search Tab**: placeholder for query builder and results (Phase 3)
+- **Log Search Tab**: targeted FAZ log search — source/destination IP
+  (required, no ANY/ANY), optional port/service and advanced field filters,
+  time range (presets or custom), paginated results, CSV/JSON export of the
+  currently-loaded results
+- **Inline Help**: a "?" button in the nav opens a help panel with
+  Dashboard/Log Search/Admin guidance, filtered to the logged-in user's
+  permitted tabs
 - **Deployment**: Docker (with TLS via an Nginx reverse-proxy sidecar
   container) and RHEL bare-metal (Gunicorn/Nginx/systemd)
 
@@ -55,7 +63,7 @@ uv run python wsgi.py              # http://localhost:5443 (PORT defaults to 544
 
 The original proof-of-concept for FAZ log search was an Ansible playbook.
 `app/faz_client.py` (Phase 2) already replaces its health/status calls;
-the playbook's log-search filter-building logic will be ported into
-`faz_client.py`'s `search_logs()`/`build_filter_expression()` in Phase 3.
+the playbook's log-search filter-building logic has been ported into
+`faz_client.py`'s `search_logs()`/`build_filter_expression()` as of Phase 3.
 Until then the playbook remains in the repo for reference — see
 [ansible/readme.md](ansible/readme.md).
