@@ -7,11 +7,13 @@ confirmed by direct curl comparison against the test appliance
 no-auth-header-at-all produced byte-identical "-11 No permission" errors,
 while Authorization: Bearer returned real data.
 
-Only login()/logout()/preflight()/get_sys_status() are implemented here —
-search_logs() and build_filter_expression() (ported from the Ansible
-playbook's Jinja filter-building logic) are added in Phase 3 when the Log
-Search tab is their first consumer.
+login()/logout()/preflight()/get_sys_status() cover health/status calls;
+build_filter_expression()/get_log_fields()/search_logs() (ported from the
+Ansible playbook's Jinja filter-building and submit->poll->fetch logic)
+support the Phase 3 Log Search tab.
 """
+
+import time
 
 import requests
 import urllib3
@@ -20,6 +22,28 @@ import urllib3
 class FAZError(Exception):
     """Raised when FortiAnalyzer returns a non-zero status code, a JSON-RPC
     error envelope, or an unexpected response shape."""
+
+
+class FAZSearchTimeout(FAZError):
+    """Raised when a log search doesn't reach 100% within the configured timeout."""
+
+
+def summarize_connection_error(exc: Exception) -> str:
+    """Collapse a raw requests/urllib3 exception into a short, UI-friendly
+    label. The full exception text still belongs in the app log."""
+    if isinstance(exc, requests.exceptions.ConnectTimeout):
+        return "Connection timed out"
+    if isinstance(exc, requests.exceptions.SSLError):
+        return "TLS/SSL error"
+    if isinstance(exc, requests.exceptions.ConnectionError):
+        if "Connection refused" in str(exc):
+            return "Connection refused"
+        if "Name or service not known" in str(exc) or "nodename nor servname" in str(exc):
+            return "DNS resolution failed"
+        return "Unable to connect"
+    if isinstance(exc, requests.exceptions.Timeout):
+        return "Request timed out"
+    return "Connection failed"
 
 
 class FAZClient:
@@ -122,6 +146,102 @@ class FAZClient:
         self._unwrap_result(self._post(body))
         return True
 
+    def get_log_fields(self, logtype: str = "traffic", devtype: str = "FortiGate") -> list[dict]:
+        """Field list for a logtype, from the same logview/logfields resource
+        preflight() already probes. Confirmed live against 192.168.64.4: the
+        response is a bare {"data": [{"field": [...]}]} with no "status" key
+        (see _unwrap_result's handling of that)."""
+        body = {
+            "jsonrpc": "2.0",
+            "id": self._next_id(),
+            "method": "get",
+            "params": [
+                {
+                    "url": self.preflight_resource,
+                    "apiver": 3,
+                    "devtype": devtype,
+                    "logtype": logtype,
+                }
+            ],
+            "session": None,
+        }
+        result = self._unwrap_result(self._post(body))
+        data = result.get("data", [])
+        if isinstance(data, list) and data and "field" in data[0]:
+            return data[0]["field"]
+        return []
+
+    def search_logs(
+        self,
+        logtype: str,
+        device: str,
+        filter_expression: str,
+        start_time: str,
+        end_time: str,
+        limit: int = 1000,
+        poll_interval: float = 2.0,
+        timeout: float = 60.0,
+    ) -> dict:
+        """Submit a FAZ log search, poll until 100% or timeout, and return
+        {"rows": [...], "fields": [...], "truncated": bool}. Ported from
+        ansible/faz_log_search.yml's submit->poll->fetch loop, using the
+        documented /logview/adom/<adom>/logsearch resource
+        (api-info/.../logview.json) rather than the playbook's probed path."""
+        submit_body = {
+            "jsonrpc": "2.0",
+            "id": self._next_id(),
+            "method": "add",
+            "params": [
+                {
+                    "url": f"/logview/adom/{self.adom}/logsearch",
+                    "apiver": 3,
+                    "device": [{"devid": device}],
+                    "filter": filter_expression,
+                    "limit": limit,
+                    "logtype": logtype,
+                    "offset": 0,
+                    "case-sensitive": False,
+                    "time-order": "desc",
+                    "time-range": {"start": start_time, "end": end_time},
+                }
+            ],
+            "session": None,
+        }
+        submit_result = self._unwrap_result(self._post(submit_body))
+        tid = submit_result.get("tid")
+        if tid is None:
+            raise FAZError(f"Log search submit returned no task ID: {submit_result!r}")
+
+        fetch_url = f"/logview/adom/{self.adom}/logsearch/{tid}"
+        deadline = time.monotonic() + timeout
+        last_result: dict = {}
+        while True:
+            if time.monotonic() >= deadline:
+                raise FAZSearchTimeout(
+                    f"Log search did not complete within {timeout}s "
+                    f"(last percentage={last_result.get('percentage', 0)})"
+                )
+            fetch_body = {
+                "jsonrpc": "2.0",
+                "id": self._next_id(),
+                "method": "get",
+                "params": [{"url": fetch_url, "apiver": 3, "limit": limit, "offset": 0}],
+                "session": None,
+            }
+            last_result = self._unwrap_result(self._post(fetch_body))
+            if last_result.get("percentage", 0) >= 100:
+                break
+            time.sleep(poll_interval)
+
+        rows = last_result.get("data", [])
+        fields = sorted({key for row in rows for key in row}) if rows else []
+        return_lines = last_result.get("return-lines", len(rows))
+        return {
+            "rows": rows,
+            "fields": fields,
+            "truncated": return_lines >= limit,
+        }
+
     def get_sys_status(self) -> dict:
         """Return FortiAnalyzer /sys/status: hostname, version, serial, HA
         mode, disk usage. The exact field names in the returned dict are
@@ -139,3 +259,23 @@ class FAZClient:
         }
         result = self._unwrap_result(self._post(body))
         return result.get("data", {})
+
+    @staticmethod
+    def build_filter_expression(
+        source_clauses: list[str],
+        destination_clauses: list[str],
+        port_clauses: list[str],
+        extra_filters: list[dict] | None = None,
+    ) -> str:
+        """Combine already-parsed clause fragments (see app/log_search_filters.py)
+        into one FAZ filter expression. Entries within one group are OR'd
+        together; the groups themselves are AND'd against each other."""
+        groups: list[str] = []
+        for clause_list in (source_clauses, destination_clauses, port_clauses):
+            if clause_list:
+                groups.append("(" + " or ".join(clause_list) + ")")
+        for f in extra_filters or []:
+            value = str(f["value"])
+            quoted_value = value if value.lstrip("-").isdigit() else f'"{value}"'
+            groups.append(f'{f["field"]}{f["op"]}{quoted_value}')
+        return " and ".join(groups)

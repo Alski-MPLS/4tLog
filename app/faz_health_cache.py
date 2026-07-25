@@ -19,7 +19,6 @@ import asyncio
 import datetime
 import threading
 
-import requests
 from flask import Flask
 from pysnmp.hlapi.v3arch.asyncio import (
     USM_AUTH_HMAC96_SHA,
@@ -39,7 +38,7 @@ from pysnmp.hlapi.v3arch.asyncio import (
 
 from app.app_logger import app_log
 from app.config import Config
-from app.faz_client import FAZClient, FAZError
+from app.faz_client import FAZClient, FAZError, summarize_connection_error
 from app.faz_targets import list_targets
 
 _lock = threading.RLock()
@@ -143,24 +142,6 @@ def _now() -> str:
     return datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
 
 
-def _summarize_connection_error(exc: Exception) -> str:
-    """Collapse a raw requests/urllib3 exception into a short, card-friendly
-    label. The full exception text still goes to the app log for admins."""
-    if isinstance(exc, requests.exceptions.ConnectTimeout):
-        return "Connection timed out"
-    if isinstance(exc, requests.exceptions.SSLError):
-        return "TLS/SSL error"
-    if isinstance(exc, requests.exceptions.ConnectionError):
-        if "Connection refused" in str(exc):
-            return "Connection refused"
-        if "Name or service not known" in str(exc) or "nodename nor servname" in str(exc):
-            return "DNS resolution failed"
-        return "Unable to connect"
-    if isinstance(exc, requests.exceptions.Timeout):
-        return "Request timed out"
-    return "Connection failed"
-
-
 def _poll_target(target: dict) -> dict:
     label = target["label"]
     host = target["host"]
@@ -196,7 +177,7 @@ def _poll_target(target: dict) -> dict:
         entry["error"] = str(exc)
         return entry
     except Exception as exc:  # network errors, timeouts, DNS failures, etc.
-        entry["error"] = _summarize_connection_error(exc)
+        entry["error"] = summarize_connection_error(exc)
         app_log("WARNING", "faz_health_cache", f"Poll failed for {label} ({host}): {exc}")
         return entry
 
