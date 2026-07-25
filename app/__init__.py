@@ -82,4 +82,10 @@ def create_app() -> Flask:
             "csrf_token": ensure_csrf_token(),
         }
 
+    if not app.config.get("_FAZ_HEALTH_STARTED"):
+        app.config["_FAZ_HEALTH_STARTED"] = True
+        from app.faz_health_cache import init_scheduler as init_faz_health_scheduler
+
+        init_faz_health_scheduler(app)
+
     return app
