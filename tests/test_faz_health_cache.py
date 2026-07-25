@@ -1,6 +1,23 @@
 import pytest
 
 
+@pytest.fixture(autouse=True)
+def clear_faz_health_cache():
+    """Clear the faz_health_cache module-level cache before each test in this file."""
+    try:
+        import app.faz_health_cache as cache_mod
+        cache_mod._cache.clear()
+    except ImportError:
+        pass
+    yield
+    # Also clear after test to be safe
+    try:
+        import app.faz_health_cache as cache_mod
+        cache_mod._cache.clear()
+    except ImportError:
+        pass
+
+
 @pytest.fixture
 def targets_file(tmp_path, monkeypatch):
     path = tmp_path / "faz_targets.json"
