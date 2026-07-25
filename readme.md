@@ -13,6 +13,10 @@ optional port/service and advanced field filters, time range) with a
 paginated results table (client-side, page size 10/25/50/100, up to the
 configured result cap) and client-side CSV/JSON export.
 
+**Note**: This is an independent open-source project and is not affiliated
+with, endorsed by, or supported by Fortinet, Inc. FortiManager is a
+trademark of Fortinet, Inc.
+
 See [CLAUDE.md](CLAUDE.md) for architecture notes and
 [docs/superpowers/specs/2026-07-24-web-app-design.md](docs/superpowers/specs/2026-07-24-web-app-design.md)
 for the full design.
