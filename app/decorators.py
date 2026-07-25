@@ -116,7 +116,8 @@ def admin_required(f):
 def check_adom_access(adom: str) -> "tuple | None":
     """Return a 403 JSON response tuple if the current user cannot access ``adom``.
 
-    Not called by any route until Phase 2's FAZ-target routes exist.
+    Called by Dashboard routes (Phase 2) and the Log Search fields/devices/
+    search routes (Phase 3, app/routes/log_search_routes.py).
     """
     if flask_session.get("role") == "admin":
         return None

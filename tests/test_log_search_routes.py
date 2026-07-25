@@ -133,6 +133,8 @@ def test_search_happy_path(client, monkeypatch):
     monkeypatch.setattr("app.faz_client.FAZClient.search_logs", fake_search_logs)
     monkeypatch.setattr("app.faz_client.FAZClient.logout", lambda self: None)
 
+    from app.app_logger import get_log_entries
+
     _login(client)
     csrf = _csrf(client)
     resp = client.post(
@@ -148,6 +150,31 @@ def test_search_happy_path(client, monkeypatch):
     body = resp.get_json()
     assert body["rows"] == [{"srcip": "10.1.1.5"}]
     assert body["truncated"] is False
+
+    entries = get_log_entries(component="log_search")
+    assert any(
+        e["level"] == "INFO" and e["message"] == "Search completed" and e["extra"]["rows"] == 1
+        for e in entries
+    )
+
+
+def test_search_rejects_extra_filter_injection(client):
+    _login(client)
+    csrf = _csrf(client)
+    resp = client.post(
+        "/api/log-search",
+        json={
+            "target": "Primary", "logtype": "traffic", "device": "All_FortiGate",
+            "start_time": "2026-07-25T00:00:00", "end_time": "2026-07-25T23:59:59",
+            "source_ips": "10.1.1.5", "destination_ips": "", "ports": "",
+            "extra_filters": [
+                {"field": "srcip", "op": "==", "value": '0.0.0.0" or dstip>="0.0.0.0'}
+            ],
+        },
+        headers={"X-CSRF-Token": csrf},
+    )
+    assert resp.status_code == 400
+    assert "quote" in resp.get_json()["error"]
 
 
 def test_search_returns_502_on_faz_error(client, monkeypatch):

@@ -10,7 +10,8 @@ TLS in front of the app, mirroring the RHEL/Nginx setup) — see
 [container.md](container.md). Phase 3 makes the Log Search tab real: a
 targeted FortiAnalyzer traffic-log search (required source/destination IP,
 optional port/service and advanced field filters, time range) with
-paginated results and client-side CSV/JSON export.
+results in a scrollable table (up to the configured result cap) and
+client-side CSV/JSON export.
 
 See [CLAUDE.md](CLAUDE.md) for architecture notes and
 [docs/superpowers/specs/2026-07-24-web-app-design.md](docs/superpowers/specs/2026-07-24-web-app-design.md)
@@ -34,8 +35,8 @@ for the full design.
   control.
 - **Log Search Tab**: targeted FAZ log search — source/destination IP
   (required, no ANY/ANY), optional port/service and advanced field filters,
-  time range (presets or custom), paginated results, CSV/JSON export of the
-  currently-loaded results
+  time range (presets or custom), results in a scrollable table (up to the
+  configured result cap), CSV/JSON export of the currently-loaded results
 - **Inline Help**: a "?" button in the nav opens a help panel with
   Dashboard/Log Search/Admin guidance, filtered to the logged-in user's
   permitted tabs

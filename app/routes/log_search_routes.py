@@ -12,6 +12,7 @@ API (JSON):
 from flask import Blueprint, jsonify, render_template, request, session
 
 from app import registry
+from app.app_logger import app_log
 from app.config import Config
 from app.decorators import check_adom_access, tab_required
 from app.faz_client import FAZClient, FAZError, FAZSearchTimeout, summarize_connection_error
@@ -99,33 +100,53 @@ def api_devices():
 def api_search():
     data = request.get_json(silent=True) or {}
     target_label = data.get("target", "")
+    user = session["user"]
     err = check_adom_access(target_label)
     if err is not None:
+        app_log(
+            "WARN", "log_search", "Search denied: ADOM access not permitted",
+            by=user, target=target_label,
+        )
         return err
     target = get_target(target_label)
     if target is None:
+        app_log(
+            "WARN", "log_search", "Search failed: target not found",
+            by=user, target=target_label,
+        )
         return jsonify({"error": f"Target '{target_label}' not found"}), 404
 
     source_raw = data.get("source_ips", "") or ""
     dest_raw = data.get("destination_ips", "") or ""
     if not source_raw.strip() and not dest_raw.strip():
+        app_log(
+            "WARN", "log_search", "Search rejected: no source or destination IP",
+            by=user, target=target_label,
+        )
         return jsonify({"error": "At least one of source or destination IP is required"}), 400
 
     start_time = data.get("start_time", "")
     end_time = data.get("end_time", "")
     if not start_time or not end_time:
+        app_log(
+            "WARN", "log_search", "Search rejected: missing start_time/end_time",
+            by=user, target=target_label,
+        )
         return jsonify({"error": "start_time and end_time are required"}), 400
 
     try:
         source_clauses = parse_ip_entries(source_raw, "srcip") if source_raw.strip() else []
         dest_clauses = parse_ip_entries(dest_raw, "dstip") if dest_raw.strip() else []
         port_clauses = parse_port_entries(data.get("ports", "") or "")
+        filter_expression = FAZClient.build_filter_expression(
+            source_clauses, dest_clauses, port_clauses, data.get("extra_filters") or []
+        )
     except FilterValidationError as exc:
+        app_log(
+            "WARN", "log_search", "Search rejected: invalid filter input",
+            by=user, target=target_label, error=str(exc),
+        )
         return jsonify({"error": str(exc)}), 400
-
-    filter_expression = FAZClient.build_filter_expression(
-        source_clauses, dest_clauses, port_clauses, data.get("extra_filters") or []
-    )
 
     try:
         with _client_for(target) as client:
@@ -139,13 +160,31 @@ def api_search():
                 poll_interval=Config.LOG_SEARCH_POLL_INTERVAL,
                 timeout=Config.LOG_SEARCH_TIMEOUT,
             )
-    except FAZSearchTimeout:
+    except FAZSearchTimeout as exc:
+        app_log(
+            "WARN", "log_search", "Search timed out",
+            by=user, target=target_label, filter_expression=filter_expression, error=str(exc),
+        )
         return jsonify(
             {"error": "Search is taking too long — narrow the time range or add more filters."}
         ), 504
     except FAZError as exc:
+        app_log(
+            "WARN", "log_search", "Search failed: FortiAnalyzer error",
+            by=user, target=target_label, filter_expression=filter_expression, error=str(exc),
+        )
         return jsonify({"error": str(exc)}), 502
     except Exception as exc:
+        app_log(
+            "WARN", "log_search", "Search failed: connection error",
+            by=user, target=target_label, filter_expression=filter_expression,
+            error=summarize_connection_error(exc),
+        )
         return jsonify({"error": summarize_connection_error(exc)}), 502
 
+    app_log(
+        "INFO", "log_search", "Search completed",
+        by=user, target=target_label, filter_expression=filter_expression,
+        rows=len(result.get("rows", [])),
+    )
     return jsonify(result)

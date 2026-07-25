@@ -24,12 +24,20 @@ function presetToRange(preset) {
 }
 
 async function loadTargets() {
-  const resp = await fetch('/api/log-search/targets');
-  if (resp.status === 401) { location.href = '/login'; return; }
-  const targets = await resp.json();
   const select = document.getElementById('targetSelect');
-  select.innerHTML = targets.map((t) => `<option value="${escHtml(t.label)}">${escHtml(t.label)} (${escHtml(t.host)})</option>`).join('');
-  await loadDevices();
+  try {
+    const resp = await fetch('/api/log-search/targets');
+    if (resp.status === 401) { location.href = '/login'; return; }
+    const targets = await resp.json();
+    if (!Array.isArray(targets)) {
+      select.innerHTML = '<option value="">(unable to load targets)</option>';
+      return;
+    }
+    select.innerHTML = targets.map((t) => `<option value="${escHtml(t.label)}">${escHtml(t.label)} (${escHtml(t.host)})</option>`).join('');
+    await loadDevices();
+  } catch {
+    select.innerHTML = '<option value="">(unable to load targets)</option>';
+  }
 }
 
 async function loadDevices() {
@@ -125,8 +133,16 @@ async function runSearch(e) {
   const preset = document.getElementById('timePreset').value;
   let start_time, end_time;
   if (preset === 'custom') {
-    start_time = document.getElementById('startTime').value;
-    end_time = document.getElementById('endTime').value;
+    // <input type="datetime-local"> values represent browser-local time
+    // with no timezone/seconds (e.g. "2026-07-25T14:30"). Run them through
+    // the same Date -> toFazTime() conversion presets use so both paths
+    // consistently send a UTC-based timestamp with seconds — otherwise
+    // preset and custom searches silently target different time windows
+    // on any FortiAnalyzer appliance not running in UTC.
+    const startValue = document.getElementById('startTime').value;
+    const endValue = document.getElementById('endTime').value;
+    start_time = startValue ? toFazTime(new Date(startValue)) : '';
+    end_time = endValue ? toFazTime(new Date(endValue)) : '';
   } else {
     const range = presetToRange(preset);
     start_time = range.start;
@@ -154,13 +170,23 @@ async function runSearch(e) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    const body = await resp.json();
+    let body;
+    try {
+      body = await resp.json();
+    } catch {
+      errBox.textContent = 'Search failed — please try again.';
+      errBox.classList.remove('hidden');
+      return;
+    }
     if (!resp.ok) {
       errBox.textContent = body.error || 'Search failed.';
       errBox.classList.remove('hidden');
       return;
     }
     renderResults(body);
+  } catch {
+    errBox.textContent = 'Search failed — please try again.';
+    errBox.classList.remove('hidden');
   } finally {
     searchBtn.disabled = false;
     searchBtn.textContent = 'Search';

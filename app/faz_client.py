@@ -14,10 +14,16 @@ submit->poll->fetch logic, plus a device-list lookup confirmed live
 against 192.168.64.4) support the Phase 3 Log Search tab.
 """
 
+import re
 import time
 
 import requests
 import urllib3
+
+from app.log_search_filters import FilterValidationError
+
+_EXTRA_FILTER_OP_WHITELIST = {"==", "!="}
+_EXTRA_FILTER_FIELD_RE = re.compile(r"^[a-zA-Z0-9_-]+$")
 
 
 class FAZError(Exception):
@@ -183,7 +189,9 @@ class FAZClient:
         — devid uses the device's serial number ("sn"), which is what
         search_logs()'s device param actually expects; the human-readable
         "name" alone is rejected by /logview/adom/<adom>/logsearch with
-        "None of the device(s) can be found under the adom"."""
+        "None of the device(s) can be found under the adom". Devices with
+        no "sn" are skipped entirely — they have no usable devid and would
+        otherwise show up as a picker entry that fails every search."""
         body = {
             "jsonrpc": "2.0",
             "id": self._next_id(),
@@ -307,7 +315,24 @@ class FAZClient:
             if clause_list:
                 groups.append("(" + " or ".join(clause_list) + ")")
         for f in extra_filters or []:
-            value = str(f["value"])
+            field = str(f.get("field", ""))
+            op = str(f.get("op", ""))
+            value = str(f.get("value", ""))
+            if op not in _EXTRA_FILTER_OP_WHITELIST:
+                raise FilterValidationError(
+                    f"Invalid filter operator '{op}' for field '{field}': "
+                    f"only == and != are allowed"
+                )
+            if not _EXTRA_FILTER_FIELD_RE.match(field):
+                raise FilterValidationError(
+                    f"Invalid filter field '{field}': only letters, digits, "
+                    f"'_' and '-' are allowed"
+                )
+            if '"' in value:
+                raise FilterValidationError(
+                    f"Invalid filter value '{value}' for field '{field}': "
+                    f'quote characters (") are not allowed'
+                )
             quoted_value = value if value.lstrip("-").isdigit() else f'"{value}"'
-            groups.append(f'{f["field"]}{f["op"]}{quoted_value}')
+            groups.append(f"({field}{op}{quoted_value})")
         return " and ".join(groups)

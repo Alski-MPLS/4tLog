@@ -15,6 +15,7 @@ import re
 _PORT_RE = re.compile(r"^\d+$")
 _PROTO_PORT_RE = re.compile(r"^(?:tcp|udp):(\d+)$", re.IGNORECASE)
 _PROTO_RANGE_RE = re.compile(r"^(?:tcp|udp):(\d+)-(\d+)$", re.IGNORECASE)
+_SERVICE_NAME_RE = re.compile(r"^[A-Za-z0-9._/+-]+$")
 
 
 class FilterValidationError(ValueError):
@@ -77,5 +78,7 @@ def parse_port_entries(raw: str) -> list[str]:
         if proto_match:
             clauses.append(f"dstport=={proto_match.group(1)}")
             continue
+        if not _SERVICE_NAME_RE.match(entry):
+            raise FilterValidationError(f"Invalid port/service entry '{entry}'")
         clauses.append(f'service=="{entry}"')
     return clauses

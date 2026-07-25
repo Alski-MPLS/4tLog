@@ -149,7 +149,48 @@ def test_build_filter_expression_extra_filters_numeric_unquoted_string_quoted():
             {"field": "policyid", "op": "==", "value": "5"},
         ],
     )
-    assert expr == '(srcip==10.1.1.5) and action=="deny" and policyid==5'
+    assert expr == '(srcip==10.1.1.5) and (action=="deny") and (policyid==5)'
+
+
+def test_build_filter_expression_rejects_disallowed_op():
+    from app.faz_client import FAZClient
+    from app.log_search_filters import FilterValidationError
+
+    with pytest.raises(FilterValidationError, match="operator"):
+        FAZClient.build_filter_expression(
+            source_clauses=["srcip==10.1.1.5"],
+            destination_clauses=[],
+            port_clauses=[],
+            extra_filters=[{"field": "srcip", "op": ">=", "value": "0.0.0.0"}],
+        )
+
+
+def test_build_filter_expression_rejects_invalid_field_chars():
+    from app.faz_client import FAZClient
+    from app.log_search_filters import FilterValidationError
+
+    with pytest.raises(FilterValidationError, match="field"):
+        FAZClient.build_filter_expression(
+            source_clauses=["srcip==10.1.1.5"],
+            destination_clauses=[],
+            port_clauses=[],
+            extra_filters=[{"field": "srcip or dstip", "op": "==", "value": "1.2.3.4"}],
+        )
+
+
+def test_build_filter_expression_rejects_quote_injection_in_value():
+    from app.faz_client import FAZClient
+    from app.log_search_filters import FilterValidationError
+
+    with pytest.raises(FilterValidationError, match="quote"):
+        FAZClient.build_filter_expression(
+            source_clauses=["srcip==10.1.1.5"],
+            destination_clauses=[],
+            port_clauses=[],
+            extra_filters=[
+                {"field": "srcip", "op": "==", "value": '0.0.0.0" or dstip>="0.0.0.0'}
+            ],
+        )
 
 
 def test_get_log_fields_returns_field_list(monkeypatch):

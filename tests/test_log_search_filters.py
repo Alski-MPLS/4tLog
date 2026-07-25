@@ -73,3 +73,13 @@ def test_parse_port_rejects_backwards_range():
 
 def test_parse_port_empty_returns_empty_list():
     assert parse_port_entries("") == []
+
+
+def test_parse_port_rejects_injection_in_service_name():
+    with pytest.raises(FilterValidationError, match="Invalid port/service entry"):
+        parse_port_entries('HTTPS" or srcip>="0.0.0.0')
+
+
+def test_parse_port_rejects_malformed_range_as_service_name():
+    with pytest.raises(FilterValidationError, match="Invalid port/service entry"):
+        parse_port_entries("tcp:abc-def")
