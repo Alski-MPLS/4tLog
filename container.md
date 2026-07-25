@@ -20,6 +20,11 @@ cp .env.example .env
 cp users.example.json users.json
 cp groups.example.json groups.json
 
+# TLS cert — see the TLS section below for a self-signed option
+mkdir -p certs
+openssl req -x509 -nodes -newkey rsa:2048 -days 365 \
+  -keyout certs/key.pem -out certs/cert.pem -subj "/CN=4tlog.local"
+
 # Create the first admin account (users.json/groups.json are bind-mounted,
 # so this writes to the host files):
 docker compose run --rm app uv run python manage_users.py add admin --role admin
@@ -29,15 +34,40 @@ docker compose up -d
 
 ## TLS
 
-The container listens on plain HTTP on port 8100. TLS is expected to
-terminate at a reverse proxy (Nginx, a load balancer, etc.) placed in front
-of the container — the Dockerfile does not bake in or mount any certs for
-TLS termination inside the container in Phase 1. Set `COOKIE_SECURE=true`
-and `TRUSTED_PROXY_COUNT` accordingly in `.env` for that topology (see
-`docs/deployment.md` §5 for the reasoning).
+An `nginx` service in front of `app` terminates TLS and proxies plain HTTP
+to `app:8100` over the internal Docker network — `app` itself no longer
+publishes a port to the host.
 
-**Planned (Phase 2):** add a reverse-proxy service (Nginx or Caddy) to
-`docker-compose.yml` that terminates TLS and proxies plain HTTP to
-`app:8100` over the internal Docker network — the same shape as the
-Nginx config in `docs/deployment.md` §3/§5, just pointing `proxy_pass` at
-`app:8100` instead of `127.0.0.1:8100`.
+```bash
+cp certs.example/cert.pem certs/cert.pem   # or your real cert
+cp certs.example/key.pem certs/key.pem     # see note below
+```
+
+There's no `certs.example/` in this repo (certs aren't templatable the way
+JSON config is) — for local/dev use, generate a self-signed pair:
+
+```bash
+mkdir -p certs
+openssl req -x509 -nodes -newkey rsa:2048 -days 365 \
+  -keyout certs/key.pem -out certs/cert.pem \
+  -subj "/CN=4tlog.local"
+```
+
+For production, replace `certs/cert.pem`/`certs/key.pem` with a real
+certificate/key pair before `docker compose up`.
+
+Set in `.env`:
+
+```bash
+COOKIE_SECURE=true
+TRUSTED_PROXY_COUNT=1
+```
+
+`COOKIE_SECURE=auto` only detects local `certs/cert.pem`/`certs/key.pem`
+from the `app` container's own filesystem — but in this topology TLS
+terminates at `nginx`, so `app` never sees a cert on disk itself, and
+`auto` would silently leave session cookies insecure. Same reasoning as
+the RHEL/Nginx path in `docs/deployment.md` §5.
+
+The app is reachable at `https://localhost:8443` (HTTP on `8080` redirects
+to HTTPS).
