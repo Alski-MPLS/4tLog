@@ -75,3 +75,43 @@ def test_admin_nav_has_exactly_one_admin_link(client, app, tmp_path):
     resp = client.get("/admin/")
     assert resp.status_code == 200
     assert resp.data.count(b"nav-link-admin") == 1
+
+
+@pytest.fixture
+def faz_dashboard_setup(tmp_path, monkeypatch):
+    import app.faz_targets as faz_targets_mod
+    import app.faz_health_cache as cache_mod
+
+    monkeypatch.setattr(faz_targets_mod, "FAZ_TARGETS_FILE", tmp_path / "faz_targets.json")
+    monkeypatch.setattr(cache_mod, "_cache", {})
+    from app.faz_targets import create_target
+
+    create_target("Primary", host="192.168.64.4", adom="root", token="tok")
+    create_target("Secondary", host="192.168.64.5", adom="root", token="tok2")
+    yield
+
+
+def test_api_dashboard_requires_login(client, faz_dashboard_setup):
+    resp = client.get("/api/dashboard")
+    assert resp.status_code == 401
+
+
+def test_api_dashboard_returns_all_targets_when_unrestricted(client, faz_dashboard_setup):
+    _login(client)
+    resp = client.get("/api/dashboard")
+    assert resp.status_code == 200
+    labels = [c["label"] for c in resp.get_json()]
+    assert labels == ["Primary", "Secondary"]
+
+
+def test_api_dashboard_filters_by_group_restriction(client, app, faz_dashboard_setup):
+    import app.groups as groups_mod
+
+    groups_mod.update_group(
+        "g1", members=["alice"], allowed_tabs=["dashboard"], adom_restrict=True, allowed_adoms=["Primary"]
+    )
+    _login(client)
+    resp = client.get("/api/dashboard")
+    assert resp.status_code == 200
+    labels = [c["label"] for c in resp.get_json()]
+    assert labels == ["Primary"]
