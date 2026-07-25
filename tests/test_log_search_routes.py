@@ -109,6 +109,7 @@ def test_search_allows_one_side_any(client, monkeypatch):
         return {"rows": [], "fields": [], "truncated": False}
 
     monkeypatch.setattr("app.faz_client.FAZClient.preflight", lambda self: True)
+    monkeypatch.setattr("app.faz_client.FAZClient.local_time_range", lambda self, s, e: (s, e))
     monkeypatch.setattr("app.faz_client.FAZClient.search_logs", fake_search_logs)
     monkeypatch.setattr("app.faz_client.FAZClient.logout", lambda self: None)
 
@@ -169,6 +170,7 @@ def test_search_happy_path(client, monkeypatch):
         return {"rows": [{"srcip": "10.1.1.5"}], "fields": ["srcip"], "truncated": False}
 
     monkeypatch.setattr("app.faz_client.FAZClient.preflight", lambda self: True)
+    monkeypatch.setattr("app.faz_client.FAZClient.local_time_range", lambda self, s, e: (s, e))
     monkeypatch.setattr("app.faz_client.FAZClient.search_logs", fake_search_logs)
     monkeypatch.setattr("app.faz_client.FAZClient.logout", lambda self: None)
 
@@ -222,6 +224,7 @@ def test_search_returns_502_on_faz_error(client, monkeypatch):
     def raising_search_logs(self, **kwargs):
         raise FAZError("No permission for the resource")
 
+    monkeypatch.setattr("app.faz_client.FAZClient.local_time_range", lambda self, s, e: (s, e))
     monkeypatch.setattr("app.faz_client.FAZClient.search_logs", raising_search_logs)
     monkeypatch.setattr("app.faz_client.FAZClient.logout", lambda self: None)
 
@@ -246,6 +249,7 @@ def test_search_returns_504_on_timeout(client, monkeypatch):
     def raising_search_logs(self, **kwargs):
         raise FAZSearchTimeout("did not complete")
 
+    monkeypatch.setattr("app.faz_client.FAZClient.local_time_range", lambda self, s, e: (s, e))
     monkeypatch.setattr("app.faz_client.FAZClient.search_logs", raising_search_logs)
     monkeypatch.setattr("app.faz_client.FAZClient.logout", lambda self: None)
 

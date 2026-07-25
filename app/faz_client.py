@@ -14,8 +14,10 @@ submit->poll->fetch logic, plus a device-list lookup confirmed live
 against 192.168.64.4) support the Phase 3 Log Search tab.
 """
 
+import datetime
 import re
 import time
+from zoneinfo import ZoneInfo
 
 import requests
 import urllib3
@@ -210,6 +212,33 @@ class FAZClient:
             for d in data
             if d.get("sn")
         ]
+
+    def local_time_range(self, start_iso: str, end_iso: str) -> tuple[str, str]:
+        """Convert UTC ISO8601 start/end (what the browser sends) into the
+        appliance's own configured timezone. FortiAnalyzer's logsearch
+        time-range is interpreted in the appliance's local time, not UTC —
+        confirmed live: an otherwise-valid filter with a UTC-based window
+        landed in the appliance's "future" relative to its own clock and
+        failed with a generic "-32603 Internal error" rather than a useful
+        message. Falls back to returning the inputs unchanged (rather than
+        failing the search) if the appliance's timezone can't be determined
+        or the inputs aren't parseable ISO8601.
+        """
+        try:
+            tz_name = self.get_sys_status().get("TZ")
+            if not tz_name:
+                return start_iso, end_iso
+            tz = ZoneInfo(tz_name)
+
+            def convert(value: str) -> str:
+                dt = datetime.datetime.fromisoformat(value.replace("Z", "+00:00"))
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=datetime.timezone.utc)
+                return dt.astimezone(tz).strftime("%Y-%m-%dT%H:%M:%S")
+
+            return convert(start_iso), convert(end_iso)
+        except Exception:
+            return start_iso, end_iso
 
     def search_logs(
         self,

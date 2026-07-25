@@ -361,6 +361,40 @@ def test_search_logs_raises_timeout_when_never_reaches_100(monkeypatch):
         )
 
 
+def test_local_time_range_converts_utc_to_appliance_timezone(monkeypatch):
+    client, _ = _client(
+        monkeypatch,
+        [
+            {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "result": [{"status": {"code": 0, "message": "OK"}, "data": {"TZ": "US/Pacific"}}],
+            }
+        ],
+    )
+    start, end = client.local_time_range("2026-07-25T21:00:00Z", "2026-07-25T22:00:00.000Z")
+    assert start == "2026-07-25T14:00:00"
+    assert end == "2026-07-25T15:00:00"
+
+
+def test_local_time_range_falls_back_when_tz_missing(monkeypatch):
+    client, _ = _client(
+        monkeypatch,
+        [{"jsonrpc": "2.0", "id": 1, "result": [{"status": {"code": 0}, "data": {}}]}],
+    )
+    start, end = client.local_time_range("2026-07-25T21:00:00Z", "2026-07-25T22:00:00Z")
+    assert (start, end) == ("2026-07-25T21:00:00Z", "2026-07-25T22:00:00Z")
+
+
+def test_local_time_range_falls_back_on_faz_error(monkeypatch):
+    client, _ = _client(
+        monkeypatch,
+        [{"jsonrpc": "2.0", "id": 1, "error": {"code": -11, "message": "No permission"}}],
+    )
+    start, end = client.local_time_range("2026-07-25T21:00:00Z", "2026-07-25T22:00:00Z")
+    assert (start, end) == ("2026-07-25T21:00:00Z", "2026-07-25T22:00:00Z")
+
+
 def test_summarize_connection_error_connection_refused():
     import requests
 

@@ -162,12 +162,13 @@ def api_search():
 
     try:
         with _client_for(target) as client:
+            local_start, local_end = client.local_time_range(start_time, end_time)
             result = client.search_logs(
                 logtype=data.get("logtype", "traffic"),
                 device=data.get("device", "All_FortiGate"),
                 filter_expression=filter_expression,
-                start_time=start_time,
-                end_time=end_time,
+                start_time=local_start,
+                end_time=local_end,
                 limit=Config.LOG_SEARCH_MAX_RESULTS,
                 poll_interval=Config.LOG_SEARCH_POLL_INTERVAL,
                 timeout=Config.LOG_SEARCH_TIMEOUT,

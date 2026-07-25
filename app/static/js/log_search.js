@@ -8,14 +8,13 @@ function escHtml(str) {
 }
 
 function toFazTime(date) {
-  // FortiAnalyzer interprets time-range.start/end in the appliance's own
-  // local timezone, not UTC (confirmed live: an otherwise-valid filter
-  // returned "-32603 Internal error" when passed a UTC-based window that
-  // fell in the future relative to the appliance's local clock, and
-  // succeeded once given the same wall-clock hour in local time). Format
-  // in the browser's local time, not toISOString()'s UTC.
-  const pad = (n) => String(n).padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+  // Send an unambiguous UTC instant — the backend (FAZClient.local_time_range)
+  // converts this to the target appliance's own configured timezone before
+  // submitting the search, since FortiAnalyzer interprets time-range.start/end
+  // in its own local time, not UTC and not the browser's local time (a naive
+  // browser-local timestamp broke as soon as the browser and the appliance
+  // were in different timezones — confirmed live).
+  return date.toISOString();
 }
 
 function presetToRange(preset) {
