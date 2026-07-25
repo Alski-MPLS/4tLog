@@ -101,6 +101,30 @@ def test_poll_all_targets_marks_offline_on_connection_failure(targets_file, monk
     assert "No permission" in entry["error"]
 
 
+def test_poll_all_targets_summarizes_raw_network_error(targets_file, monkeypatch):
+    # Raw requests/urllib3 exception text (connection pool internals, retry
+    # counts, etc.) must not leak to the Dashboard card verbatim.
+    import requests
+
+    import app.faz_health_cache as cache_mod
+
+    def raising_preflight(self):
+        raise requests.exceptions.ConnectionError(
+            "HTTPSConnectionPool(host='192.168.64.4', port=443): Max retries exceeded "
+            "with url: /jsonrpc (Caused by NewConnectionError("
+            "\"HTTPSConnection(host='192.168.64.4', port=443): Failed to establish a "
+            "new connection: [Errno 111] Connection refused\"))"
+        )
+
+    monkeypatch.setattr("app.faz_client.FAZClient.preflight", raising_preflight)
+    monkeypatch.setattr("app.faz_client.FAZClient.logout", lambda self: None)
+
+    cache_mod.poll_all_targets()
+    entry = cache_mod.get_cached("Primary")
+    assert entry["status"] == "offline"
+    assert entry["error"] == "Connection refused"
+
+
 def test_poll_all_targets_survives_malformed_target(targets_file, monkeypatch):
     # A malformed entry (e.g. missing "host") must not abort the whole poll
     # cycle and leave every OTHER valid target frozen at its last cache
