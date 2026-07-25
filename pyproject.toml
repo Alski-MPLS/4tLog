@@ -6,6 +6,9 @@ dependencies = [
     "flask>=3.0,<4",
     "python-dotenv>=1.0",
     "bcrypt>=4.1",
+    "requests>=2.31",
+    "apscheduler>=3.11.2",
+    "pysnmp>=7.1.27",
 ]
 
 [project.optional-dependencies]

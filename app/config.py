@@ -34,3 +34,31 @@ class Config:
         os.environ.get("SESSION_ABSOLUTE_LIFETIME", str(10 * 3600))
     )  # 10 h
     MAX_CONTENT_LENGTH = int(os.environ.get("MAX_CONTENT_LENGTH", str(4 * 1024 * 1024)))
+
+    # FortiAnalyzer client (app/faz_client.py)
+    FAZ_VERIFY_SSL = os.environ.get("FAZ_VERIFY_SSL", "false").lower() == "true"
+    FAZ_REQUEST_TIMEOUT = int(os.environ.get("FAZ_REQUEST_TIMEOUT", "30"))
+
+    # SNMPv3 health polling (app/faz_health_cache.py)
+    SNMP_ENABLED = os.environ.get("SNMP_ENABLED", "false").lower() == "true"
+    SNMP_PORT = int(os.environ.get("SNMP_PORT", "161"))
+    SNMP_TIMEOUT = int(os.environ.get("SNMP_TIMEOUT", "5"))
+    SNMP_RETRIES = int(os.environ.get("SNMP_RETRIES", "1"))
+    SNMP_POLL_INTERVAL = int(os.environ.get("SNMP_POLL_INTERVAL", "60"))
+    SNMP_USER = os.environ.get("SNMP_USER", "")
+    SNMP_AUTH_PROTOCOL = os.environ.get("SNMP_AUTH_PROTOCOL", "SHA")
+    SNMP_AUTH_KEY = os.environ.get("SNMP_AUTH_KEY", "")
+    SNMP_PRIV_PROTOCOL = os.environ.get("SNMP_PRIV_PROTOCOL", "AES")
+    SNMP_PRIV_KEY = os.environ.get("SNMP_PRIV_KEY", "")
+
+    # Three-tier health thresholds (percent), same convention as 4thealth
+    CPU_WARN = float(os.environ.get("CPU_WARN", "70"))
+    CPU_CRIT = float(os.environ.get("CPU_CRIT", "90"))
+    MEM_WARN = float(os.environ.get("MEM_WARN", "70"))
+    MEM_CRIT = float(os.environ.get("MEM_CRIT", "90"))
+
+    # Set by tests/conftest.py to skip starting the background health
+    # poller (real network/SNMP calls) during the test suite.
+    FAZ_HEALTH_POLL_DISABLED = (
+        os.environ.get("FAZ_HEALTH_POLL_DISABLED", "false").lower() == "true"
+    )
