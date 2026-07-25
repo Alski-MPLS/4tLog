@@ -8,9 +8,10 @@ no-auth-header-at-all produced byte-identical "-11 No permission" errors,
 while Authorization: Bearer returned real data.
 
 login()/logout()/preflight()/get_sys_status() cover health/status calls;
-build_filter_expression()/get_log_fields()/search_logs() (ported from the
-Ansible playbook's Jinja filter-building and submit->poll->fetch logic)
-support the Phase 3 Log Search tab.
+build_filter_expression()/get_log_fields()/get_devices()/search_logs()
+(ported from the Ansible playbook's Jinja filter-building and
+submit->poll->fetch logic, plus a device-list lookup confirmed live
+against 192.168.64.4) support the Phase 3 Log Search tab.
 """
 
 import time
@@ -170,6 +171,37 @@ class FAZClient:
         if isinstance(data, list) and data and "field" in data[0]:
             return data[0]["field"]
         return []
+
+    def get_devices(self) -> list[dict]:
+        """Cheap device list for the ADOM, from /dvmdb/adom/<adom>/device.
+
+        Confirmed live against 192.168.64.4: this resource (distinct from
+        /dvm/adom/<adom>/device, which errors "URI /dvm/device not
+        supported") returns each managed device's full DVM record,
+        including sensitive fields (adm_pass, private_key). Only the
+        fields needed for the Log Search device picker are extracted here
+        — devid uses the device's serial number ("sn"), which is what
+        search_logs()'s device param actually expects; the human-readable
+        "name" alone is rejected by /logview/adom/<adom>/logsearch with
+        "None of the device(s) can be found under the adom"."""
+        body = {
+            "jsonrpc": "2.0",
+            "id": self._next_id(),
+            "method": "get",
+            "params": [{"url": f"/dvmdb/adom/{self.adom}/device"}],
+            "session": None,
+        }
+        result = self._unwrap_result(self._post(body))
+        data = result.get("data", [])
+        return [
+            {
+                "devid": d.get("sn", ""),
+                "name": d.get("name", ""),
+                "platform": d.get("platform_str", ""),
+            }
+            for d in data
+            if d.get("sn")
+        ]
 
     def search_logs(
         self,

@@ -5,6 +5,7 @@ Page:  GET  /log-search
 API (JSON):
   GET  /api/log-search/targets           allowed-ADOM-filtered target list
   GET  /api/log-search/fields?target=&logtype=   field names for the advanced-filter picker
+  GET  /api/log-search/devices?target=   managed-device list for the device picker
   POST /api/log-search                   run a search, return matching rows
 """
 
@@ -71,6 +72,26 @@ def api_fields():
     except Exception as exc:
         return jsonify({"error": summarize_connection_error(exc)}), 502
     return jsonify(fields)
+
+
+@bp.route("/api/log-search/devices")
+@tab_required("log_search")
+def api_devices():
+    target_label = request.args.get("target", "")
+    err = check_adom_access(target_label)
+    if err is not None:
+        return err
+    target = get_target(target_label)
+    if target is None:
+        return jsonify({"error": f"Target '{target_label}' not found"}), 404
+    try:
+        with _client_for(target) as client:
+            devices = client.get_devices()
+    except FAZError as exc:
+        return jsonify({"error": str(exc)}), 502
+    except Exception as exc:
+        return jsonify({"error": summarize_connection_error(exc)}), 502
+    return jsonify(devices)
 
 
 @bp.route("/api/log-search", methods=["POST"])

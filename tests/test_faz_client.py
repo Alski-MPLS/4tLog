@@ -179,6 +179,43 @@ def test_get_log_fields_returns_field_list(monkeypatch):
     assert calls[0]["json"]["params"][0]["logtype"] == "traffic"
 
 
+def test_get_devices_returns_serial_name_platform(monkeypatch):
+    client, calls = _client(
+        monkeypatch,
+        [
+            {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "result": {
+                    "data": [
+                        {
+                            "sn": "FWF71GTK25000691",
+                            "name": "FortiWiFi-71G",
+                            "platform_str": "FortiWiFi-71G",
+                            "adm_pass": ["ENC", "should-not-leak"],
+                        },
+                        {"sn": "", "name": "no-serial-device"},
+                    ]
+                },
+            }
+        ],
+    )
+    devices = client.get_devices()
+    assert devices == [
+        {"devid": "FWF71GTK25000691", "name": "FortiWiFi-71G", "platform": "FortiWiFi-71G"}
+    ]
+    assert calls[0]["json"]["params"][0]["url"] == "/dvmdb/adom/root/device"
+    assert "adm_pass" not in str(devices)
+
+
+def test_get_devices_empty_list(monkeypatch):
+    client, _ = _client(
+        monkeypatch,
+        [{"jsonrpc": "2.0", "id": 1, "result": {"data": []}}],
+    )
+    assert client.get_devices() == []
+
+
 def test_search_logs_happy_path(monkeypatch):
     client, calls = _client(
         monkeypatch,

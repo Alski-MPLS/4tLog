@@ -29,6 +29,31 @@ async function loadTargets() {
   const targets = await resp.json();
   const select = document.getElementById('targetSelect');
   select.innerHTML = targets.map((t) => `<option value="${escHtml(t.label)}">${escHtml(t.label)} (${escHtml(t.host)})</option>`).join('');
+  await loadDevices();
+}
+
+async function loadDevices() {
+  const deviceSelect = document.getElementById('deviceInput');
+  const target = document.getElementById('targetSelect').value;
+  const allOption = '<option value="All_FortiGate" selected>All_FortiGate</option>';
+  if (!target) {
+    deviceSelect.innerHTML = allOption;
+    return;
+  }
+  try {
+    const resp = await fetch(`/api/log-search/devices?target=${encodeURIComponent(target)}`);
+    if (!resp.ok) { deviceSelect.innerHTML = allOption; return; }
+    const devices = await resp.json();
+    if (!Array.isArray(devices) || devices.length === 0) {
+      deviceSelect.innerHTML = allOption;
+      return;
+    }
+    deviceSelect.innerHTML = allOption + devices.map((d) =>
+      `<option value="${escHtml(d.devid)}">${escHtml(d.name || d.devid)}${d.platform ? ' (' + escHtml(d.platform) + ')' : ''}</option>`
+    ).join('');
+  } catch {
+    deviceSelect.innerHTML = allOption;
+  }
 }
 
 function addFilterRow() {
@@ -145,6 +170,7 @@ async function runSearch(e) {
 document.getElementById('timePreset').addEventListener('change', function () {
   document.getElementById('customTimeRow').classList.toggle('hidden', this.value !== 'custom');
 });
+document.getElementById('targetSelect').addEventListener('change', loadDevices);
 document.getElementById('addFilterBtn').addEventListener('click', addFilterRow);
 document.getElementById('searchForm').addEventListener('submit', runSearch);
 document.getElementById('exportCsvBtn').addEventListener('click', exportCsv);

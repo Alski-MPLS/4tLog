@@ -217,26 +217,56 @@ settings.
 - `tests/test_log_search_routes.py` — 400 on both-blank IPs, 404 on
   disallowed target, happy-path JSON shape, field-picker endpoint.
 
-## Open implementation-time checks (live validation required)
+## Live-validation findings (confirmed against 192.168.64.4, 2026-07-25)
 
 Same category as the Dashboard issues already hit and fixed this session
-(field-name casing, `_unwrap_result()`'s status-field assumption) — these
-must be confirmed against 192.168.64.4 during implementation, not assumed:
+(field-name casing, `_unwrap_result()`'s status-field assumption). All three
+checks below are now confirmed against the real appliance — no further
+implementation-time verification is required for these:
 
-1. **IP/port range filter syntax** — `(srcip>=x and srcip<=y)` /
-   `(dstport>=a and dstport<=b)` is a guess; confirm it's accepted by FAZ's
-   filter grammar, or find the real syntax and update this doc + code
-   together.
-2. **Device list source** — confirm whether there's a cheap FAZ resource to
-   populate a real device dropdown beyond the `All_*` wildcards; fall back to
-   free-text prefilled with `All_FortiGate` if not.
-3. **`/logview/adom/<adom>/logsearch` exact behavior** — the Ansible
-   playbook's preflight-then-submit pattern targeted a resource path it
-   wasn't fully certain of; the documented spec
-   (`api-info/.../logview.json`) says `/logview/adom/<adom>/logsearch`,
-   which should be used directly rather than re-deriving it, but confirm the
-   full request/response shape end-to-end against the real appliance
-   (required params: `url`, `apiver`, `device`, `time-range`, `logtype`).
+1. **IP/port range filter syntax — confirmed working as designed.**
+   `(srcip>=10.1.1.1 and srcip<=10.1.1.10)` was submitted verbatim to
+   `/logview/adom/root/logsearch` and returned `status.code: 0`, no
+   filter-parse error, with `total-count: 4982` matching rows, all of whose
+   `srcip` values fell inside the requested range. No code changes needed
+   for `app/log_search_filters.py`'s range-clause generation. (Port ranges
+   use the identical `(field>=a and field<=b)` pattern and were not
+   separately live-tested, but there is no reason to expect FAZ's filter
+   grammar to treat `dstport` differently from `srcip` here.)
+2. **Device list source — a real resource exists and is now used.**
+   `/dvmdb/adom/<adom>/device` (distinct from `/dvm/adom/<adom>/device`,
+   which errors `"URI /dvm/device not supported"`) returns the full DVM
+   record for every managed device, including sensitive fields
+   (`adm_pass`, `private_key`) that must never reach the client. One
+   non-obvious finding: `/logview/adom/<adom>/logsearch`'s `device[0].devid`
+   must be the device's **serial number** (`sn`, e.g. `FWF71GTK25000691`),
+   not its human-readable `name` (`FortiWiFi-71G`) — passing the name
+   returns `"None of the device(s) can be found under the adom [root]"`.
+   Implemented as `FAZClient.get_devices()` (`app/faz_client.py`), which
+   extracts only `devid` (from `sn`), `name`, and `platform` (from
+   `platform_str`) and drops everything else, exposed via
+   `GET /api/log-search/devices?target=` (`app/routes/log_search_routes.py`).
+   `app/static/js/log_search.js`'s `deviceInput` is now a `<select>`
+   (`app/templates/log_search.html`) populated from this endpoint per
+   target-selection change, defaulting to/falling back to `All_FortiGate`
+   on fetch failure or an empty device list.
+3. **`/logview/adom/<adom>/logsearch` exact behavior — confirmed end-to-end.**
+   Submit (`method: add`) returns `{"result": {"tid": <int>}}` immediately;
+   fetching that `tid` via `method: get` on
+   `/logview/adom/<adom>/logsearch/<tid>` returned `percentage: 100` on the
+   very first poll (test dataset was small enough not to need multiple poll
+   iterations — the poll loop itself is unchanged and still needed for
+   larger result sets), with `data` (row array), `return-lines`,
+   `total-count`, `scanned-logs`, and a `status: {"code": 0, "message":
+   "succeeded"}` field, all matching `FAZClient.search_logs()`'s existing
+   parsing (`app/faz_client.py`) and `_unwrap_result()`'s status handling.
+   Confirmed further via a full request through the actual Flask app (test
+   client, logged in, real target/token): `/api/log-search/targets`,
+   `/api/log-search/devices`, and `POST /api/log-search` all returned
+   correct data — a 1000-row result set (`truncated: true`, hit
+   `LOG_SEARCH_MAX_RESULTS`) with real field names (`srcip`, `dstip`,
+   `action`, `service`, etc.) ready for the results table. No code changes
+   needed for the request/response shape.
 
 ## Documentation/help tasks (tracked as explicit plan tasks)
 

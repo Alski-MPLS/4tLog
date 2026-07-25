@@ -209,3 +209,32 @@ def test_fields_endpoint(client, monkeypatch):
     resp = client.get("/api/log-search/fields?target=Primary&logtype=traffic")
     assert resp.status_code == 200
     assert resp.get_json() == [{"name": "srcip"}]
+
+
+def test_devices_endpoint(client, monkeypatch):
+    monkeypatch.setattr(
+        "app.faz_client.FAZClient.get_devices",
+        lambda self: [
+            {"devid": "FWF71GTK25000691", "name": "FortiWiFi-71G", "platform": "FortiWiFi-71G"}
+        ],
+    )
+    monkeypatch.setattr("app.faz_client.FAZClient.logout", lambda self: None)
+
+    _login(client)
+    resp = client.get("/api/log-search/devices?target=Primary")
+    assert resp.status_code == 200
+    assert resp.get_json() == [
+        {"devid": "FWF71GTK25000691", "name": "FortiWiFi-71G", "platform": "FortiWiFi-71G"}
+    ]
+
+
+def test_devices_endpoint_rejects_disallowed_target(client, app):
+    import app.groups as groups_mod
+
+    groups_mod.update_group(
+        "g1", members=["alice"], allowed_tabs=["log_search"],
+        adom_restrict=True, allowed_adoms=["Secondary"],
+    )
+    _login(client)
+    resp = client.get("/api/log-search/devices?target=Primary")
+    assert resp.status_code == 403
