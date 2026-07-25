@@ -41,6 +41,7 @@ uv sync
 cp .env.example .env               # set SECRET_KEY (uv run python manage_users.py secret)
 cp users.example.json users.json
 cp groups.example.json groups.json
+cp faz_targets.example.json faz_targets.json
 uv run python manage_users.py add admin --role admin
 uv run python wsgi.py              # http://localhost:5443 (PORT defaults to 5443; add certs/ for HTTPS)
 ```

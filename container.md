@@ -19,6 +19,7 @@ cp .env.example .env
 
 cp users.example.json users.json
 cp groups.example.json groups.json
+cp faz_targets.example.json faz_targets.json
 
 # TLS cert — see the TLS section below for a self-signed option
 mkdir -p certs

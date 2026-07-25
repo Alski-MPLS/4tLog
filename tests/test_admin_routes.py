@@ -224,6 +224,65 @@ def test_faz_targets_missing_label_rejected(client, faz_targets_file):
     assert resp.status_code == 400
 
 
+def test_faz_targets_responses_do_not_leak_raw_token(client, faz_targets_file):
+    # List/create/update responses must not include a usable raw token —
+    # only a token_set boolean. Putting a live FAZ credential in API
+    # responses (and thus the DOM/dev-tools) has no functional benefit.
+    _login(client, "admin1")
+    csrf = _csrf(client)
+
+    resp = client.post(
+        "/admin/api/faz-targets",
+        json={"label": "Primary", "host": "192.168.64.4", "adom": "root", "token": "supersecret"},
+        headers={"X-CSRF-Token": csrf},
+    )
+    assert resp.status_code == 201
+    body = resp.get_json()
+    assert "token" not in body
+    assert body["token_set"] is True
+
+    resp = client.get("/admin/api/faz-targets")
+    assert resp.status_code == 200
+    for t in resp.get_json():
+        assert "token" not in t
+
+    resp = client.put(
+        "/admin/api/faz-targets/Primary",
+        json={"host": "10.0.0.9", "adom": "lab"},
+        headers={"X-CSRF-Token": csrf},
+    )
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert "token" not in body
+    assert body["token_set"] is True
+
+
+def test_faz_targets_update_without_token_preserves_existing_token(client, faz_targets_file):
+    # The edit modal leaves the token field blank; omitting it from the PUT
+    # body must not clobber the previously stored token.
+    from app.faz_targets import get_target
+
+    _login(client, "admin1")
+    csrf = _csrf(client)
+
+    client.post(
+        "/admin/api/faz-targets",
+        json={"label": "Primary", "host": "192.168.64.4", "adom": "root", "token": "supersecret"},
+        headers={"X-CSRF-Token": csrf},
+    )
+
+    resp = client.put(
+        "/admin/api/faz-targets/Primary",
+        json={"host": "10.0.0.9", "adom": "root"},
+        headers={"X-CSRF-Token": csrf},
+    )
+    assert resp.status_code == 200
+
+    t = get_target("Primary")
+    assert t["host"] == "10.0.0.9"
+    assert t["token"] == "supersecret"
+
+
 def test_faz_targets_update_missing_returns_404(client, faz_targets_file):
     _login(client, "admin1")
     csrf = _csrf(client)

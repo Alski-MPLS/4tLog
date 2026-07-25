@@ -57,6 +57,20 @@ _SNMP_OVERRIDE_FIELDS = (
 )
 
 
+def _mask_target(target: dict | None) -> dict | None:
+    """Strip the raw bearer token from a target dict before it goes out over
+    the API. Replaced with a boolean `token_set` flag — the Admin UI has no
+    functional need to redisplay a live FortiAnalyzer credential, and doing
+    so puts it in the DOM, dev tools, and potentially browser
+    history/autofill for no benefit."""
+    if target is None:
+        return None
+    masked = dict(target)
+    masked["token_set"] = bool(masked.get("token"))
+    masked.pop("token", None)
+    return masked
+
+
 @bp.route("/")
 @_admin_required
 def admin_page():
@@ -134,7 +148,7 @@ def api_groups_delete(name: str):
 @bp.route("/api/faz-targets")
 @_admin_required
 def api_faz_targets_list():
-    return jsonify(list_targets())
+    return jsonify([_mask_target(t) for t in list_targets()])
 
 
 @bp.route("/api/faz-targets", methods=["POST"])
@@ -152,7 +166,7 @@ def api_faz_targets_create():
     if not ok:
         return jsonify({"error": f"Target '{label}' already exists"}), 409
     app_log("INFO", "admin", "FAZ target created", by=session["user"], target=label)
-    return jsonify(get_target(label)), 201
+    return jsonify(_mask_target(get_target(label))), 201
 
 
 @bp.route("/api/faz-targets/<label>", methods=["PUT"])
@@ -161,13 +175,17 @@ def api_faz_targets_update(label: str):
     data = request.get_json(silent=True) or {}
     host = data.get("host", "")
     adom = data.get("adom", "root")
+    # A blank/omitted token means "keep the existing one" — the edit modal
+    # leaves the token input blank on open (see admin.js) rather than
+    # redisplaying the stored credential, so update_target() preserves the
+    # prior token whenever this is empty.
     token = data.get("token", "")
     snmp_overrides = {k: data[k] for k in _SNMP_OVERRIDE_FIELDS if data.get(k)}
     ok = update_target(label, host, adom, token, snmp_overrides)
     if not ok:
         return jsonify({"error": f"Target '{label}' not found"}), 404
     app_log("INFO", "admin", "FAZ target updated", by=session["user"], target=label)
-    return jsonify(get_target(label))
+    return jsonify(_mask_target(get_target(label)))
 
 
 @bp.route("/api/faz-targets/<label>", methods=["DELETE"])

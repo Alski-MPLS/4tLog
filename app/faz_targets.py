@@ -19,8 +19,11 @@ up by the next background poll cycle (Task 4) without an app restart.
 """
 
 import json
+import sys
 import threading
 from pathlib import Path
+
+from app.app_logger import app_log
 
 FAZ_TARGETS_FILE = Path(__file__).parent.parent / "faz_targets.json"
 _lock = threading.Lock()
@@ -37,8 +40,16 @@ _SNMP_FIELDS = (
 def _load() -> list[dict]:
     if not FAZ_TARGETS_FILE.exists():
         return []
-    with FAZ_TARGETS_FILE.open() as f:
-        return json.load(f)
+    try:
+        with FAZ_TARGETS_FILE.open() as f:
+            return json.load(f)
+    except (json.JSONDecodeError, OSError) as exc:
+        message = f"Failed to load {FAZ_TARGETS_FILE}: {exc}"
+        try:
+            app_log("ERROR", "faz_targets", message)
+        except Exception:
+            print(f"[faz_targets] ERROR: {message}", file=sys.stderr)
+        return []
 
 
 def _save(targets: list[dict]) -> None:
@@ -95,12 +106,25 @@ def update_target(
     token: str,
     snmp_overrides: dict | None = None,
 ) -> bool:
-    """Returns False if no target with this label exists."""
+    """Returns False if no target with this label exists.
+
+    Fields the caller doesn't explicitly provide are preserved from the
+    existing stored entry rather than being wiped: a blank/omitted `token`
+    keeps the previously stored token, and any SNMP field in _SNMP_FIELDS
+    not present in `snmp_overrides` keeps its previously stored value. This
+    matters because the Admin UI's edit modal has no SNMP fields and (as of
+    the token-masking fix) leaves the token input blank unless the admin is
+    deliberately changing it — without this, every UI-driven edit would
+    silently drop SNMP credential overrides and/or the bearer token.
+    """
     with _lock:
         targets = _load()
         for i, t in enumerate(targets):
             if t.get("label") == label:
-                targets[i] = _build_entry(label, host, adom, token, snmp_overrides)
+                effective_token = token if token else t.get("token", "")
+                merged_overrides = {key: t[key] for key in _SNMP_FIELDS if key in t}
+                merged_overrides.update(snmp_overrides or {})
+                targets[i] = _build_entry(label, host, adom, effective_token, merged_overrides)
                 _save(targets)
                 return True
     return False

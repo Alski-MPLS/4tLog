@@ -22,9 +22,15 @@ USER appuser
 
 EXPOSE 8100
 
+# --workers 1: the FAZ health poller (app/faz_health_cache.py) keeps its
+# scheduler and its polled-status cache in this process's memory only. With
+# more than one Gunicorn worker, each pre-forked process would run its own
+# independent scheduler/cache, doubling (or more) the actual FAZ/SNMP poll
+# rate and causing dashboard status to flip-flop depending on which worker
+# served a given request. Concurrency comes from threads instead.
 CMD ["gunicorn", \
-     "--workers", "2", \
-     "--threads", "4", \
+     "--workers", "1", \
+     "--threads", "8", \
      "--worker-class", "gthread", \
      "--bind", "0.0.0.0:8100", \
      "--timeout", "120", \

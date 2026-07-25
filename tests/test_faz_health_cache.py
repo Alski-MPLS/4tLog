@@ -99,6 +99,47 @@ def test_poll_all_targets_marks_offline_on_connection_failure(targets_file, monk
     assert "No permission" in entry["error"]
 
 
+def test_poll_all_targets_survives_malformed_target(targets_file, monkeypatch):
+    # A malformed entry (e.g. missing "host") must not abort the whole poll
+    # cycle and leave every OTHER valid target frozen at its last cache
+    # state — it should be recorded as offline and polling should continue.
+    import app.faz_health_cache as cache_mod
+    import app.faz_targets as faz_targets_mod
+    from app.config import Config
+
+    targets = faz_targets_mod._load()
+    targets.append({"label": "Broken"})  # no "host" key
+    faz_targets_mod._save(targets)
+
+    monkeypatch.setattr(Config, "SNMP_ENABLED", False)
+
+    def fake_get_sys_status(self):
+        return {
+            "hostname": "FAZ-TEST",
+            "version": "v7.6.7",
+            "serial": "SN1",
+            "ha-mode": "standalone",
+        }
+
+    def fake_preflight(self):
+        return True
+
+    monkeypatch.setattr("app.faz_client.FAZClient.get_sys_status", fake_get_sys_status)
+    monkeypatch.setattr("app.faz_client.FAZClient.preflight", fake_preflight)
+    monkeypatch.setattr("app.faz_client.FAZClient.logout", lambda self: None)
+
+    cache_mod.poll_all_targets()
+
+    primary = cache_mod.get_cached("Primary")
+    assert primary is not None
+    assert primary["status"] == "green"
+
+    broken = cache_mod.get_cached("Broken")
+    assert broken is not None
+    assert broken["status"] == "offline"
+    assert "Malformed target entry" in broken["error"]
+
+
 def test_get_all_cached_returns_uncached_targets_as_pending(targets_file):
     import app.faz_health_cache as cache_mod
 

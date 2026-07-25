@@ -200,7 +200,30 @@ def poll_all_targets() -> None:
         label = target.get("label")
         if not label:
             continue
-        result = _poll_target(target)
+        try:
+            result = _poll_target(target)
+        except Exception as exc:
+            # A malformed entry (e.g. hand-edited faz_targets.json missing
+            # "host") must not abort the whole poll cycle — that would
+            # freeze every OTHER target's cache at its last-known state.
+            # Record this target as offline and move on to the next one.
+            result = {
+                "label": label,
+                "host": target.get("host", ""),
+                "adom": target.get("adom", "root"),
+                "status": "offline",
+                "hostname": "n/a",
+                "version": "n/a",
+                "serial": "n/a",
+                "ha_mode": "n/a",
+                "ha_role": "n/a",
+                "disk_used": "n/a",
+                "cpu": None,
+                "mem": None,
+                "snmp_status": "disabled",
+                "error": f"Malformed target entry: {exc}",
+                "last_updated": _now(),
+            }
         with _lock:
             _cache[label] = result
 

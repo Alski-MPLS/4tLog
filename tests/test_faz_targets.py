@@ -59,10 +59,73 @@ def test_update_target(targets_file):
     assert t["token"] == "xyz789"
 
 
+def test_update_target_preserves_snmp_overrides_when_omitted(targets_file):
+    from app.faz_targets import create_target, get_target, update_target
+
+    create_target(
+        "Primary",
+        host="192.168.64.4",
+        adom="root",
+        token="abc123",
+        snmp_overrides={"snmp_user": "monitor2", "snmp_auth_key": "k1"},
+    )
+
+    # Editing only host/adom/token (as the Admin UI's edit modal does, since
+    # it has no SNMP fields) must not wipe the previously-set SNMP overrides.
+    ok = update_target("Primary", host="10.0.0.9", adom="lab", token="xyz789", snmp_overrides=None)
+    assert ok is True
+    t = get_target("Primary")
+    assert t["host"] == "10.0.0.9"
+    assert t["snmp_user"] == "monitor2"
+    assert t["snmp_auth_key"] == "k1"
+
+
+def test_update_target_explicit_snmp_overrides_still_apply(targets_file):
+    from app.faz_targets import create_target, get_target, update_target
+
+    create_target(
+        "Primary",
+        host="192.168.64.4",
+        snmp_overrides={"snmp_user": "monitor2", "snmp_auth_key": "k1"},
+    )
+
+    ok = update_target(
+        "Primary",
+        host="192.168.64.4",
+        adom="root",
+        token="abc123",
+        snmp_overrides={"snmp_user": "monitor3"},
+    )
+    assert ok is True
+    t = get_target("Primary")
+    assert t["snmp_user"] == "monitor3"
+    # snmp_auth_key wasn't part of the explicit override, so it's preserved.
+    assert t["snmp_auth_key"] == "k1"
+
+
+def test_update_target_blank_token_preserves_existing_token(targets_file):
+    from app.faz_targets import create_target, get_target, update_target
+
+    create_target("Primary", host="192.168.64.4", adom="root", token="abc123")
+
+    ok = update_target("Primary", host="10.0.0.9", adom="root", token="")
+    assert ok is True
+    t = get_target("Primary")
+    assert t["token"] == "abc123"
+    assert t["host"] == "10.0.0.9"
+
+
 def test_update_missing_target_fails(targets_file):
     from app.faz_targets import update_target
 
     assert update_target("Ghost", host="10.0.0.9", adom="root", token="x") is False
+
+
+def test_list_returns_empty_on_corrupt_json(targets_file):
+    from app.faz_targets import list_targets
+
+    targets_file.write_text("{not valid json")
+    assert list_targets() == []
 
 
 def test_delete_target(targets_file):

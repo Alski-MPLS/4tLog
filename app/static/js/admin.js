@@ -196,7 +196,12 @@
     document.getElementById('fazTargetLabelInput').disabled = !!target;
     document.getElementById('fazTargetHostInput').value = target ? target.host : '';
     document.getElementById('fazTargetAdomInput').value = target ? target.adom : 'root';
-    document.getElementById('fazTargetTokenInput').value = target ? target.token : '';
+    // Never redisplay a stored bearer token — the server no longer sends
+    // the raw value anyway (see token_set). Leave blank on edit; the save
+    // handler only sends a token if the admin types a new one.
+    const tokenInput = document.getElementById('fazTargetTokenInput');
+    tokenInput.value = '';
+    tokenInput.placeholder = target ? 'Leave blank to keep existing token' : 'Bearer token';
     document.getElementById('fazTargetModalError').classList.add('hidden');
     modal.classList.remove('hidden');
   }
@@ -224,10 +229,14 @@
         body: JSON.stringify({ label, host, adom, token }),
       });
     } else {
+      // A blank token field means "keep the existing token" — only send it
+      // if the admin actually typed a replacement value.
+      const body = { host, adom };
+      if (token) body.token = token;
       resp = await fetch(`/admin/api/faz-targets/${encodeURIComponent(origLabel)}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ host, adom, token }),
+        body: JSON.stringify(body),
       });
     }
     if (!resp.ok) {
