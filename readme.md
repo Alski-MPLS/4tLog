@@ -17,9 +17,13 @@ configured result cap) and client-side CSV/JSON export.
 with, endorsed by, or supported by Fortinet, Inc. FortiManager is a
 trademark of Fortinet, Inc.
 
-See [CLAUDE.md](CLAUDE.md) for architecture notes and
-[docs/superpowers/specs/2026-07-24-web-app-design.md](docs/superpowers/specs/2026-07-24-web-app-design.md)
-for the full design.
+Project documentation:
+
+- [CONTRIBUTING.md](CONTRIBUTING.md)
+- [SECURITY.md](SECURITY.md)
+- [SUPPORT.md](SUPPORT.md)
+- [docs/superpowers/README.md](docs/superpowers/README.md)
+- [LICENSE](LICENSE)
 
 ## Current features
 
@@ -66,6 +70,19 @@ uv run python wsgi.py              # http://localhost:5443 (PORT defaults to 544
 
 - Docker: see [container.md](container.md)
 - RHEL bare-metal: see [docs/deployment.md](docs/deployment.md)
+
+## Quality checks
+
+```bash
+uv run ruff check .
+uv run pytest -q
+```
+
+GitHub Actions runs the same checks on pushes and pull requests.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
 
 ## Legacy Ansible scaffold
 

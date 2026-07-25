@@ -45,30 +45,33 @@ ansible-playbook faz_log_search.yml --extra-vars 'faz_api_key=YOUR_API_KEY'
 
 ## Using Ansible Vault
 
-If you do not want to pass credentials on the command line, store them in an encrypted file created with Ansible Vault. The file can include both the FAZ username and API key:
+If you do not want to pass credentials on the command line, store them in a local encrypted file created with Ansible Vault. Start from the committed example file:
+
+```bash
+cp my-vault.example.yml my-vault.local.yml
+ansible-vault encrypt my-vault.local.yml
+```
+
+The file can include both the FAZ username and API key:
 
 ```yaml
 faz_username: adminapi
 faz_api_key: YOUR_API_KEY
 ```
 
-Create the encrypted file with `ansible-vault` using any filename you prefer:
-
-```bash
-ansible-vault create my-vault.yml
-```
-
 To use the vaulted file, pass it with `-e` or `--extra-vars` and provide a vault password prompt or file:
 
 ```bash
-ansible-playbook faz_log_search.yml -e @my-vault.yml --ask-vault-pass
+ansible-playbook faz_log_search.yml -e @my-vault.local.yml --ask-vault-pass
 ```
 
 Or, if you already have a vault password file:
 
 ```bash
-ansible-playbook faz_log_search.yml -e @my-vault.yml --vault-password-file ~/.ansible_vault_pass
+ansible-playbook faz_log_search.yml -e @my-vault.local.yml --vault-password-file ~/.ansible_vault_pass
 ```
+
+Local vaulted files are intentionally git-ignored.
 
 If you want to write the export somewhere else, override the output path:
 
@@ -81,7 +84,7 @@ If you are passing lists or multiple query values, JSON syntax is safer because 
 
 ```bash
 ansible-playbook faz_log_search.yml \
-	-e @my-vault.yml \
+	-e @my-vault.local.yml \
 	--ask-vault-pass \
 	--extra-vars '{"faz_source_ips":["10.1.1.0/24"],"faz_destination_ips":["any"],"faz_ports":["https"],"faz_time_window":"30m"}'
 ```

@@ -4,7 +4,8 @@ import os
 
 from dotenv import load_dotenv
 
-load_dotenv()
+if os.environ.get("APP_LOAD_DOTENV", "true").lower() == "true":
+    load_dotenv()
 
 
 def _require_secret_key() -> str:

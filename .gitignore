@@ -7,9 +7,10 @@ plan.md
 # Ansible
 *.retry
 ansible/output/
+ansible/*.local.yml
+ansible/*.local.yaml
 
 # Ansible Vault password files / accidental decrypted copies
-# (my-vault.yml itself is fine to commit - it's vault-encrypted)
 .vault_pass
 .vault-password
 vault_pass.txt

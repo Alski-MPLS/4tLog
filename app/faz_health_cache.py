@@ -190,9 +190,15 @@ def _poll_target(target: dict) -> dict:
     entry["hostname"] = sys_status.get("Hostname", sys_status.get("hostname", "n/a"))
     entry["version"] = sys_status.get("Version", sys_status.get("version", "n/a"))
     entry["serial"] = sys_status.get("Serial Number", sys_status.get("serial", "n/a"))
-    entry["ha_mode"] = sys_status.get("HA Mode", sys_status.get("ha-mode", sys_status.get("ha_mode", "n/a")))
-    entry["ha_role"] = sys_status.get("HA Role", sys_status.get("ha-role", sys_status.get("ha_role", "n/a")))
-    entry["disk_used"] = sys_status.get("Disk Usage", sys_status.get("disk-usage", sys_status.get("disk_usage", "n/a")))
+    entry["ha_mode"] = sys_status.get(
+        "HA Mode", sys_status.get("ha-mode", sys_status.get("ha_mode", "n/a"))
+    )
+    entry["ha_role"] = sys_status.get(
+        "HA Role", sys_status.get("ha-role", sys_status.get("ha_role", "n/a"))
+    )
+    entry["disk_used"] = sys_status.get(
+        "Disk Usage", sys_status.get("disk-usage", sys_status.get("disk_usage", "n/a"))
+    )
 
     cpu, mem, snmp_status = _poll_snmp(target)
     entry["cpu"] = round(cpu, 1) if cpu is not None else None
