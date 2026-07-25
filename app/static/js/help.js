@@ -40,9 +40,9 @@ const SECTIONS = [
     tab: 'log_search',
     html: `
 <h3>Required filters</h3>
-<p>At least one of Source IP or Destination IP must be filled in — searches with both left blank (ANY/ANY) are blocked to keep queries targeted and fast.</p>
+<p>At least one of Source IP or Destination IP must be filled in — searches with both left blank (or both set to <code>ANY</code>/<code>ALL</code>) are blocked to keep queries targeted and fast.</p>
 <h3>IP formats</h3>
-<p>Each IP box accepts a comma-separated list of single IPs, CIDR blocks (<code>10.1.1.0/24</code>), or explicit ranges (<code>10.1.1.1-10.1.1.10</code>) — IPv4 or IPv6.</p>
+<p>Each IP box accepts a comma-separated list of single IPs, CIDR blocks (<code>10.1.1.0/24</code>), or explicit ranges (<code>10.1.1.1-10.1.1.10</code>) — IPv4 or IPv6. Leaving a box blank, or typing <code>ANY</code> or <code>ALL</code>, means "no filter on this field" — useful when you want to fix only one side (e.g. any source, but destination <code>8.8.8.8</code>).</p>
 <h3>Port/Service formats</h3>
 <p>Accepts a port number (<code>443</code>), <code>tcp:443</code>/<code>udp:53</code>, a range (<code>tcp:1000-1200</code>), or a bare service name (<code>HTTPS</code>). Leave blank to match any port/service.</p>
 <h3>Advanced filters</h3>

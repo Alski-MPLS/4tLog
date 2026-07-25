@@ -45,6 +45,16 @@ def test_parse_ip_empty_returns_empty_list():
     assert parse_ip_entries("", "srcip") == []
 
 
+def test_parse_ip_any_returns_empty_list():
+    assert parse_ip_entries("ANY", "srcip") == []
+    assert parse_ip_entries("any", "srcip") == []
+    assert parse_ip_entries("All", "srcip") == []
+
+
+def test_parse_ip_any_mixed_with_real_entries_skips_only_any():
+    assert parse_ip_entries("ANY, 10.1.1.5", "srcip") == ["srcip==10.1.1.5"]
+
+
 def test_parse_port_numeric():
     assert parse_port_entries("443") == ["dstport==443"]
 
@@ -73,6 +83,11 @@ def test_parse_port_rejects_backwards_range():
 
 def test_parse_port_empty_returns_empty_list():
     assert parse_port_entries("") == []
+
+
+def test_parse_port_any_returns_empty_list():
+    assert parse_port_entries("ANY") == []
+    assert parse_port_entries("all") == []
 
 
 def test_parse_port_rejects_injection_in_service_name():

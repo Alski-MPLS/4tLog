@@ -87,6 +87,45 @@ def test_search_rejects_both_ips_blank(client):
     assert "source or destination" in resp.get_json()["error"]
 
 
+def test_search_rejects_both_ips_any(client):
+    _login(client)
+    csrf = _csrf(client)
+    resp = client.post(
+        "/api/log-search",
+        json={
+            "target": "Primary", "logtype": "traffic", "device": "All_FortiGate",
+            "start_time": "2026-07-25T00:00:00", "end_time": "2026-07-25T23:59:59",
+            "source_ips": "ANY", "destination_ips": "ALL", "ports": "",
+        },
+        headers={"X-CSRF-Token": csrf},
+    )
+    assert resp.status_code == 400
+    assert "source or destination" in resp.get_json()["error"]
+
+
+def test_search_allows_one_side_any(client, monkeypatch):
+    def fake_search_logs(self, **kwargs):
+        assert kwargs["filter_expression"] == "(dstip==8.8.8.8)"
+        return {"rows": [], "fields": [], "truncated": False}
+
+    monkeypatch.setattr("app.faz_client.FAZClient.preflight", lambda self: True)
+    monkeypatch.setattr("app.faz_client.FAZClient.search_logs", fake_search_logs)
+    monkeypatch.setattr("app.faz_client.FAZClient.logout", lambda self: None)
+
+    _login(client)
+    csrf = _csrf(client)
+    resp = client.post(
+        "/api/log-search",
+        json={
+            "target": "Primary", "logtype": "traffic", "device": "All_FortiGate",
+            "start_time": "2026-07-25T00:00:00", "end_time": "2026-07-25T23:59:59",
+            "source_ips": "ANY", "destination_ips": "8.8.8.8", "ports": "",
+        },
+        headers={"X-CSRF-Token": csrf},
+    )
+    assert resp.status_code == 200
+
+
 def test_search_rejects_invalid_ip(client):
     _login(client)
     csrf = _csrf(client)

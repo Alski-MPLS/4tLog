@@ -16,6 +16,7 @@ _PORT_RE = re.compile(r"^\d+$")
 _PROTO_PORT_RE = re.compile(r"^(?:tcp|udp):(\d+)$", re.IGNORECASE)
 _PROTO_RANGE_RE = re.compile(r"^(?:tcp|udp):(\d+)-(\d+)$", re.IGNORECASE)
 _SERVICE_NAME_RE = re.compile(r"^[A-Za-z0-9._/+-]+$")
+_ANY_VALUES = {"any", "all"}
 
 
 class FilterValidationError(ValueError):
@@ -29,6 +30,8 @@ def _split_entries(raw: str) -> list[str]:
 def parse_ip_entries(raw: str, field: str) -> list[str]:
     clauses = []
     for entry in _split_entries(raw):
+        if entry.lower() in _ANY_VALUES:
+            continue
         if "-" in entry and "/" not in entry:
             start_str, _, end_str = entry.partition("-")
             start_str, end_str = start_str.strip(), end_str.strip()
@@ -62,6 +65,8 @@ def parse_ip_entries(raw: str, field: str) -> list[str]:
 def parse_port_entries(raw: str) -> list[str]:
     clauses = []
     for entry in _split_entries(raw):
+        if entry.lower() in _ANY_VALUES:
+            continue
         range_match = _PROTO_RANGE_RE.match(entry)
         if range_match:
             start, end = int(range_match.group(1)), int(range_match.group(2))

@@ -118,12 +118,6 @@ def api_search():
 
     source_raw = data.get("source_ips", "") or ""
     dest_raw = data.get("destination_ips", "") or ""
-    if not source_raw.strip() and not dest_raw.strip():
-        app_log(
-            "WARN", "log_search", "Search rejected: no source or destination IP",
-            by=user, target=target_label,
-        )
-        return jsonify({"error": "At least one of source or destination IP is required"}), 400
 
     start_time = data.get("start_time", "")
     end_time = data.get("end_time", "")
@@ -138,6 +132,24 @@ def api_search():
         source_clauses = parse_ip_entries(source_raw, "srcip") if source_raw.strip() else []
         dest_clauses = parse_ip_entries(dest_raw, "dstip") if dest_raw.strip() else []
         port_clauses = parse_port_entries(data.get("ports", "") or "")
+    except FilterValidationError as exc:
+        app_log(
+            "WARN", "log_search", "Search rejected: invalid filter input",
+            by=user, target=target_label, error=str(exc),
+        )
+        return jsonify({"error": str(exc)}), 400
+
+    # ANY/ALL (or a blank box) means "no filter on this field" — parse_ip_entries
+    # already drops those entries, so checking the resulting clause lists (not
+    # the raw strings) is what actually enforces "no ANY/ANY searches".
+    if not source_clauses and not dest_clauses:
+        app_log(
+            "WARN", "log_search", "Search rejected: no source or destination IP",
+            by=user, target=target_label,
+        )
+        return jsonify({"error": "At least one of source or destination IP is required"}), 400
+
+    try:
         filter_expression = FAZClient.build_filter_expression(
             source_clauses, dest_clauses, port_clauses, data.get("extra_filters") or []
         )
