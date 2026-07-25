@@ -21,3 +21,14 @@ def test_config_loads_defaults(monkeypatch):
     assert config_mod.Config.SECRET_KEY == "a-real-secret"
     assert config_mod.Config.SESSION_COOKIE_HTTPONLY is True
     assert config_mod.Config.PERMANENT_SESSION_LIFETIME == 3600
+
+
+def test_log_search_defaults(monkeypatch):
+    monkeypatch.delenv("LOG_SEARCH_MAX_RESULTS", raising=False)
+    monkeypatch.delenv("LOG_SEARCH_POLL_INTERVAL", raising=False)
+    monkeypatch.delenv("LOG_SEARCH_TIMEOUT", raising=False)
+    import app.config as config_mod
+    importlib.reload(config_mod)
+    assert config_mod.Config.LOG_SEARCH_MAX_RESULTS == 1000
+    assert config_mod.Config.LOG_SEARCH_POLL_INTERVAL == 2.0
+    assert config_mod.Config.LOG_SEARCH_TIMEOUT == 60.0

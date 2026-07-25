@@ -57,6 +57,11 @@ class Config:
     MEM_WARN = float(os.environ.get("MEM_WARN", "70"))
     MEM_CRIT = float(os.environ.get("MEM_CRIT", "90"))
 
+    # Log Search tab (app/faz_client.py's search_logs(), app/log_search_filters.py)
+    LOG_SEARCH_MAX_RESULTS = int(os.environ.get("LOG_SEARCH_MAX_RESULTS", "1000"))
+    LOG_SEARCH_POLL_INTERVAL = float(os.environ.get("LOG_SEARCH_POLL_INTERVAL", "2.0"))
+    LOG_SEARCH_TIMEOUT = float(os.environ.get("LOG_SEARCH_TIMEOUT", "60.0"))
+
     # Set by tests/conftest.py to skip starting the background health
     # poller (real network/SNMP calls) during the test suite.
     FAZ_HEALTH_POLL_DISABLED = (
