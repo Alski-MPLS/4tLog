@@ -49,7 +49,7 @@ The original Ansible playbook (`ansible/faz_log_search.yml`) predates the Flask 
 
 ### Reference material
 
-- `api-info/*.json` — official FortiAnalyzer 7.6.7 Swagger/OpenAPI specs for the `eventmgmt`, `fortiview`, and `logview` modules. Authoritative reference for available JSON-RPC resources/parameters/response schemas — consult before guessing at an API shape. Note `get_sys_status()`'s `/sys/status` resource is *not* covered by these specs (only logview/eventmgmt/fortiview are) — its response field names were validated by live testing against the test appliance.
+- `api-info/*.json` — official FortiAnalyzer 7.6.7 Swagger/OpenAPI specs for the `eventmgmt`, `fortiview`, and `logview` modules. Authoritative reference for available JSON-RPC resources/parameters/response schemas — consult before guessing at an API shape. Note `get_sys_status()`'s `/sys/status` resource is *not* covered by these specs (only logview/eventmgmt/fortiview are) — its response field names (`hostname`, `version`, `serial`, `ha-mode`/`ha_mode`, `ha-role`/`ha_role`, `disk-usage`/`disk_usage`) are still only validated against `tests/test_faz_client.py`'s mocks, **not** against a real appliance response. Live validation against `192.168.64.4` (a real API token and network reachability required) is outstanding — see Task 9 in `docs/superpowers/plans/2026-07-25-phase2-dashboard-tls.md`. If the real field names differ, update `app/faz_health_cache.py`'s `_poll_target()` lookups and the corresponding mocked test data together.
 - `api-info/site.md` — short primer on the FAZ JSON-RPC message format (request/response envelope: `id`, `method`, `params`, `session`; response `status.code` of `0` means success).
 
 ## Running the app

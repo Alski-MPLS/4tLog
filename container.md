@@ -39,13 +39,9 @@ An `nginx` service in front of `app` terminates TLS and proxies plain HTTP
 to `app:8100` over the internal Docker network — `app` itself no longer
 publishes a port to the host.
 
-```bash
-cp certs.example/cert.pem certs/cert.pem   # or your real cert
-cp certs.example/key.pem certs/key.pem     # see note below
-```
-
 There's no `certs.example/` in this repo (certs aren't templatable the way
-JSON config is) — for local/dev use, generate a self-signed pair:
+JSON config is) — place your real `certs/cert.pem`/`certs/key.pem`, or for
+local/dev use, generate a self-signed pair:
 
 ```bash
 mkdir -p certs

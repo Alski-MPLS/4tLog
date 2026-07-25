@@ -53,7 +53,7 @@ Group=4tlog
 WorkingDirectory=/opt/4tlog
 Environment="PATH=/opt/4tlog/.venv/bin"
 ExecStart=/opt/4tlog/.venv/bin/gunicorn \
-    --workers 2 --threads 4 --worker-class gthread \
+    --workers 1 --threads 8 --worker-class gthread \
     --bind 127.0.0.1:8100 --timeout 120 \
     --access-logfile - --error-logfile - \
     wsgi:app
@@ -70,10 +70,15 @@ sudo systemctl enable --now 4tlog
 sudo systemctl status 4tlog
 ```
 
-**Note on the `gthread` worker class:** later phases add a background health
-polling thread. `sync` workers fork child processes and background threads
-from the parent do not transfer — always use `--worker-class gthread`, even
-though Phase 1 has no background threads yet.
+**Note on `--workers 1 --threads 8` / `gthread`:** Phase 2's FAZ health
+poller (`app/faz_health_cache.py`) runs an APScheduler job and an
+in-memory cache inside the Gunicorn process. Both are per-process state,
+not shared across pre-forked workers — running more than one worker would
+poll FortiAnalyzer redundantly and serve a different, independently-timed
+cache depending on which worker handles a given request. Get concurrency
+from threads instead (`--worker-class gthread`, which lets a background
+thread run within the same process — `sync` workers fork child processes
+and don't share the parent's threads at all).
 
 ## 5. Nginx reverse proxy
 

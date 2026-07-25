@@ -54,5 +54,8 @@ uv run python wsgi.py              # http://localhost:5443 (PORT defaults to 544
 ## Legacy Ansible scaffold
 
 The original proof-of-concept for FAZ log search was an Ansible playbook.
-It will be superseded by the web app's FAZ client (planned for Phase 2) but
-remains in the repo for reference — see [ansible/readme.md](ansible/readme.md).
+`app/faz_client.py` (Phase 2) already replaces its health/status calls;
+the playbook's log-search filter-building logic will be ported into
+`faz_client.py`'s `search_logs()`/`build_filter_expression()` in Phase 3.
+Until then the playbook remains in the repo for reference — see
+[ansible/readme.md](ansible/readme.md).
