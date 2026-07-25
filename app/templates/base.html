@@ -26,6 +26,7 @@
   </nav>
   <div class="topbar-right">
     <span class="nav-user">{{ session.get('user') }}</span>
+    <button class="btn btn-sm btn-ghost" id="helpBtn" title="Help &amp; Guide">&#10067;</button>
     <button class="btn btn-sm btn-ghost" id="themeToggle" title="Toggle light/dark mode">&#9788;</button>
     <form method="post" action="{{ url_for('auth.logout') }}" style="display:inline">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
@@ -48,6 +49,8 @@
 (function () {
   const csrfMeta = document.querySelector('meta[name="csrf-token"]');
   const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '';
+  window._helpAllowedTabs = {{ allowed_tabs | list | tojson }};
+  window._helpIsAdmin = {{ (current_role == 'admin') | tojson }};
   const nativeFetch = window.fetch.bind(window);
   window.fetch = function (input, init) {
     const opts = init || {};
@@ -74,6 +77,9 @@
   }
 })();
 </script>
+
+<script src="{{ url_for('static', filename='js/help.js') }}?v=1"></script>
+
 {% block scripts %}{% endblock %}
 </body>
 </html>

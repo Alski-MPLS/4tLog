@@ -119,3 +119,17 @@ def test_api_dashboard_filters_by_group_restriction(client, app, faz_dashboard_s
     assert resp.status_code == 200
     labels = [c["label"] for c in resp.get_json()]
     assert labels == ["Primary"]
+
+
+def test_help_button_renders_for_logged_in_user(client):
+    _login(client)
+    resp = client.get("/")
+    assert resp.status_code == 200
+    assert b'id="helpBtn"' in resp.data
+
+
+def test_help_allowed_tabs_global_reflects_session(client):
+    _login(client)
+    resp = client.get("/")
+    assert b"_helpAllowedTabs" in resp.data
+    assert b"dashboard" in resp.data
