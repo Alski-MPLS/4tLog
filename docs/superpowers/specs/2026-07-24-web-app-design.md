@@ -177,10 +177,11 @@ first-milestone discovery work, consistent with how the original Ansible playboo
 built (preflight check + configurable resource path + documented troubleshooting steps),
 not a blocker to starting implementation.
 
-FortiAnalyzer and FortiAuthenticator SNMP OIDs are unconfirmed against real hardware in
-4thealth itself (per its `CLAUDE.md`) — the same caveat applies here for FAZ CPU/mem OIDs
-and should be verified with `snmpwalk` or Fortinet's official MIBs before enabling
-`SNMP_ENABLED=true` in production.
+**Update (2026-07-25):** FortiAnalyzer SNMP OIDs are in fact confirmed against real
+hardware (v7.4.10) in 4thealth's `infra_health_cache.py` — see
+`docs/superpowers/specs/2026-07-25-phase2-dashboard-tls-design.md`. This caveat now
+applies only to FortiAuthenticator OIDs, which are out of scope for 4tlog entirely
+(FAZ-only project).
 
 ## Out of scope for v1
 
