@@ -29,3 +29,5 @@ certs/
 users.json
 groups.json
 faz_targets.json
+
+graphify-out
