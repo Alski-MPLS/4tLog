@@ -160,6 +160,7 @@ def api_search():
         )
         return jsonify({"error": str(exc)}), 400
 
+    local_start = local_end = None
     try:
         with _client_for(target) as client:
             local_start, local_end = client.local_time_range(start_time, end_time)
@@ -177,6 +178,7 @@ def api_search():
         app_log(
             "WARN", "log_search", "Search timed out",
             by=user, target=target_label, filter_expression=filter_expression, error=str(exc),
+            appliance_local=f"{local_start}..{local_end}",
         )
         return jsonify(
             {"error": "Search is taking too long — narrow the time range or add more filters."}
@@ -185,6 +187,7 @@ def api_search():
         app_log(
             "WARN", "log_search", "Search failed: FortiAnalyzer error",
             by=user, target=target_label, filter_expression=filter_expression, error=str(exc),
+            appliance_local=f"{local_start}..{local_end}",
         )
         return jsonify({"error": str(exc)}), 502
     except Exception as exc:
@@ -192,6 +195,7 @@ def api_search():
             "WARN", "log_search", "Search failed: connection error",
             by=user, target=target_label, filter_expression=filter_expression,
             error=summarize_connection_error(exc),
+            appliance_local=f"{local_start}..{local_end}",
         )
         return jsonify({"error": summarize_connection_error(exc)}), 502
 
@@ -199,5 +203,7 @@ def api_search():
         "INFO", "log_search", "Search completed",
         by=user, target=target_label, filter_expression=filter_expression,
         rows=len(result.get("rows", [])),
+        requested_utc=f"{start_time}..{end_time}",
+        appliance_local=f"{local_start}..{local_end}",
     )
     return jsonify(result)

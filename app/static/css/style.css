@@ -417,9 +417,12 @@ a:hover { text-decoration: underline; }
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 10px;
-  overflow-x: auto;
-  overflow-y: hidden;
   box-shadow: var(--shadow);
+}
+
+.table-scroll {
+  overflow: auto;
+  max-height: 70vh;
 }
 
 .table-controls {
@@ -450,6 +453,13 @@ a:hover { text-decoration: underline; }
   letter-spacing: .04em;
   color: var(--text-muted);
   border-bottom: 1px solid var(--border);
+  /* Keeps column names visible while scrolling a tall results table, so a
+     horizontal scrollbar sitting below many rows doesn't leave the header
+     (and which column is which) off-screen. Sticks to .table-scroll's own
+     scrollport (see there for why it isn't the page/viewport instead). */
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
 .data-table td {
