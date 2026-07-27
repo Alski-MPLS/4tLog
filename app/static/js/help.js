@@ -48,9 +48,13 @@ const SECTIONS = [
 <h3>Advanced filters</h3>
 <p>Use "+ Add filter" to add extra field/operator/value rows beyond the basics — narrows the search further.</p>
 <h3>Results table</h3>
-<p>Source IP and Destination IP are always shown as the first two columns when present. Use "Show" to pick how many rows appear per page (10/25/50/100) and the &laquo;/&lsaquo;/&rsaquo;/&raquo; controls to move between pages.</p>
+<p>Date/Time, Source, Destination, Port, Action, and Firewall are always shown as the first six columns, in that order, when present — any other returned fields follow alphabetically. Use "Show" to pick how many rows appear per page (10/25/50/100) and the &laquo;/&lsaquo;/&rsaquo;/&raquo; controls to move between pages.</p>
+<h3>Refine filter</h3>
+<p>Once results load, use the filter box above the table to narrow them further without re-running the search — no need to wait on FortiAnalyzer again. Choose <strong>Contains</strong> for a plain substring match or <strong>Regex</strong> for a regular expression, and check <strong>Negate</strong> to keep only rows that <em>don't</em> match (e.g. everything except <code>8.8.8.8</code>). It matches against every column's value, filters live as you type, and narrows pagination, the row count, and both exports to what's currently matched.</p>
+<h3>Columns</h3>
+<p>Click "Columns" above the table to show or hide any of the non-pinned fields returned by a search — the six pinned columns above can't be hidden. Your choices are remembered in this browser across future searches and log types.</p>
 <h3>Export</h3>
-<p>"Export CSV"/"Export JSON" download the full set of currently-loaded results (up to the result cap), not just the page currently shown.</p>
+<p>"Export CSV"/"Export JSON" download the currently-loaded and currently-filtered results (up to the result cap) — including only the columns currently shown — not just the page on screen.</p>
 `,
   },
   {
