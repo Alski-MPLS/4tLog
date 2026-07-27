@@ -2,19 +2,94 @@
 
 let currentRows = [];
 let currentFields = [];
+let currentColumns = [];
 let currentPage = 1;
 let pageSize = 25;
 
-// Pinned to the front of the results table (in this order) when present,
-// with friendlier header labels — the rest of the returned fields follow
-// in their existing (alphabetical) order.
-const PINNED_FIELDS = ['srcip', 'dstip'];
-const FIELD_LABELS = { srcip: 'Source IP', dstip: 'Destination IP' };
+// The 6 columns below are always shown first, in this order, when their
+// underlying raw field(s) exist in the result set — the rest of the
+// returned fields follow in their existing (alphabetical) order. Each
+// virtual column merges one or more raw FortiAnalyzer fields into a single
+// display value (e.g. Source = srcip, plus a resolved name if the row has
+// one). Field-name fallbacks here are defensive: confirmed live traffic
+// logs only return srcip/dstip, no resolved name field, so srcname/srchost
+// are untested guesses for logs that do resolve names.
+const VIRTUAL_COLUMNS = [
+  {
+    key: 'datetime',
+    label: 'Date/Time',
+    sourceFields: ['date', 'time', 'itime', 'eventtime'],
+    render(row) {
+      if (row.date != null && row.time != null) return `${row.date} ${row.time}`;
+      for (const f of ['itime', 'eventtime', 'date']) {
+        if (row[f] != null) return String(row[f]);
+      }
+      return '';
+    },
+  },
+  {
+    key: 'source',
+    label: 'Source',
+    sourceFields: ['srcip', 'srcname', 'srchost'],
+    render(row) {
+      const name = row.srcname || row.srchost;
+      if (name && row.srcip) return `${name} (${row.srcip})`;
+      return name || row.srcip || '';
+    },
+  },
+  {
+    key: 'destination',
+    label: 'Destination',
+    sourceFields: ['dstip', 'dstname', 'dsthost'],
+    render(row) {
+      const name = row.dstname || row.dsthost;
+      if (name && row.dstip) return `${name} (${row.dstip})`;
+      return name || row.dstip || '';
+    },
+  },
+  {
+    key: 'port',
+    label: 'Port',
+    sourceFields: ['dstport', 'service'],
+    render(row) {
+      if (row.dstport != null && row.service) return `${row.dstport}/${row.service}`;
+      if (row.dstport != null) return String(row.dstport);
+      return row.service || '';
+    },
+  },
+  {
+    key: 'action',
+    label: 'Action',
+    sourceFields: ['action'],
+    render(row) { return row.action != null ? String(row.action) : ''; },
+  },
+  {
+    key: 'firewall',
+    label: 'Firewall',
+    sourceFields: ['devname', 'devid'],
+    render(row) { return row.devname || row.devid || ''; },
+  },
+];
 
-function orderFields(fields) {
-  const pinned = PINNED_FIELDS.filter((f) => fields.includes(f));
-  const rest = fields.filter((f) => !pinned.includes(f));
-  return [...pinned, ...rest];
+function buildColumns(fields) {
+  const fieldSet = new Set(fields);
+  const consumed = new Set();
+  const columns = [];
+  for (const vc of VIRTUAL_COLUMNS) {
+    const present = vc.sourceFields.filter((f) => fieldSet.has(f));
+    if (present.length === 0) continue;
+    present.forEach((f) => consumed.add(f));
+    columns.push({ key: vc.key, label: vc.label, isVirtual: true, render: vc.render });
+  }
+  const rest = fields.filter((f) => !consumed.has(f));
+  for (const f of rest) {
+    columns.push({ key: f, label: f, isVirtual: false, raw: f });
+  }
+  return columns;
+}
+
+function cellValue(column, row) {
+  return column.isVirtual ? column.render(row) : row[column.raw];
 }
 
 function escHtml(str) {
@@ -121,12 +196,12 @@ function goToPage(page) {
 function renderPage() {
   const headerRow = document.getElementById('resultsHeaderRow');
   const body = document.getElementById('resultsBody');
-  headerRow.innerHTML = currentFields.map((f) => `<th>${escHtml(FIELD_LABELS[f] || f)}</th>`).join('');
+  headerRow.innerHTML = currentColumns.map((c) => `<th>${escHtml(c.label)}</th>`).join('');
 
   const start = (currentPage - 1) * pageSize;
   const pageRows = currentRows.slice(start, start + pageSize);
   body.innerHTML = pageRows.map((row) =>
-    `<tr>${currentFields.map((f) => `<td>${escHtml(row[f])}</td>`).join('')}</tr>`
+    `<tr>${currentColumns.map((c) => `<td>${escHtml(cellValue(c, row))}</td>`).join('')}</tr>`
   ).join('');
 
   const total = currentRows.length;
@@ -143,7 +218,8 @@ function renderPage() {
 
 function renderResults(result) {
   currentRows = result.rows;
-  currentFields = orderFields(result.fields);
+  currentFields = result.fields;
+  currentColumns = buildColumns(currentFields);
   currentPage = 1;
   renderPage();
   document.getElementById('truncatedBanner').classList.toggle('hidden', !result.truncated);
@@ -162,9 +238,9 @@ function downloadBlob(content, filename, mimeType) {
 }
 
 function exportCsv() {
-  const header = currentFields.join(',');
+  const header = currentColumns.map((c) => c.label).join(',');
   const lines = currentRows.map((row) =>
-    currentFields.map((f) => `"${String(row[f] ?? '').replace(/"/g, '""')}"`).join(',')
+    currentColumns.map((c) => `"${String(cellValue(c, row) ?? '').replace(/"/g, '""')}"`).join(',')
   );
   downloadBlob([header, ...lines].join('\n'), 'log_search_results.csv', 'text/csv');
 }
