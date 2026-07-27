@@ -109,7 +109,12 @@ function loadHiddenColumns() {
 }
 
 function saveHiddenColumns() {
-  localStorage.setItem(HIDDEN_COLUMNS_KEY, JSON.stringify([...hiddenColumns]));
+  try {
+    localStorage.setItem(HIDDEN_COLUMNS_KEY, JSON.stringify([...hiddenColumns]));
+  } catch {
+    // Storage unavailable or quota exceeded — hiddenColumns stays in-memory
+    // only for this page session; renderPage() below still runs.
+  }
 }
 
 let hiddenColumns = loadHiddenColumns();
@@ -231,7 +236,15 @@ function collectExtraFilters() {
 }
 
 function rowMatches(row, term, mode) {
-  const haystack = currentColumns.map((c) => String(cellValue(c, row) ?? '')).join(' ␟ ');
+  // Search over both the rendered virtual-column text (so pinned-column
+  // labels/formatted values like "443/HTTPS" remain matchable as a combined
+  // string) AND every raw field value in the row (so fields a virtual
+  // column's render() consumed-but-didn't-emit — e.g. devid when devname is
+  // present — stay searchable regardless of column visibility/consumption).
+  const haystack = [
+    ...currentColumns.filter((c) => c.isVirtual).map((c) => String(cellValue(c, row) ?? '')),
+    ...Object.values(row).map((v) => String(v ?? '')),
+  ].join(' ␟ ');
   if (mode === 'regex') {
     return new RegExp(term, 'i').test(haystack);
   }
@@ -305,6 +318,7 @@ function renderResults(result) {
   currentColumns = buildColumns(currentFields);
   visibleRows = currentRows;
   document.getElementById('refineFilterInput').value = '';
+  document.getElementById('refineFilterMode').value = 'contains';
   document.getElementById('refineFilterNegate').checked = false;
   document.getElementById('refineFilterError').classList.add('hidden');
   renderColumnsPopover();
