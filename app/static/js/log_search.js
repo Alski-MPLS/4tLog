@@ -3,6 +3,7 @@
 let currentRows = [];
 let currentFields = [];
 let currentColumns = [];
+let visibleRows = [];
 let currentPage = 1;
 let pageSize = 25;
 
@@ -184,8 +185,44 @@ function collectExtraFilters() {
   })).filter((f) => f.field && f.value);
 }
 
+function rowMatches(row, term, mode) {
+  const haystack = currentColumns.map((c) => String(cellValue(c, row) ?? '')).join(' ␟ ');
+  if (mode === 'regex') {
+    return new RegExp(term, 'i').test(haystack);
+  }
+  return haystack.toLowerCase().includes(term.toLowerCase());
+}
+
+function applyRefineFilter() {
+  const term = document.getElementById('refineFilterInput').value.trim();
+  const mode = document.getElementById('refineFilterMode').value;
+  const negate = document.getElementById('refineFilterNegate').checked;
+  const errBox = document.getElementById('refineFilterError');
+  errBox.classList.add('hidden');
+
+  if (!term) {
+    visibleRows = currentRows;
+    currentPage = 1;
+    renderPage();
+    return;
+  }
+
+  try {
+    visibleRows = currentRows.filter((row) => {
+      const matched = rowMatches(row, term, mode);
+      return negate ? !matched : matched;
+    });
+  } catch (exc) {
+    errBox.textContent = mode === 'regex' ? `Invalid regex: ${exc.message}` : 'Filter error';
+    errBox.classList.remove('hidden');
+    return;
+  }
+  currentPage = 1;
+  renderPage();
+}
+
 function totalPages() {
-  return Math.max(1, Math.ceil(currentRows.length / pageSize));
+  return Math.max(1, Math.ceil(visibleRows.length / pageSize));
 }
 
 function goToPage(page) {
@@ -199,12 +236,12 @@ function renderPage() {
   headerRow.innerHTML = currentColumns.map((c) => `<th>${escHtml(c.label)}</th>`).join('');
 
   const start = (currentPage - 1) * pageSize;
-  const pageRows = currentRows.slice(start, start + pageSize);
+  const pageRows = visibleRows.slice(start, start + pageSize);
   body.innerHTML = pageRows.map((row) =>
     `<tr>${currentColumns.map((c) => `<td>${escHtml(cellValue(c, row))}</td>`).join('')}</tr>`
   ).join('');
 
-  const total = currentRows.length;
+  const total = visibleRows.length;
   const pages = totalPages();
   document.getElementById('resultsSummary').textContent = total === 0
     ? 'No results'
@@ -220,6 +257,10 @@ function renderResults(result) {
   currentRows = result.rows;
   currentFields = result.fields;
   currentColumns = buildColumns(currentFields);
+  visibleRows = currentRows;
+  document.getElementById('refineFilterInput').value = '';
+  document.getElementById('refineFilterNegate').checked = false;
+  document.getElementById('refineFilterError').classList.add('hidden');
   currentPage = 1;
   renderPage();
   document.getElementById('truncatedBanner').classList.toggle('hidden', !result.truncated);
@@ -239,14 +280,14 @@ function downloadBlob(content, filename, mimeType) {
 
 function exportCsv() {
   const header = currentColumns.map((c) => c.label).join(',');
-  const lines = currentRows.map((row) =>
+  const lines = visibleRows.map((row) =>
     currentColumns.map((c) => `"${String(cellValue(c, row) ?? '').replace(/"/g, '""')}"`).join(',')
   );
   downloadBlob([header, ...lines].join('\n'), 'log_search_results.csv', 'text/csv');
 }
 
 function exportJson() {
-  downloadBlob(JSON.stringify(currentRows, null, 2), 'log_search_results.json', 'application/json');
+  downloadBlob(JSON.stringify(visibleRows, null, 2), 'log_search_results.json', 'application/json');
 }
 
 async function runSearch(e) {
@@ -333,6 +374,9 @@ document.getElementById('firstPageBtn').addEventListener('click', () => goToPage
 document.getElementById('prevPageBtn').addEventListener('click', () => goToPage(currentPage - 1));
 document.getElementById('nextPageBtn').addEventListener('click', () => goToPage(currentPage + 1));
 document.getElementById('lastPageBtn').addEventListener('click', () => goToPage(totalPages()));
+document.getElementById('refineFilterInput').addEventListener('input', applyRefineFilter);
+document.getElementById('refineFilterMode').addEventListener('change', applyRefineFilter);
+document.getElementById('refineFilterNegate').addEventListener('change', applyRefineFilter);
 
 renderPage();
 loadTargets();

@@ -75,6 +75,18 @@
   <button type="submit" class="btn btn-primary" id="searchBtn">Search</button>
 </form>
 
+<div class="refine-filter-row">
+  <input type="text" id="refineFilterInput" class="form-control" placeholder="Filter results (e.g. 8.8.8.8)" />
+  <select id="refineFilterMode" class="form-select-sm">
+    <option value="contains" selected>Contains</option>
+    <option value="regex">Regex</option>
+  </select>
+  <label class="refine-negate-label">
+    <input type="checkbox" id="refineFilterNegate" /> Negate
+  </label>
+  <span id="refineFilterError" class="refine-filter-error hidden"></span>
+</div>
+
 <div id="truncatedBanner" class="alert alert-warning hidden">
   Result cap reached — narrow the time range or filters to see more.
 </div>
