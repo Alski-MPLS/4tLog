@@ -97,6 +97,51 @@ function escHtml(str) {
   return String(str ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
+const HIDDEN_COLUMNS_KEY = 'logSearchHiddenColumns';
+
+function loadHiddenColumns() {
+  try {
+    const raw = localStorage.getItem(HIDDEN_COLUMNS_KEY);
+    return new Set(raw ? JSON.parse(raw) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function saveHiddenColumns() {
+  localStorage.setItem(HIDDEN_COLUMNS_KEY, JSON.stringify([...hiddenColumns]));
+}
+
+let hiddenColumns = loadHiddenColumns();
+
+function renderedColumns() {
+  return currentColumns.filter((c) => c.isVirtual || !hiddenColumns.has(c.raw));
+}
+
+function renderColumnsPopover() {
+  const popover = document.getElementById('columnsPopover');
+  const nonPinned = currentColumns.filter((c) => !c.isVirtual);
+  if (nonPinned.length === 0) {
+    popover.innerHTML = '<div class="columns-popover-empty">No extra columns</div>';
+    return;
+  }
+  popover.innerHTML = nonPinned.map((c) => `
+    <label>
+      <input type="checkbox" class="column-toggle" data-field="${escHtml(c.raw)}" ${hiddenColumns.has(c.raw) ? '' : 'checked'} />
+      ${escHtml(c.label)}
+    </label>
+  `).join('');
+  popover.querySelectorAll('.column-toggle').forEach((cb) => {
+    cb.addEventListener('change', () => {
+      const field = cb.dataset.field;
+      if (cb.checked) hiddenColumns.delete(field);
+      else hiddenColumns.add(field);
+      saveHiddenColumns();
+      renderPage();
+    });
+  });
+}
+
 function toFazTime(date) {
   // Send an unambiguous UTC instant — the backend (FAZClient.local_time_range)
   // converts this to the target appliance's own configured timezone before
@@ -233,12 +278,13 @@ function goToPage(page) {
 function renderPage() {
   const headerRow = document.getElementById('resultsHeaderRow');
   const body = document.getElementById('resultsBody');
-  headerRow.innerHTML = currentColumns.map((c) => `<th>${escHtml(c.label)}</th>`).join('');
+  const columns = renderedColumns();
+  headerRow.innerHTML = columns.map((c) => `<th>${escHtml(c.label)}</th>`).join('');
 
   const start = (currentPage - 1) * pageSize;
   const pageRows = visibleRows.slice(start, start + pageSize);
   body.innerHTML = pageRows.map((row) =>
-    `<tr>${currentColumns.map((c) => `<td>${escHtml(cellValue(c, row))}</td>`).join('')}</tr>`
+    `<tr>${columns.map((c) => `<td>${escHtml(cellValue(c, row))}</td>`).join('')}</tr>`
   ).join('');
 
   const total = visibleRows.length;
@@ -261,6 +307,7 @@ function renderResults(result) {
   document.getElementById('refineFilterInput').value = '';
   document.getElementById('refineFilterNegate').checked = false;
   document.getElementById('refineFilterError').classList.add('hidden');
+  renderColumnsPopover();
   currentPage = 1;
   renderPage();
   document.getElementById('truncatedBanner').classList.toggle('hidden', !result.truncated);
@@ -279,9 +326,10 @@ function downloadBlob(content, filename, mimeType) {
 }
 
 function exportCsv() {
-  const header = currentColumns.map((c) => c.label).join(',');
+  const columns = renderedColumns();
+  const header = columns.map((c) => c.label).join(',');
   const lines = visibleRows.map((row) =>
-    currentColumns.map((c) => `"${String(cellValue(c, row) ?? '').replace(/"/g, '""')}"`).join(',')
+    columns.map((c) => `"${String(cellValue(c, row) ?? '').replace(/"/g, '""')}"`).join(',')
   );
   downloadBlob([header, ...lines].join('\n'), 'log_search_results.csv', 'text/csv');
 }
@@ -377,6 +425,16 @@ document.getElementById('lastPageBtn').addEventListener('click', () => goToPage(
 document.getElementById('refineFilterInput').addEventListener('input', applyRefineFilter);
 document.getElementById('refineFilterMode').addEventListener('change', applyRefineFilter);
 document.getElementById('refineFilterNegate').addEventListener('change', applyRefineFilter);
+document.getElementById('columnsBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  document.getElementById('columnsPopover').classList.toggle('hidden');
+});
+document.addEventListener('click', (e) => {
+  const picker = document.querySelector('.columns-picker');
+  if (picker && !picker.contains(e.target)) {
+    document.getElementById('columnsPopover').classList.add('hidden');
+  }
+});
 
 renderPage();
 loadTargets();

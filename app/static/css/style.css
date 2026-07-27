@@ -457,6 +457,35 @@ a:hover { text-decoration: underline; }
   color: var(--danger, #dc3545);
 }
 
+.columns-picker { position: relative; }
+.columns-popover {
+  position: absolute;
+  right: 0;
+  top: calc(100% + .3rem);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: .5rem .75rem;
+  min-width: 180px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 50;
+}
+.columns-popover label {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: .85rem;
+  font-weight: 400;
+  padding: .25rem 0;
+  white-space: nowrap;
+}
+.columns-popover-empty {
+  font-size: .8rem;
+  color: var(--text-muted);
+}
+
 .data-table {
   width: 100%;
   border-collapse: collapse;
