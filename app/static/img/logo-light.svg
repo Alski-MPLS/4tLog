@@ -1,0 +1,9 @@
+<svg width="340" height="96" viewBox="0 0 340 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M48 6 L86 26 V70 L48 90 L10 70 V26 Z" fill="#141a24"/>
+  <path d="M48 6 L86 26 L48 46 L10 26 Z" fill="#3f7fd1"/>
+  <path d="M48 46 L86 26 V70 L48 90 Z" fill="#1c2530"/>
+  <rect x="24" y="46" width="30" height="4.4" rx="2.2" fill="#eef1f4"/>
+  <rect x="24" y="56" width="44" height="4.4" rx="2.2" fill="#eef1f4"/>
+  <rect x="24" y="66" width="20" height="4.4" rx="2.2" fill="#eef1f4"/>
+  <text x="112" y="60" font-family="Space Grotesk, Segoe UI, Helvetica, Arial, sans-serif" font-size="34" font-weight="700" fill="#141a24">4t<tspan fill="#3f7fd1" font-weight="600">Log</tspan></text>
+</svg>

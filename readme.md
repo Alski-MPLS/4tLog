@@ -1,4 +1,8 @@
-# 4tlog
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="app/static/img/logo-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="app/static/img/logo-light.svg">
+  <img alt="4tLog logo" src="app/static/img/logo-light.svg" width="240">
+</picture>
 
 A Flask web application for interacting with FortiAnalyzer. Phase 1 provides
 a working dashboard frame with bcrypt login, group-based access control, and
