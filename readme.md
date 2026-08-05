@@ -1,4 +1,4 @@
-<img alt="4tLog logo" src="app/static/img/logo-console.svg" width="240">
+<img alt="4tLog logo" src="app/static/img/logo-console-v2.svg" width="240">
 
 A Flask web application for interacting with FortiAnalyzer. Phase 1 provides
 a working dashboard frame with bcrypt login, group-based access control, and
